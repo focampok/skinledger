@@ -1,0 +1,21 @@
+/* SkinLedger shell styles on top of Pico.css. */
+
+:root {
+  --sl-accent: #1f6f5c;
+}
+
+body > header nav ul li a {
+  text-decoration: none;
+}
+
+body > footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-block: 1.5rem;
+  opacity: 0.8;
+}
+
+main.container {
+  padding-block: 1.5rem;
+}

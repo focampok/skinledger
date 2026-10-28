@@ -1,0 +1,1 @@
+-- SkinLedger SQLite schema (written in P02).
