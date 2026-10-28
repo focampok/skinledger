@@ -2,34 +2,30 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
-from skinledger import copy
 from skinledger.db import init_db
+from skinledger.pipeline import resume_pending
+from skinledger.web.routes.captures import router as captures_router
+from skinledger.web.templating import WEB_DIR, templates
 
-WEB_DIR = Path(__file__).resolve().parent
 STATIC_DIR = WEB_DIR / "static"
 
-templates = Jinja2Templates(directory=str(WEB_DIR / "templates"))
-templates.env.globals.update(
-    disclaimer=copy.DISCLAIMER,
-    powered_by=copy.POWERED_BY,
-)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Create the SQLite schema on startup; the migration is idempotent."""
+    """Create the SQLite schema on startup and resume recent YouCam tasks."""
     init_db()
+    await resume_pending()
     yield
 
 
 app = FastAPI(title="SkinLedger", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.include_router(captures_router)
 
 
 @app.get("/healthz")

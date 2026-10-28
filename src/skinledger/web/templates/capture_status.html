@@ -1,0 +1,37 @@
+<section
+  id="capture-status"
+  data-status="{{ capture.status }}"
+  data-capture-id="{{ capture.id }}"
+  {% if capture.status in ['queued', 'uploading', 'running'] %}
+  hx-get="/api/captures/{{ capture.id }}/status"
+  hx-trigger="every 3s"
+  hx-swap="outerHTML"
+  {% endif %}
+>
+  <p><strong>Status:</strong> {{ status_label }}</p>
+
+  {% if capture.status == 'error' and capture.error_message %}
+  <p role="alert">{{ capture.error_message }}</p>
+  {% endif %}
+
+  {% if capture.status == 'timeout' %}
+  <p>This is taking longer than usual. Leave the page open; SkinLedger keeps checking.</p>
+  {% endif %}
+
+  {% if capture.status == 'success' %}
+  <table>
+    <thead>
+      <tr><th>Aspect</th><th>Score</th></tr>
+    </thead>
+    <tbody>
+      {% for row in scores %}
+      <tr><td>{{ row.label }}</td><td>{{ row.value }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if analyses_left is not none %}
+  <p><small>You have {{ analyses_left }} analysis{{ '' if analyses_left == 1 else 'es' }} left</small></p>
+  {% endif %}
+</section>
