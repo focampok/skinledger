@@ -35,9 +35,12 @@
     "the short side — or use the guided camera. This attempt didn't count toward your limit.";
 
   var kitReady = false;
-  var kitUnavailable = false;
-  var kitInitTried = false;
+  var listenersRegistered = false;
+  var initCalled = false;
   var retriedLowQuality = false;
+  var videoQuality = "1080p";
+  var asyncInitTimer = null;
+  var lastLoadingBucket = -1;
   var objectUrl = null;
   var pollTimer = null;
   var handledCaptureId = null;
@@ -100,16 +103,17 @@
 
   function updateButtons() {
     var attested = Boolean(attestation && attestation.checked);
-    // Attestation gates both buttons; Camera Kit readiness is explained on click,
-    // never by a silently disabled button.
     if (startButton) {
-      startButton.disabled = !attested;
+      startButton.disabled = !attested || !kitReady;
     }
     if (uploadButton) {
       uploadButton.disabled = !attested;
     }
     if (attestationHint) {
       attestationHint.hidden = attested;
+    }
+    if (!kitReady && help && !help.textContent) {
+      help.textContent = "Guided camera is still loading…";
     }
   }
 
@@ -335,119 +339,184 @@
   }
 
   function cameraUnavailable(message, reason, switchToUpload) {
-    kitReady = false;
-    if (reason !== "sdk_pending" && reason !== "not_ready_at_click") {
-      kitUnavailable = true;
-    }
-    updateButtons();
     if (help) {
       help.textContent = message || "Guided camera unavailable on this device.";
     }
     clientLog("warning", "camera_unavailable", "reason=" + (reason || "unknown"));
+    updateButtons();
     if (allowUpload && switchToUpload !== false) {
       selectTab("upload");
     }
   }
 
-  function kitLoaded() {
-    try {
-      return (
-        typeof YMK !== "undefined" &&
-        typeof YMK.isLoaded === "function" &&
-        Boolean(YMK.isLoaded())
-      );
-    } catch (error) {
-      // UNVERIFIED: isLoaded may throw before the kit finishes loading.
-      return false;
+  function kitIsReady() {
+    return typeof YMK !== "undefined" && Boolean(window.YMKAsyncInitFired);
+  }
+
+  function logLifecycle(name, detail) {
+    clientLog("info", name, detail || "");
+  }
+
+  function onOpened() {
+    logLifecycle("opened", "event=opened");
+    if (help) {
+      help.textContent = "Camera open. Hold still and look at the camera.";
     }
   }
 
-  function markReady(attempt) {
-    // UNVERIFIED: whether YMK.isLoaded() turns true before or after init resolves.
-    // Give it a short grace period instead of silently leaving the button dead.
-    attempt = attempt || 0;
-    if (kitLoaded()) {
-      kitReady = true;
-      kitUnavailable = false;
-      updateButtons();
-      if (help) {
-        help.textContent = "Camera ready. Hold still and look at the camera.";
+  function onLoading(state) {
+    var progress = state;
+    if (state && typeof state === "object") {
+      progress = state.progress;
+      if (progress === undefined) {
+        progress = state.percent;
       }
-      clientLog("info", "ymk_init", "ready attempt=" + attempt);
+      if (progress === undefined) {
+        progress = state.value;
+      }
+    }
+    var numeric = Number(progress);
+    if (!isFinite(numeric)) {
+      logLifecycle("loading", "event=loading progress=unknown");
       return;
     }
-    if (attempt < 5) {
-      window.setTimeout(function () {
-        markReady(attempt + 1);
-      }, 400);
+    // Log only when the progress crosses a 25% bucket.
+    var bucket = Math.floor(numeric / 25) * 25;
+    if (bucket === lastLoadingBucket) {
       return;
     }
-    clientLog("warning", "ymk_init", "isLoaded false after init");
-    cameraUnavailable("Guided camera unavailable on this device.", "isloaded_false");
+    lastLoadingBucket = bucket;
+    logLifecycle("loading", "event=loading progress=" + bucket);
+  }
+
+  function onLoaded() {
+    lastLoadingBucket = -1;
+    logLifecycle("loaded", "event=loaded");
+    if (help) {
+      help.textContent = "Camera ready. Hold still and look at the camera.";
+    }
+  }
+
+  function onClosed() {
+    logLifecycle("closed", "event=closed");
+    if (help) {
+      help.textContent = "Camera closed.";
+    }
+  }
+
+  function onFaceDetectionStarted() {
+    logLifecycle("face_detection_started", "event=faceDetectionStarted");
+    if (help) {
+      help.textContent = "Hold still and look at the camera.";
+    }
+  }
+
+  function onCameraOpened() {
+    logLifecycle("camera_opened", "event=cameraOpened");
+  }
+
+  function onCameraClosed() {
+    logLifecycle("camera_closed", "event=cameraClosed");
   }
 
   function onQuality(state) {
-    // UNVERIFIED: exact field values of faceQualityChanged; adjust from the console.
     var now = Date.now();
     if (now - lastQualityLog >= 2000) {
       lastQualityLog = now;
       clientLog(
         "info",
-        "camera_event",
-        "event=faceQualityChanged has_face=" + (state && state.hasFace) +
+        "face_quality_changed",
+        "event=faceQualityChanged" +
+          " has_face=" + (state && state.hasFace) +
           " frontal=" + (state && state.frontal) +
           " lighting=" + (state && state.lighting) +
           " position=" + (state && state.position)
       );
     }
     var messages = [];
-    if (state && state.hasFace === false) {
-      messages.push("Move closer");
+    if (state) {
+      if (state.position === "toosmall") {
+        messages.push("Move closer");
+      } else if (state.position === "outofboundary" || state.position === "notgood") {
+        messages.push("Center your face");
+      }
+      if (state.frontal === "notgood") {
+        messages.push("Look straight");
+      }
+      if (state.lighting === "notgood") {
+        messages.push("Face the light");
+      }
+      if (state.hasFace === false && !messages.length) {
+        messages.push("Center your face");
+      }
     }
-    if (state && state.frontal === false) {
-      messages.push("Look straight");
+    if (help) {
+      help.textContent = messages.length
+        ? messages.join(" · ")
+        : "Hold still and look at the camera.";
     }
-    if (
-      state &&
-      (state.lighting === false || state.lighting === "dark" || state.lighting === "low")
-    ) {
-      messages.push("Face the light");
-    }
-    if (state && state.position && ["center", "centered", "ok"].indexOf(state.position) === -1) {
-      messages.push("Center your face in the frame");
-    }
-    help.textContent = messages.length
-      ? messages.join(" · ")
-      : "Hold still and look at the camera.";
   }
 
   function onCameraFailed(state) {
     var code = (state && (state.error || state.code || state.error_code)) || "";
-    clientLog("warning", "camera_event", "event=cameraFailed code=" + (code || "unknown"));
+    clientLog(
+      "warning",
+      "camera_failed",
+      "event=cameraFailed code=" + (code || "unknown")
+    );
     var messages = {
       error_permission_denied: "Allow camera access in your browser settings",
       error_resolution_unsupported: "Your camera resolution isn't supported; try another device",
       error_access_failed: "We couldn't open the camera",
     };
-    help.textContent = messages[code] || "We couldn't open the camera";
-    var link = document.createElement("a");
-    link.href = "#upload";
-    link.textContent = "Upload a photo instead";
-    link.addEventListener("click", function (event) {
-      event.preventDefault();
-      if (allowUpload) {
-        selectTab("upload");
-      }
-    });
-    help.append(document.createElement("br"), link);
+    if (help) {
+      help.textContent = messages[code] || "We couldn't open the camera";
+      var link = document.createElement("a");
+      link.href = "#upload";
+      link.textContent = "Upload a photo instead";
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (allowUpload) {
+          selectTab("upload");
+        }
+      });
+      help.append(document.createElement("br"), link);
+    }
+  }
+
+  function handleCapturedImage(image) {
+    if (image instanceof Blob) {
+      setPreview(image);
+      sendImage(image, "camera_kit");
+      return;
+    }
+    if (typeof image === "string") {
+      fetch(image)
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("image fetch failed");
+          }
+          return response.blob();
+        })
+        .then(function (blob) {
+          setPreview(blob);
+          sendImage(blob, "camera_kit");
+        })
+        .catch(function (error) {
+          clientLog("error", "capture_image", "fetch_failed " + errorText(error));
+          showError("The camera did not return a photo. Please try again.");
+        });
+      return;
+    }
+    showError("The camera did not return a photo. Please try again.");
   }
 
   function onCaptured(state) {
-    // UNVERIFIED: phase may bring several images in skincare mode; keep the largest.
+    // UNVERIFIED: skincare mode may return more than one image; keep the largest.
     var images = (state && state.images) || [];
     clientLog(
       "info",
-      "camera_event",
+      "face_detection_captured",
       "event=faceDetectionCaptured images=" + images.length
     );
     if (!images.length) {
@@ -458,117 +527,157 @@
       var bSize = (b.width || 0) * (b.height || 0);
       return aSize >= bSize ? a : b;
     });
-    var blob = best.image;
     try {
       YMK.close();
     } catch (error) {
       /* The kit may already be closed. */
     }
-    if (!(blob instanceof Blob)) {
-      showError("The camera did not return a photo. Please try again.");
-      return;
-    }
-    setPreview(blob);
-    sendImage(blob, "camera_kit");
+    handleCapturedImage(best.image);
   }
 
-  function startKit(videoQuality) {
+  function initKit(quality) {
     var config = {
       faceDetectionMode: "skincare",
       imageFormat: "blob",
       language: loadLanguage(),
       qualityLevel: "strict",
-      videoQuality: videoQuality,
+      videoQuality: quality,
     };
-    clientLog("info", "ymk_init", "call quality=" + videoQuality);
-    kitUnavailable = false;
+    clientLog("info", "init", "call quality=" + quality);
+    var result;
     try {
-      var result = YMK.init(config);
-      if (result && typeof result.then === "function") {
-        result
-          .then(function () {
-            clientLog("info", "ymk_init", "resolved quality=" + videoQuality);
-            markReady(0);
-          })
-          .catch(function (error) {
-            clientLog("error", "ymk_init", "rejected " + errorText(error));
-            cameraUnavailable("Guided camera unavailable on this device.", "init_rejected");
-          });
-      } else {
-        clientLog("info", "ymk_init", "returned synchronously");
-        markReady(0);
-      }
+      result = YMK.init(config);
     } catch (error) {
-      clientLog("error", "ymk_init", "exception " + errorText(error));
+      clientLog("error", "init", "exception " + errorText(error));
       cameraUnavailable("Guided camera unavailable on this device.", "init_exception");
+      return false;
+    }
+    initCalled = true;
+    // UNVERIFIED: whether init returns a promise; opening never waits for it.
+    if (result && typeof result.then === "function") {
+      result
+        .then(function () {
+          clientLog("info", "init", "resolved quality=" + quality);
+        })
+        .catch(function (error) {
+          clientLog("error", "init", "rejected " + errorText(error));
+        });
+    } else {
+      clientLog("info", "init", "returned synchronously");
+    }
+    return true;
+  }
+
+  function openKit() {
+    try {
+      clientLog("info", "open_camera_kit", "called");
+      YMK.openCameraKit();
+      clientLog("info", "open_camera_kit", "returned");
+    } catch (error) {
+      clientLog("error", "open_camera_kit", "exception " + errorText(error));
+      onCameraFailed({ error_access_failed: true });
     }
   }
 
   function onUnsupportedResolution() {
-    clientLog("warning", "camera_event", "event=unsupportedResolution");
+    clientLog("warning", "unsupported_resolution", "event=unsupportedResolution");
     if (retriedLowQuality) {
       cameraUnavailable("Guided camera unavailable on this device.", "resolution_unsupported");
       return;
     }
     retriedLowQuality = true;
-    help.textContent = "Trying a lower camera resolution…";
+    videoQuality = "720p";
+    initCalled = false;
+    if (help) {
+      help.textContent = "Trying a lower camera resolution…";
+    }
     try {
       YMK.close();
     } catch (error) {
       /* The kit may not be open yet. */
     }
-    startKit("720p");
-    help.textContent = "Switched to 720p because your camera did not support 1080p.";
+    if (initKit(videoQuality)) {
+      openKit();
+    }
   }
 
-  function initCameraKit() {
-    if (kitInitTried) {
+  function startAsyncInitWatch() {
+    if (window.YMKAsyncInitFired || asyncInitTimer !== null) {
       return;
     }
-    kitInitTried = true;
-    clientLog(
-      "info",
-      "ymk_init",
-      "starting sdk=" + (window.__ymkScriptState || "pending") +
-        " secure=" + Boolean(window.isSecureContext)
-    );
+    asyncInitTimer = window.setTimeout(function () {
+      asyncInitTimer = null;
+      if (window.YMKAsyncInitFired) {
+        return;
+      }
+      clientLog(
+        "error",
+        "async_init_missing",
+        "sdk=" + (window.__ymkScriptState || "pending")
+      );
+      cameraUnavailable("Guided camera unavailable on this device.", "async_init_missing");
+    }, 10000);
+  }
+
+  function registerCameraKit() {
+    if (listenersRegistered) {
+      return;
+    }
+    listenersRegistered = true;
+    if (asyncInitTimer !== null) {
+      window.clearTimeout(asyncInitTimer);
+      asyncInitTimer = null;
+    }
+    if (typeof YMK === "undefined") {
+      clientLog("error", "async_init_missing", "has_ymk=false");
+      cameraUnavailable("Guided camera unavailable on this device.", "sdk_missing");
+      return;
+    }
     if (!window.isSecureContext) {
       cameraUnavailable("Guided camera unavailable on this device.", "insecure_context");
       return;
     }
-    if (typeof YMK === "undefined") {
-      if (window.__ymkScriptState === "failed") {
-        cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
-      } else {
-        cameraUnavailable("Guided camera is still loading…", "sdk_pending", false);
-      }
-      return;
-    }
-    // UNVERIFIED: exact addEventListener signature; adjust from the browser console.
-    YMK.addEventListener("faceQualityChanged", onQuality);
-    YMK.addEventListener("faceDetectionCaptured", onCaptured);
+    YMK.addEventListener("opened", onOpened);
+    YMK.addEventListener("loading", onLoading);
+    YMK.addEventListener("loaded", onLoaded);
+    YMK.addEventListener("closed", onClosed);
+    YMK.addEventListener("faceDetectionStarted", onFaceDetectionStarted);
+    YMK.addEventListener("cameraOpened", onCameraOpened);
+    YMK.addEventListener("cameraClosed", onCameraClosed);
     YMK.addEventListener("cameraFailed", onCameraFailed);
     YMK.addEventListener("unsupportedResolution", onUnsupportedResolution);
-    startKit("1080p");
+    YMK.addEventListener("faceQualityChanged", onQuality);
+    YMK.addEventListener("faceDetectionCaptured", onCaptured);
+
+    kitReady = kitIsReady();
+    updateButtons();
+    if (help && !help.textContent) {
+      help.textContent = "Camera ready. Tick the checkbox, then start.";
+    }
+    clientLog(
+      "info",
+      "kit_ready",
+      "sdk=" + (window.__ymkScriptState || "pending") +
+        " secure=" + Boolean(window.isSecureContext)
+    );
   }
 
-  window.SkinLedgerCameraKitReady = initCameraKit;
-  if (window.__ymkReady) {
-    initCameraKit();
+  window.SkinLedgerCameraKitReady = registerCameraKit;
+  if (window.__ymkReady || window.YMKAsyncInitFired) {
+    registerCameraKit();
   }
+  window.addEventListener("ymk-loaded", startAsyncInitWatch);
   window.addEventListener("ymk-error", function () {
     // The template already logged sdk_fail; explain it on screen too.
     cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
   });
-  if (window.__ymkScriptState === "failed") {
+  if (window.__ymkScriptState === "failed" && !window.YMKAsyncInitFired) {
     // The script failed before this listener existed.
     cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
   }
-  window.setTimeout(function () {
-    if (!kitReady) {
-      cameraUnavailable("Guided camera unavailable on this device.", "init_timeout");
-    }
-  }, 10000);
+  if (window.__ymkScriptState === "loaded" && !window.YMKAsyncInitFired) {
+    startAsyncInitWatch();
+  }
 
   if (attestation) {
     attestation.addEventListener("change", updateButtons);
@@ -582,29 +691,16 @@
         "button_click",
         "button=start_capture attested=" + attested +
           " kit_ready=" + kitReady +
-          " is_loaded=" + kitLoaded()
+          " initialized=" + initCalled
       );
-      if (!attested) {
-        help.textContent = "Tick the 18+ checkbox above first.";
+      if (!attested || !kitReady) {
+        updateButtons();
         return;
       }
-      if (!kitLoaded()) {
-        if (window.__ymkScriptState === "failed" || !window.isSecureContext) {
-          cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
-        } else if (kitReady || kitUnavailable) {
-          cameraUnavailable("Guided camera unavailable on this device.", "isloaded_false_at_click");
-        } else {
-          cameraUnavailable("Guided camera is still loading…", "not_ready_at_click", false);
-        }
+      if (!initCalled && !initKit(videoQuality)) {
         return;
       }
-      try {
-        clientLog("info", "open_camera_kit", "called");
-        YMK.openCameraKit();
-      } catch (error) {
-        clientLog("error", "open_camera_kit", "exception " + errorText(error));
-        onCameraFailed({ error_access_failed: true });
-      }
+      openKit();
     });
   }
 
@@ -672,7 +768,6 @@
     "info",
     "page_load",
     "has_ymk=" + (typeof YMK !== "undefined") +
-      " is_loaded=" + kitLoaded() +
       " sdk=" + (window.__ymkScriptState || "pending") +
       " async_init=" + Boolean(window.YMKAsyncInitFired) +
       " ua=" + shortUserAgent()

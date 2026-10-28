@@ -30,15 +30,16 @@
   // Queue client logs until capture.js installs the real sender.
   window.__clientLogQueue = [];
   window.__ymkScriptState = "pending";
+  window.__ymkScriptLoadedAt = null;
   window.SkinLedgerClientLog = function (level, event, detail) {
     window.__clientLogQueue.push([level, event, detail]);
   };
-  // Must exist before the Camera Kit SDK script runs.
+  // Must exist before the Camera Kit SDK script runs. It only registers listeners.
   window.YMKAsyncInit = function () {
     window.YMKAsyncInitFired = true;
     window.SkinLedgerClientLog(
       "info",
-      "ymk_async_init",
+      "async_init",
       "fired capture_ready=" + Boolean(window.SkinLedgerCameraKitReady)
     );
     if (window.SkinLedgerCameraKitReady) {
@@ -51,7 +52,7 @@
 <script
   src="https://plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"
   async
-  onload="window.__ymkScriptState = 'loaded'; window.SkinLedgerClientLog('info', 'sdk_load', 'script loaded');"
+  onload="window.__ymkScriptState = 'loaded'; window.__ymkScriptLoadedAt = Date.now(); window.SkinLedgerClientLog('info', 'sdk_load', 'script loaded'); window.dispatchEvent(new Event('ymk-loaded'));"
   onerror="window.__ymkScriptState = 'failed'; window.SkinLedgerClientLog('error', 'sdk_fail', 'script failed to load'); window.dispatchEvent(new Event('ymk-error'));"
 ></script>
 <script src="/static/capture.js" defer></script>

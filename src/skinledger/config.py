@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     youcam_poll_interval_s: int = 5
     youcam_poll_timeout_s: int = 180
     data_dir: Path = Path("./data")
+    log_dir: Path = Path("./logs")
     log_level: str = "INFO"
     public_url: str = "http://localhost:8000"
     invite_code: SecretStr = SecretStr("")

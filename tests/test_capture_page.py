@@ -305,6 +305,21 @@ def test_capture_page_loads_the_camera_kit_after_the_ready_hook():
     assert 'imageFormat: "blob"' in (STATIC / "capture.js").read_text(encoding="utf-8")
 
 
+def test_guided_capture_never_gates_opening_on_is_loaded():
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+
+    # isLoaded() means "something is drawn on the canvas", so it is not a readiness gate.
+    assert "isLoaded" not in source
+    assert "YMK.isLoaded" not in source
+    assert "YMK.openCameraKit()" in source
+    assert "YMK.init(" in source
+    assert source.index('"call quality="') < source.index('"open_camera_kit", "called"')
+    # Init once per page, then open; 720p is the single re-init exception.
+    assert "if (!initCalled && !initKit(videoQuality))" in source
+    assert 'videoQuality = "720p";' in source
+    assert "initCalled = false;" in source
+
+
 def test_guided_capture_reports_every_failure_instead_of_staying_silent():
     source = (STATIC / "capture.js").read_text(encoding="utf-8")
 
@@ -313,34 +328,62 @@ def test_guided_capture_reports_every_failure_instead_of_staying_silent():
         "Guided camera unavailable on this device.",
         "camera_unavailable",
         "sdk_fail",
-        "sdk_pending",
-        "isloaded_false",
-        "not_ready_at_click",
+        "async_init_missing",
         "page_load",
-        "ymk_init",
         "button_click",
         "open_camera_kit",
-        "camera_event",
-        "faceQualityChanged",
+        "face_quality_changed",
+        "face_detection_captured",
+        "camera_failed",
+        "unsupported_resolution",
         "fetch_start",
         "fetch_response",
         "unhandledrejection",
         "/api/client-log",
+        "now - lastQualityLog >= 2000",
     ):
         assert expected in source, expected
-    # Attestation is the only thing that disables the buttons; kit readiness is
-    # explained on click, never as a silently disabled control.
-    assert "startButton.disabled = !attested;" in source
-    assert "!attested || !kitReady" not in source
-    assert "now - lastQualityLog >= 2000" in source
+    # Ready = SDK present AND YMKAsyncInit ran; the button waits for both.
+    assert "startButton.disabled = !attested || !kitReady;" in source
+
+
+def test_lifecycle_and_camera_events_are_registered_and_logged():
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+
+    for event in (
+        "opened",
+        "loading",
+        "loaded",
+        "closed",
+        "faceDetectionStarted",
+        "cameraOpened",
+        "cameraClosed",
+        "cameraFailed",
+        "unsupportedResolution",
+        "faceQualityChanged",
+        "faceDetectionCaptured",
+    ):
+        assert f'YMK.addEventListener("{event}"' in source, event
+    for event in (
+        "opened",
+        "loading",
+        "loaded",
+        "closed",
+        "face_detection_started",
+        "camera_opened",
+        "camera_closed",
+    ):
+        assert f'logLifecycle("{event}"' in source, event
 
 
 def test_capture_template_defines_the_sdk_hooks_before_the_script():
     template = (TEMPLATES / "capture.html").read_text(encoding="utf-8")
 
     assert "window.__ymkScriptState" in template
+    assert "window.__ymkScriptLoadedAt" in template
+    assert "onload=" in template
     assert "onerror=" in template
-    assert "ymk_async_init" in template
+    assert '"async_init"' in template
     assert template.index("window.SkinLedgerClientLog") < template.index(
         "plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"
     )

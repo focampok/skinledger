@@ -68,6 +68,14 @@ def web(env):
         yield client
 
 
+@pytest.fixture(autouse=True)
+def _restore_event_log_dir():
+    yield
+    # The file logger follows the settings object; put it back after a test
+    # pointed LOG_DIR at a temporary directory.
+    logs.configure_logging()
+
+
 def event_lines(caplog) -> list[str]:
     return [
         record.getMessage()
@@ -169,6 +177,56 @@ def test_full_mock_analysis_logs_events_without_secrets(env, web, caplog):
     ):
         assert secret not in text, secret
         assert secret not in caplog.text, secret
+
+
+def test_events_are_also_written_as_json_lines_without_secrets(
+    env, web, caplog, tmp_path, monkeypatch
+):
+    log_dir = tmp_path / "logs"
+    monkeypatch.setattr(env, "log_dir", log_dir)
+    logs.configure_logging()
+    caplog.set_level(logging.DEBUG, logger=logs.EVENT_LOGGER)
+
+    person_id = create_profile(web)
+    cookie_value = web.cookies.get(guards.OWNER_COOKIE)
+    web.cookies.set(guards.INVITE_COOKIE, guards.encode_invite_cookie(INVITE))
+    response = web.post(
+        "/api/captures",
+        params={
+            "person_id": person_id,
+            "source": "camera_kit",
+            "is_baseline_pair": 0,
+            "attested": 1,
+        },
+        content=jpeg_bytes(),
+        headers={"Content-Type": "image/jpeg"},
+    )
+    assert response.status_code == 202
+    wait_final(web, latest_capture_id())
+
+    path = log_dir / logs.LOG_FILE_NAME
+    assert path.is_file()
+    lines = path.read_text(encoding="utf-8").splitlines()
+    payloads = [json.loads(line) for line in lines]
+    events = [payload["event"] for payload in payloads]
+    assert "capture.reserved" in events
+    assert "youcam.success" in events
+    assert "usage.recorded" in events
+    assert all("ts" in payload and "level" in payload for payload in payloads)
+
+    text = path.read_text(encoding="utf-8")
+    for secret in (
+        DISPLAY_NAME,
+        INVITE,
+        ADMIN,
+        API_KEY,
+        OWNER_TOKEN,
+        cookie_value or "",
+        "Authorization",
+        "Bearer",
+        "signature=",
+    ):
+        assert secret not in text, secret
 
 
 def test_log_event_redacts_blocked_fields_secrets_and_signed_urls(env, caplog):
