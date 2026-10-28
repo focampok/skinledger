@@ -1,5 +1,7 @@
 """FastAPI application: health check, static shell and the PWA entry points."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -8,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from skinledger import copy
+from skinledger.db import init_db
 
 WEB_DIR = Path(__file__).resolve().parent
 STATIC_DIR = WEB_DIR / "static"
@@ -18,7 +21,14 @@ templates.env.globals.update(
     powered_by=copy.POWERED_BY,
 )
 
-app = FastAPI(title="SkinLedger")
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Create the SQLite schema on startup; the migration is idempotent."""
+    init_db()
+    yield
+
+
+app = FastAPI(title="SkinLedger", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
