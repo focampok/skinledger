@@ -1,0 +1,4 @@
+{ "permissions": { "deny": [
+    "Read(./.env)", "Read(./.env.*)", "Read(./data/**)",
+    "Bash(cat:*.env*)", "Bash(printenv:*)", "Bash(env)"
+] } }

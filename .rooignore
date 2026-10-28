@@ -1,0 +1,6 @@
+.env
+.env.*
+data/
+*.jpg
+*.png
+!web/static/icons/
