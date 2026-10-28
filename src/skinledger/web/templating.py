@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi.templating import Jinja2Templates
 
 from skinledger import copy
+from skinledger.features import FEATURES
 
 WEB_DIR = Path(__file__).resolve().parent
 
@@ -16,4 +17,5 @@ templates.env.globals.update(
     privacy_note=copy.PRIVACY_NOTE,
     upload_tip=copy.UPLOAD_TIP,
     baseline_done=copy.BASELINE_DONE,
+    features=FEATURES,
 )

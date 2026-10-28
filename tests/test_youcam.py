@@ -10,7 +10,7 @@ import pytest
 import respx
 from PIL import Image
 
-from skinledger import youcam
+from skinledger import mock_masks
 from skinledger.aspects import SD_ACTIONS
 from skinledger.imaging import PreparedImage
 from skinledger.youcam import (
@@ -503,8 +503,8 @@ async def test_mock_mode_runs_the_whole_flow_without_network():
     assert result.raw["_label"] == "SAMPLE"
     with Image.open(io.BytesIO(mask)) as mask_image:
         assert mask_image.format == "PNG"
-        assert mask_image.mode == "L"
-        assert mask_image.size == youcam.MOCK_MASK_SIZE
+        assert mask_image.mode == "RGBA"
+        assert mask_image.size == (mock_masks.MASK_WIDTH, mock_masks.MASK_HEIGHT)
 
 
 @respx.mock

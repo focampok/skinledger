@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import copy
-import io
 import json
 import logging
 import random
@@ -16,9 +15,9 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from PIL import Image
 from pydantic import SecretStr
 
+from skinledger import logs, mock_masks
 from skinledger.aspects import SD_ACTIONS
 from skinledger.config import get_settings
 from skinledger.imaging import PreparedImage
@@ -36,7 +35,6 @@ FILE_API_VERSION = "v2.0"
 
 MOCK_RUNNING_POLLS = 2
 MOCK_POLL_INTERVAL_S = 0.5
-MOCK_MASK_SIZE = (64, 48)
 
 SAMPLE_FIXTURE_PATH = (
     Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "sd_result_SAMPLE.json"
@@ -266,7 +264,6 @@ class YouCamClient:
         self._mock_file_counter = 0
         self._mock_task_counter = 0
         self._mock_task_polls: dict[str, int] = {}
-        self._mock_masks: dict[str, bytes] = {}
 
     # -- auth and low-level HTTP ------------------------------------------------
 
@@ -609,8 +606,16 @@ class YouCamClient:
         loop = asyncio.get_running_loop()
         started = loop.time()
 
+        attempt = 0
         while True:
+            attempt += 1
             result = await self.get_task(task_id)
+            logs.log_event(
+                "youcam.poll",
+                attempt=attempt,
+                task_status=result.status,
+                mode=logs.mode_name(mock=self.mock),
+            )
             if result.status == "success":
                 return result
             if result.status == "error":
@@ -679,14 +684,8 @@ class YouCamClient:
         return body
 
     def _mock_mask_png(self, url: str) -> bytes:
-        cached = self._mock_masks.get(url)
-        if cached is None:
-            buffer = io.BytesIO()
-            # A flat grey PNG made in memory; never a face and never a real mask.
-            Image.new("L", MOCK_MASK_SIZE, color=200).save(buffer, format="PNG")
-            cached = buffer.getvalue()
-            self._mock_masks[url] = cached
-        return cached
+        # A transparent PNG with one soft region per aspect; never a face.
+        return mock_masks.mock_mask_png_for_url(url)
 
 
 def _dig(body: Any, *keys: str) -> Any:

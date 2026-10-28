@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from skinledger import copy
+from skinledger import copy, features
 from skinledger.config import Settings
 from skinledger.web.app import app
 
@@ -27,6 +27,40 @@ def test_home_page_shows_exact_disclaimer_and_attribution():
     assert response.status_code == 200
     assert copy.DISCLAIMER in response.text
     assert copy.POWERED_BY in response.text
+
+
+def test_home_page_offers_the_tagline_try_it_and_my_people():
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Is it working or not? Know before you rebuy." in response.text
+    assert 'href="/try"' in response.text
+    assert "Try it" in response.text
+    assert 'href="/people"' in response.text
+    assert "My people" in response.text
+
+
+def test_unbuilt_navigation_items_are_hidden_by_the_feature_flags():
+    response = client.get("/")
+
+    for path in ("/timeline", "/products", "/routine"):
+        assert f'href="{path}"' not in response.text
+    assert 'href="/people"' in response.text
+
+
+def test_feature_flags_enable_a_nav_item_in_one_place(monkeypatch):
+    monkeypatch.setitem(features.FEATURES, "timeline", True)
+
+    response = client.get("/")
+
+    assert 'href="/timeline"' in response.text
+
+
+def test_favicon_and_apple_touch_icon_reuse_the_192_icon():
+    response = client.get("/")
+
+    assert '<link rel="icon" href="/static/icons/icon-192.png" type="image/png">' in response.text
+    assert '<link rel="apple-touch-icon" href="/static/icons/icon-192.png">' in response.text
 
 
 def test_offline_page_is_available_for_the_service_worker():

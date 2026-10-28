@@ -14,7 +14,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from skinledger import copy, usage
+from skinledger import copy, logs, usage
 from skinledger.aspects import NUMERIC_ASPECTS
 from skinledger.config import Settings, get_settings
 from skinledger.db import connect, db_path
@@ -108,6 +108,9 @@ def mark_capture_error(
 async def finish_analysis(capture_id: int) -> None:
     """Poll the YouCam task, then store scores, masks, the raw JSON and the usage row."""
     settings = get_settings()
+    mode = logs.mode_name(mock=settings.youcam_mock)
+    loop = asyncio.get_running_loop()
+    started = loop.time()
     conn = connect(db_path())
     try:
         capture = conn.execute(
@@ -115,8 +118,17 @@ async def finish_analysis(capture_id: int) -> None:
         ).fetchone()
         if capture is None or capture["status"] not in ("running", "timeout"):
             return
+        person_id = capture["person_id"]
         task_id = capture["task_id"]
         if not task_id:
+            logs.log_event(
+                "youcam.error",
+                level="warning",
+                capture_id=capture_id,
+                person_id=person_id,
+                error_code="interrupted_upload",
+                mode=mode,
+            )
             mark_capture_error(conn, capture_id, "interrupted_upload", copy.TRY_AGAIN_NO_UNITS)
             conn.commit()
             return
@@ -125,16 +137,42 @@ async def finish_analysis(capture_id: int) -> None:
         try:
             result = await client.poll(task_id)
         except YouCamTaskError as exc:
+            logs.log_event(
+                "youcam.error",
+                level="warning",
+                capture_id=capture_id,
+                person_id=person_id,
+                error_code=exc.error_code,
+                duration_ms=_elapsed_ms(started, loop),
+                mode=mode,
+            )
             mark_capture_error(conn, capture_id, exc.error_code, exc.user_message)
             conn.commit()
             return
         except YouCamError as exc:
             code = getattr(exc, "code", None) or "unknown_internal_error"
+            logs.log_event(
+                "youcam.error",
+                level="warning",
+                capture_id=capture_id,
+                person_id=person_id,
+                error_code=code,
+                duration_ms=_elapsed_ms(started, loop),
+                mode=mode,
+            )
             mark_capture_error(conn, capture_id, code, exc.user_message)
             conn.commit()
             return
 
         if result.status == "timeout":
+            logs.log_event(
+                "youcam.timeout",
+                capture_id=capture_id,
+                person_id=person_id,
+                task_id=task_id,
+                duration_ms=_elapsed_ms(started, loop),
+                mode=mode,
+            )
             conn.execute(
                 "UPDATE captures SET status = 'timeout' WHERE id = ? "
                 "AND status IN ('running', 'timeout')",
@@ -143,9 +181,25 @@ async def finish_analysis(capture_id: int) -> None:
             conn.commit()
             return
 
+        logs.log_event(
+            "youcam.success",
+            capture_id=capture_id,
+            person_id=person_id,
+            task_id=task_id,
+            aspects=len(result.scores),
+            duration_ms=_elapsed_ms(started, loop),
+            mode=mode,
+        )
         await _store_success(conn, capture, result, client, settings)
     except Exception:
         logger.exception("Analysis capture %s failed unexpectedly", capture_id)
+        logs.log_event(
+            "youcam.error",
+            level="error",
+            capture_id=capture_id,
+            error_code="unknown_internal_error",
+            mode=mode,
+        )
         try:
             mark_capture_error(
                 conn, capture_id, "unknown_internal_error", copy.TRY_AGAIN_NO_UNITS
@@ -155,6 +209,10 @@ async def finish_analysis(capture_id: int) -> None:
             logger.warning("Could not mark capture %s as failed", capture_id)
     finally:
         conn.close()
+
+
+def _elapsed_ms(started: float, loop: asyncio.AbstractEventLoop) -> int:
+    return int((loop.time() - started) * 1000)
 
 
 async def _store_success(
@@ -182,6 +240,7 @@ async def _store_success(
             return
 
         mask_rows = _write_masks(capture, downloads, settings)
+        day = usage.guatemala_today()
         try:
             for aspect, raw_score, value_text in _score_rows(result):
                 conn.execute(
@@ -206,13 +265,22 @@ async def _store_success(
                 (
                     capture["id"],
                     capture["owner_token_hash"],
-                    usage.guatemala_today(),
+                    day,
                     charged,
                     mode,
                     int(capture["is_admin"]),
                 ),
             )
             conn.commit()
+            logs.log_event(
+                "usage.recorded",
+                capture_id=capture["id"],
+                person_id=capture["person_id"],
+                units=charged,
+                mode=mode,
+                day=day,
+                is_admin=bool(capture["is_admin"]),
+            )
         except sqlite3.Error:
             conn.rollback()
             raise
@@ -255,12 +323,22 @@ async def _collect_masks(
             try:
                 data = await client.download(url, task_id=capture["task_id"])
             except YouCamError:
-                logger.warning("Could not download the mask for aspect %s", aspect)
+                logs.log_event(
+                    "masks.refused",
+                    level="warning",
+                    capture_id=capture["id"],
+                    aspect=aspect,
+                    reason="download_failed",
+                )
                 continue
             refusal = _mask_refusal_reason(data)
             if refusal:
-                logger.warning(
-                    "Refusing to store the mask for aspect %s: %s", aspect, refusal
+                logs.log_event(
+                    "masks.refused",
+                    level="warning",
+                    capture_id=capture["id"],
+                    aspect=aspect,
+                    reason=refusal,
                 )
                 continue
             collected.append((aspect, index, data))
@@ -286,6 +364,7 @@ def _write_masks(
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
         written.append((aspect, str(relative)))
+    logs.log_event("masks.saved", capture_id=capture["id"], count=len(written))
     return written
 
 
@@ -325,6 +404,7 @@ async def resume_pending() -> None:
     finally:
         conn.close()
 
+    logs.log_event("resume.pending", count=len(resume_ids))
     for capture_id in resume_ids:
         spawn_finish(capture_id)
 

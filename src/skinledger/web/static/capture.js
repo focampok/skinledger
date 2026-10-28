@@ -14,6 +14,7 @@
   var languageKey = "skinledger_camera_language";
 
   var attestation = document.getElementById("attestation");
+  var attestationHint = document.getElementById("attestation-hint");
   var startButton = document.getElementById("start-capture");
   var uploadButton = document.getElementById("send-upload");
   var fileInput = document.getElementById("photo");
@@ -34,11 +35,52 @@
     "the short side — or use the guided camera. This attempt didn't count toward your limit.";
 
   var kitReady = false;
+  var kitUnavailable = false;
   var kitInitTried = false;
   var retriedLowQuality = false;
   var objectUrl = null;
   var pollTimer = null;
   var handledCaptureId = null;
+  var lastQualityLog = 0;
+
+  function errorText(error) {
+    if (error && typeof error.message === "string") {
+      return error.message;
+    }
+    if (typeof error === "string") {
+      return error;
+    }
+    return "non-error value";
+  }
+
+  function shortUserAgent() {
+    return String(navigator.userAgent || "")
+      .replace(/\s+/g, " ")
+      .slice(0, 120);
+  }
+
+  function clientLog(level, event, detail) {
+    try {
+      fetch("/api/client-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level: level, event: event, detail: detail || "" }),
+        keepalive: true,
+      }).catch(function () {
+        /* Diagnostics must never break the capture flow. */
+      });
+    } catch (error) {
+      /* Diagnostics must never break the capture flow. */
+    }
+  }
+
+  // Install the real sender and flush anything the template logged before this file ran.
+  var queuedLogs = window.__clientLogQueue || [];
+  window.__clientLogQueue = [];
+  window.SkinLedgerClientLog = clientLog;
+  queuedLogs.forEach(function (item) {
+    clientLog(item[0], item[1], item[2]);
+  });
 
   function loadLanguage() {
     try {
@@ -58,11 +100,16 @@
 
   function updateButtons() {
     var attested = Boolean(attestation && attestation.checked);
+    // Attestation gates both buttons; Camera Kit readiness is explained on click,
+    // never by a silently disabled button.
     if (startButton) {
-      startButton.disabled = !attested || !kitReady;
+      startButton.disabled = !attested;
     }
     if (uploadButton) {
       uploadButton.disabled = !attested;
+    }
+    if (attestationHint) {
+      attestationHint.hidden = attested;
     }
   }
 
@@ -185,11 +232,17 @@
   function watchCapture(captureId) {
     stopPolling();
     var tick = function () {
+      clientLog("debug", "fetch_start", "endpoint=status capture_id=" + captureId);
       fetch("/api/captures/" + encodeURIComponent(captureId) + "/status", {
         headers: { "HX-Request": "true" },
       })
         .then(function (response) {
           if (!response.ok) {
+            clientLog(
+              "warning",
+              "fetch_response",
+              "endpoint=status capture_id=" + captureId + " status=" + response.status
+            );
             stopPolling();
             return null;
           }
@@ -201,10 +254,20 @@
           }
           var state = applyStatus(html);
           if (state === "success" || state === "error") {
+            clientLog(
+              "info",
+              "fetch_response",
+              "endpoint=status capture_id=" + captureId + " state=" + state
+            );
             stopPolling();
           }
         })
-        .catch(function () {
+        .catch(function (error) {
+          clientLog(
+            "warning",
+            "fetch_error",
+            "endpoint=status message=" + errorText(error)
+          );
           /* Keep the interval running; a transient failure is fine. */
         });
     };
@@ -232,12 +295,22 @@
       attested: "1",
     });
     statusBox.innerHTML = "<p>Uploading…</p>";
+    clientLog(
+      "info",
+      "fetch_start",
+      "endpoint=/api/captures source=" + source + " bytes=" + blob.size
+    );
     fetch("/api/captures?" + params.toString(), {
       method: "POST",
       body: blob,
       headers: { "Content-Type": blob.type || "image/jpeg" },
     })
       .then(function (response) {
+        clientLog(
+          "info",
+          "fetch_response",
+          "endpoint=/api/captures source=" + source + " status=" + response.status
+        );
         return response.text().then(function (text) {
           if (!response.ok) {
             showError(extractDetail(text));
@@ -251,36 +324,82 @@
           watchCapture(section.getAttribute("data-capture-id"));
         });
       })
-      .catch(function () {
+      .catch(function (error) {
+        clientLog(
+          "error",
+          "fetch_error",
+          "endpoint=/api/captures message=" + errorText(error)
+        );
         showError("We couldn't reach SkinLedger. Check your connection and try again.");
       });
   }
 
-  function cameraUnavailable() {
+  function cameraUnavailable(message, reason, switchToUpload) {
     kitReady = false;
+    if (reason !== "sdk_pending" && reason !== "not_ready_at_click") {
+      kitUnavailable = true;
+    }
     updateButtons();
-    help.textContent = "Guided camera unavailable on this device.";
-    if (allowUpload) {
+    if (help) {
+      help.textContent = message || "Guided camera unavailable on this device.";
+    }
+    clientLog("warning", "camera_unavailable", "reason=" + (reason || "unknown"));
+    if (allowUpload && switchToUpload !== false) {
       selectTab("upload");
     }
   }
 
   function kitLoaded() {
-    return (
-      typeof YMK !== "undefined" &&
-      typeof YMK.isLoaded === "function" &&
-      YMK.isLoaded()
-    );
+    try {
+      return (
+        typeof YMK !== "undefined" &&
+        typeof YMK.isLoaded === "function" &&
+        Boolean(YMK.isLoaded())
+      );
+    } catch (error) {
+      // UNVERIFIED: isLoaded may throw before the kit finishes loading.
+      return false;
+    }
   }
 
-  function markReady() {
-    kitReady = true;
-    updateButtons();
-    help.textContent = "Camera ready. Hold still and look at the camera.";
+  function markReady(attempt) {
+    // UNVERIFIED: whether YMK.isLoaded() turns true before or after init resolves.
+    // Give it a short grace period instead of silently leaving the button dead.
+    attempt = attempt || 0;
+    if (kitLoaded()) {
+      kitReady = true;
+      kitUnavailable = false;
+      updateButtons();
+      if (help) {
+        help.textContent = "Camera ready. Hold still and look at the camera.";
+      }
+      clientLog("info", "ymk_init", "ready attempt=" + attempt);
+      return;
+    }
+    if (attempt < 5) {
+      window.setTimeout(function () {
+        markReady(attempt + 1);
+      }, 400);
+      return;
+    }
+    clientLog("warning", "ymk_init", "isLoaded false after init");
+    cameraUnavailable("Guided camera unavailable on this device.", "isloaded_false");
   }
 
   function onQuality(state) {
     // UNVERIFIED: exact field values of faceQualityChanged; adjust from the console.
+    var now = Date.now();
+    if (now - lastQualityLog >= 2000) {
+      lastQualityLog = now;
+      clientLog(
+        "info",
+        "camera_event",
+        "event=faceQualityChanged has_face=" + (state && state.hasFace) +
+          " frontal=" + (state && state.frontal) +
+          " lighting=" + (state && state.lighting) +
+          " position=" + (state && state.position)
+      );
+    }
     var messages = [];
     if (state && state.hasFace === false) {
       messages.push("Move closer");
@@ -304,6 +423,7 @@
 
   function onCameraFailed(state) {
     var code = (state && (state.error || state.code || state.error_code)) || "";
+    clientLog("warning", "camera_event", "event=cameraFailed code=" + (code || "unknown"));
     var messages = {
       error_permission_denied: "Allow camera access in your browser settings",
       error_resolution_unsupported: "Your camera resolution isn't supported; try another device",
@@ -325,6 +445,11 @@
   function onCaptured(state) {
     // UNVERIFIED: phase may bring several images in skincare mode; keep the largest.
     var images = (state && state.images) || [];
+    clientLog(
+      "info",
+      "camera_event",
+      "event=faceDetectionCaptured images=" + images.length
+    );
     if (!images.length) {
       return;
     }
@@ -355,21 +480,34 @@
       qualityLevel: "strict",
       videoQuality: videoQuality,
     };
+    clientLog("info", "ymk_init", "call quality=" + videoQuality);
+    kitUnavailable = false;
     try {
       var result = YMK.init(config);
       if (result && typeof result.then === "function") {
-        result.then(markReady).catch(cameraUnavailable);
+        result
+          .then(function () {
+            clientLog("info", "ymk_init", "resolved quality=" + videoQuality);
+            markReady(0);
+          })
+          .catch(function (error) {
+            clientLog("error", "ymk_init", "rejected " + errorText(error));
+            cameraUnavailable("Guided camera unavailable on this device.", "init_rejected");
+          });
       } else {
-        markReady();
+        clientLog("info", "ymk_init", "returned synchronously");
+        markReady(0);
       }
     } catch (error) {
-      cameraUnavailable();
+      clientLog("error", "ymk_init", "exception " + errorText(error));
+      cameraUnavailable("Guided camera unavailable on this device.", "init_exception");
     }
   }
 
   function onUnsupportedResolution() {
+    clientLog("warning", "camera_event", "event=unsupportedResolution");
     if (retriedLowQuality) {
-      cameraUnavailable();
+      cameraUnavailable("Guided camera unavailable on this device.", "resolution_unsupported");
       return;
     }
     retriedLowQuality = true;
@@ -388,8 +526,22 @@
       return;
     }
     kitInitTried = true;
-    if (!window.isSecureContext || typeof YMK === "undefined") {
-      cameraUnavailable();
+    clientLog(
+      "info",
+      "ymk_init",
+      "starting sdk=" + (window.__ymkScriptState || "pending") +
+        " secure=" + Boolean(window.isSecureContext)
+    );
+    if (!window.isSecureContext) {
+      cameraUnavailable("Guided camera unavailable on this device.", "insecure_context");
+      return;
+    }
+    if (typeof YMK === "undefined") {
+      if (window.__ymkScriptState === "failed") {
+        cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
+      } else {
+        cameraUnavailable("Guided camera is still loading…", "sdk_pending", false);
+      }
       return;
     }
     // UNVERIFIED: exact addEventListener signature; adjust from the browser console.
@@ -404,10 +556,17 @@
   if (window.__ymkReady) {
     initCameraKit();
   }
-  window.addEventListener("ymk-error", cameraUnavailable);
+  window.addEventListener("ymk-error", function () {
+    // The template already logged sdk_fail; explain it on screen too.
+    cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
+  });
+  if (window.__ymkScriptState === "failed") {
+    // The script failed before this listener existed.
+    cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
+  }
   window.setTimeout(function () {
     if (!kitReady) {
-      cameraUnavailable();
+      cameraUnavailable("Guided camera unavailable on this device.", "init_timeout");
     }
   }, 10000);
 
@@ -417,16 +576,33 @@
 
   if (startButton) {
     startButton.addEventListener("click", function () {
-      if (!attestation.checked) {
+      var attested = Boolean(attestation && attestation.checked);
+      clientLog(
+        "info",
+        "button_click",
+        "button=start_capture attested=" + attested +
+          " kit_ready=" + kitReady +
+          " is_loaded=" + kitLoaded()
+      );
+      if (!attested) {
+        help.textContent = "Tick the 18+ checkbox above first.";
         return;
       }
       if (!kitLoaded()) {
-        cameraUnavailable();
+        if (window.__ymkScriptState === "failed" || !window.isSecureContext) {
+          cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
+        } else if (kitReady || kitUnavailable) {
+          cameraUnavailable("Guided camera unavailable on this device.", "isloaded_false_at_click");
+        } else {
+          cameraUnavailable("Guided camera is still loading…", "not_ready_at_click", false);
+        }
         return;
       }
       try {
+        clientLog("info", "open_camera_kit", "called");
         YMK.openCameraKit();
       } catch (error) {
+        clientLog("error", "open_camera_kit", "exception " + errorText(error));
         onCameraFailed({ error_access_failed: true });
       }
     });
@@ -450,7 +626,10 @@
 
   if (uploadButton) {
     uploadButton.addEventListener("click", function () {
-      if (!attestation.checked) {
+      var attested = Boolean(attestation && attestation.checked);
+      clientLog("info", "button_click", "button=send_upload attested=" + attested);
+      if (!attested) {
+        showError("Tick the 18+ checkbox above first.");
         return;
       }
       var file = fileInput.files && fileInput.files[0];
@@ -469,6 +648,35 @@
       sendImage(file, "upload");
     });
   }
+
+  window.addEventListener("error", function (event) {
+    // Message and position only: never image data or blob contents.
+    clientLog(
+      "error",
+      "error",
+      "message=" + errorText(event.error || event.message) +
+        " line=" + (event.lineno || 0) +
+        " col=" + (event.colno || 0)
+    );
+  });
+
+  window.addEventListener("unhandledrejection", function (event) {
+    clientLog(
+      "error",
+      "error",
+      "unhandled_rejection message=" + errorText(event.reason)
+    );
+  });
+
+  clientLog(
+    "info",
+    "page_load",
+    "has_ymk=" + (typeof YMK !== "undefined") +
+      " is_loaded=" + kitLoaded() +
+      " sdk=" + (window.__ymkScriptState || "pending") +
+      " async_init=" + Boolean(window.YMKAsyncInitFired) +
+      " ua=" + shortUserAgent()
+  );
 
   selectTab("guided");
   updateButtons();

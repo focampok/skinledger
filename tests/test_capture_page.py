@@ -145,6 +145,8 @@ def test_capture_page_has_exact_copy_and_baseline_step(env, web):
     response = web.get(f"/people/{person_id}/capture")
 
     assert response.status_code == 200
+    assert 'id="attestation-hint"' in response.text
+    assert "Tick the checkbox above to enable" in response.text
     assert copy.ATTESTATION in response.text
     assert copy.DISCLAIMER in response.text
     assert copy.PRIVACY_NOTE in response.text
@@ -301,3 +303,44 @@ def test_capture_page_loads_the_camera_kit_after_the_ready_hook():
         encoding="utf-8"
     )
     assert 'imageFormat: "blob"' in (STATIC / "capture.js").read_text(encoding="utf-8")
+
+
+def test_guided_capture_reports_every_failure_instead_of_staying_silent():
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+
+    for expected in (
+        "Guided camera is still loading…",
+        "Guided camera unavailable on this device.",
+        "camera_unavailable",
+        "sdk_fail",
+        "sdk_pending",
+        "isloaded_false",
+        "not_ready_at_click",
+        "page_load",
+        "ymk_init",
+        "button_click",
+        "open_camera_kit",
+        "camera_event",
+        "faceQualityChanged",
+        "fetch_start",
+        "fetch_response",
+        "unhandledrejection",
+        "/api/client-log",
+    ):
+        assert expected in source, expected
+    # Attestation is the only thing that disables the buttons; kit readiness is
+    # explained on click, never as a silently disabled control.
+    assert "startButton.disabled = !attested;" in source
+    assert "!attested || !kitReady" not in source
+    assert "now - lastQualityLog >= 2000" in source
+
+
+def test_capture_template_defines_the_sdk_hooks_before_the_script():
+    template = (TEMPLATES / "capture.html").read_text(encoding="utf-8")
+
+    assert "window.__ymkScriptState" in template
+    assert "onerror=" in template
+    assert "ymk_async_init" in template
+    assert template.index("window.SkinLedgerClientLog") < template.index(
+        "plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"
+    )

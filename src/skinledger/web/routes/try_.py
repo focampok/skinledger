@@ -8,7 +8,7 @@ import time
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from skinledger import copy, guards
+from skinledger import copy, guards, logs
 from skinledger.config import get_settings
 from skinledger.web.forms import read_urlencoded_form
 from skinledger.web.templating import templates
@@ -53,15 +53,29 @@ async def submit_invite(request: Request):
     current = settings.invite_code.get_secret_value()
 
     if current and hmac.compare_digest(code, current):
+        logs.log_event("invite.ok", http_status=303)
         response = RedirectResponse("/people/new", status_code=303)
         guards.set_invite_cookie(response, current)
         return response
 
     ip = _client_ip(request)
     now = time.monotonic()
-    if len(_recent_failures(ip, now)) >= MAX_INVITE_FAILURES:
+    failures = _recent_failures(ip, now)
+    if len(failures) >= MAX_INVITE_FAILURES:
+        logs.log_event(
+            "invite.failed",
+            level="warning",
+            count=len(failures),
+            http_status=429,
+        )
         raise HTTPException(status_code=429, detail=copy.TOO_MANY_INVITE_ATTEMPTS)
-    _recent_failures(ip, now).append(now)
+    failures.append(now)
+    logs.log_event(
+        "invite.failed",
+        level="info",
+        count=len(failures),
+        http_status=400,
+    )
     return templates.TemplateResponse(
         request, "try.html", {"error": copy.INVALID_INVITE}, status_code=400
     )

@@ -27,8 +27,20 @@
   }
 </style>
 <script>
+  // Queue client logs until capture.js installs the real sender.
+  window.__clientLogQueue = [];
+  window.__ymkScriptState = "pending";
+  window.SkinLedgerClientLog = function (level, event, detail) {
+    window.__clientLogQueue.push([level, event, detail]);
+  };
   // Must exist before the Camera Kit SDK script runs.
   window.YMKAsyncInit = function () {
+    window.YMKAsyncInitFired = true;
+    window.SkinLedgerClientLog(
+      "info",
+      "ymk_async_init",
+      "fired capture_ready=" + Boolean(window.SkinLedgerCameraKitReady)
+    );
     if (window.SkinLedgerCameraKitReady) {
       window.SkinLedgerCameraKitReady();
     } else {
@@ -39,7 +51,8 @@
 <script
   src="https://plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"
   async
-  onerror="window.dispatchEvent(new Event('ymk-error'))"
+  onload="window.__ymkScriptState = 'loaded'; window.SkinLedgerClientLog('info', 'sdk_load', 'script loaded');"
+  onerror="window.__ymkScriptState = 'failed'; window.SkinLedgerClientLog('error', 'sdk_fail', 'script failed to load'); window.dispatchEvent(new Event('ymk-error'));"
 ></script>
 <script src="/static/capture.js" defer></script>
 {% endblock %}
@@ -63,6 +76,7 @@
     <input type="checkbox" id="attestation">
     {{ attestation }}
   </label>
+  <p id="attestation-hint"><small>Tick the checkbox above to enable the camera and upload buttons.</small></p>
 
   <p><small>{{ privacy_note }} <a href="/privacy">Read the privacy page</a></small></p>
 

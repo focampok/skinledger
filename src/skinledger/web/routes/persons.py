@@ -8,7 +8,7 @@ import shutil
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from skinledger import copy, guards, pipeline, usage
+from skinledger import copy, guards, logs, pipeline, usage
 from skinledger.config import get_settings
 from skinledger.db import connect, db_path
 from skinledger.web.forms import read_urlencoded_form
@@ -125,6 +125,7 @@ async def create_person(request: Request):
         )
         conn.commit()
         person_id = int(cursor.lastrowid or 0)
+        logs.log_event("person.created", person_id=person_id)
     finally:
         conn.close()
     return _redirect(f"/people/{person_id}/consent", token, is_new)
@@ -182,6 +183,11 @@ async def accept_consent(request: Request, person_id: int):
             (person_id, copy.CONSENT_VERSION, usage.utc_now_iso()),
         )
         conn.commit()
+        logs.log_event(
+            "consent.accepted",
+            person_id=person_id,
+            consent_version=copy.CONSENT_VERSION,
+        )
     finally:
         conn.close()
     return RedirectResponse("/people", status_code=303)
@@ -247,6 +253,7 @@ async def delete_person(request: Request, person_id: int) -> HTMLResponse:
     finally:
         conn.close()
 
+    logs.log_event("person.deleted", person_id=person_id)
     # UNVERIFIED: YouCam's exact deletion channel for an uploaded photo.
     return templates.TemplateResponse(
         request, "person_deleted.html", {"message": copy.DELETED_MESSAGE}
