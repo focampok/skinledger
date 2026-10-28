@@ -8,6 +8,7 @@ import json
 import logging
 import re
 import sqlite3
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -31,6 +32,14 @@ logger = logging.getLogger(__name__)
 TASK_RETENTION_DAYS = 30
 
 _background_tasks: set[asyncio.Task[None]] = set()
+_io_lock = asyncio.Lock()
+
+
+@asynccontextmanager
+async def analysis_io_lock():
+    """Serialize mask writes and the success commit with person deletion."""
+    async with _io_lock:
+        yield
 
 
 def spawn_finish(capture_id: int) -> None:
@@ -155,50 +164,66 @@ async def _store_success(
     client: YouCamClient,
     settings: Settings,
 ) -> None:
-    mask_rows = await _download_masks(capture, result, client, settings)
+    if not _capture_exists(conn, capture["id"]):
+        return
+    downloads = await _collect_masks(capture, result, client, settings)
     charged = 0 if settings.youcam_mock else settings.units_per_analysis
     mode = "mock" if settings.youcam_mock else "real"
 
-    current = conn.execute(
-        "SELECT status FROM captures WHERE id = ?", (capture["id"],)
-    ).fetchone()
-    if current is None or current["status"] not in ("running", "timeout"):
-        return
+    async with analysis_io_lock():
+        # Deletion takes the same lock; if the person went away while we were
+        # downloading, stop before writing any file or row.
+        current = conn.execute(
+            "SELECT c.status FROM captures c JOIN persons p ON p.id = c.person_id "
+            "WHERE c.id = ?",
+            (capture["id"],),
+        ).fetchone()
+        if current is None or current["status"] not in ("running", "timeout"):
+            return
 
-    try:
-        for aspect, raw_score, value_text in _score_rows(result):
+        mask_rows = _write_masks(capture, downloads, settings)
+        try:
+            for aspect, raw_score, value_text in _score_rows(result):
+                conn.execute(
+                    "INSERT INTO aspect_scores (capture_id, aspect, raw_score, value_text) "
+                    "VALUES (?, ?, ?, ?)",
+                    (capture["id"], aspect, raw_score, value_text),
+                )
+            for aspect, relative_path in mask_rows:
+                conn.execute(
+                    "INSERT INTO masks (capture_id, aspect, file_path) VALUES (?, ?, ?)",
+                    (capture["id"], aspect, relative_path),
+                )
             conn.execute(
-                "INSERT INTO aspect_scores (capture_id, aspect, raw_score, value_text) "
-                "VALUES (?, ?, ?, ?)",
-                (capture["id"], aspect, raw_score, value_text),
+                "UPDATE captures SET status = 'success', raw_result_json = ?, "
+                "units_charged = ? WHERE id = ?",
+                (json.dumps(result.raw), charged, capture["id"]),
             )
-        for aspect, relative_path in mask_rows:
             conn.execute(
-                "INSERT INTO masks (capture_id, aspect, file_path) VALUES (?, ?, ?)",
-                (capture["id"], aspect, relative_path),
+                "INSERT INTO api_usage "
+                "(capture_id, owner_token_hash, day, units, mode, is_admin) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    capture["id"],
+                    capture["owner_token_hash"],
+                    usage.guatemala_today(),
+                    charged,
+                    mode,
+                    int(capture["is_admin"]),
+                ),
             )
-        conn.execute(
-            "UPDATE captures SET status = 'success', raw_result_json = ?, "
-            "units_charged = ? WHERE id = ?",
-            (json.dumps(result.raw), charged, capture["id"]),
-        )
-        conn.execute(
-            "INSERT INTO api_usage "
-            "(capture_id, owner_token_hash, day, units, mode, is_admin) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
-            (
-                capture["id"],
-                capture["owner_token_hash"],
-                usage.guatemala_today(),
-                charged,
-                mode,
-                int(capture["is_admin"]),
-            ),
-        )
-        conn.commit()
-    except sqlite3.Error:
-        conn.rollback()
-        raise
+            conn.commit()
+        except sqlite3.Error:
+            conn.rollback()
+            raise
+
+
+def _capture_exists(conn: sqlite3.Connection, capture_id: int) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM captures c JOIN persons p ON p.id = c.person_id WHERE c.id = ?",
+        (capture_id,),
+    ).fetchone()
+    return row is not None
 
 
 def _score_rows(result: TaskResult) -> list[tuple[str, float | None, str | None]]:
@@ -215,16 +240,16 @@ def _score_rows(result: TaskResult) -> list[tuple[str, float | None, str | None]
     return rows
 
 
-async def _download_masks(
+async def _collect_masks(
     capture: sqlite3.Row,
     result: TaskResult,
     client: YouCamClient,
     settings: Settings,
-) -> list[tuple[str, str]]:
+) -> list[tuple[str, int, bytes]]:
     """Download only the mask keys the parser exposes; never resize_image."""
     if not settings.store_masks:
         return []
-    written: list[tuple[str, str]] = []
+    collected: list[tuple[str, int, bytes]] = []
     for aspect, urls in result.mask_urls.items():
         for index, url in enumerate(urls):
             try:
@@ -238,17 +263,29 @@ async def _download_masks(
                     "Refusing to store the mask for aspect %s: %s", aspect, refusal
                 )
                 continue
-            safe_aspect = re.sub(r"[^A-Za-z0-9_.-]", "_", aspect)
-            relative = (
-                Path("masks")
-                / str(capture["person_id"])
-                / str(capture["id"])
-                / f"{safe_aspect}_{index}.png"
-            )
-            target = settings.data_dir / relative
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(data)
-            written.append((aspect, str(relative)))
+            collected.append((aspect, index, data))
+    return collected
+
+
+def _write_masks(
+    capture: sqlite3.Row,
+    downloads: list[tuple[str, int, bytes]],
+    settings: Settings,
+) -> list[tuple[str, str]]:
+    """Write collected masks; the caller holds the analysis IO lock."""
+    written: list[tuple[str, str]] = []
+    for aspect, index, data in downloads:
+        safe_aspect = re.sub(r"[^A-Za-z0-9_.-]", "_", aspect)
+        relative = (
+            Path("masks")
+            / str(capture["person_id"])
+            / str(capture["id"])
+            / f"{safe_aspect}_{index}.png"
+        )
+        target = settings.data_dir / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        written.append((aspect, str(relative)))
     return written
 
 

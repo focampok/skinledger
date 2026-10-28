@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from skinledger.db import init_db
 from skinledger.pipeline import resume_pending
 from skinledger.web.routes.captures import router as captures_router
+from skinledger.web.routes.persons import router as persons_router
+from skinledger.web.routes.try_ import router as try_router
 from skinledger.web.templating import WEB_DIR, templates
 
 STATIC_DIR = WEB_DIR / "static"
@@ -26,6 +28,8 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="SkinLedger", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.include_router(captures_router)
+app.include_router(persons_router)
+app.include_router(try_router)
 
 
 @app.get("/healthz")

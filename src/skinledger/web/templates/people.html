@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — People{% endblock %}
+
+{% block content %}
+<h1>People</h1>
+
+<ul>
+  {% for person in persons %}
+  <li>
+    <strong>{{ person.display_name }}</strong>
+    {% if person.is_demo_public %}
+    <small>Sample profile · SIMULATED · read-only</small>
+    {% else %}
+    <small>
+      <a href="/people/{{ person.id }}/consent">Consent</a> ·
+      <a href="/people/{{ person.id }}/delete">Delete</a>
+    </small>
+    {% endif %}
+  </li>
+  {% else %}
+  <li>No profiles yet.</li>
+  {% endfor %}
+</ul>
+
+<p><a href="/people/new" role="button">Create a profile</a></p>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — Try it{% endblock %}
+
+{% block content %}
+<h1>Try SkinLedger</h1>
+<p>
+  SkinLedger measures 16 skin aspects from one selfie and tells you whether a product is really
+  working, against your own measurement noise. {{ powered_by }}.
+</p>
+<p><a href="/people">Browse the sample profile</a> — no invite code needed.</p>
+
+{% if error %}
+<p role="alert">{{ error }}</p>
+{% endif %}
+
+<form method="post" action="/try">
+  <label for="invite_code">Invite code</label>
+  <input type="text" id="invite_code" name="invite_code" autocomplete="off" required>
+  <button type="submit">Continue</button>
+</form>
+
+<p><small>An invite code is required to analyze your own face. Visitors get 2 analyses.</small></p>
+{% endblock %}

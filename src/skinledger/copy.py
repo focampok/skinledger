@@ -26,3 +26,22 @@ UPLOAD_DISABLED = "Photo upload is currently unavailable. Use the guided camera 
 TRY_AGAIN_NO_UNITS = "Please try again. No units were charged."
 
 TASK_EXPIRED = "This analysis expired. No units were charged."
+
+CONSENT_VERSION = "consent-v2"
+
+INVALID_INVITE = "That invite code isn't valid."
+
+TOO_MANY_INVITE_ATTEMPTS = "Too many attempts. Try again in an hour."
+
+CONSENT_BOXES_REQUIRED = "Please tick both boxes to continue."
+
+NAME_REQUIRED = "Please enter a display name."
+
+DELETE_CONFIRM_MISMATCH = "Type the profile name exactly to confirm."
+
+DEMO_READ_ONLY = "This sample profile is read-only."
+
+DELETED_MESSAGE = (
+    "Deleted from SkinLedger. Your photo was never stored here. To ask YouCam to "
+    "delete the uploaded photo sooner, contact Perfect Corp (YouCam API support)."
+)

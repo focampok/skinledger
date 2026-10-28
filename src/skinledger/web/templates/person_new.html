@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — New profile{% endblock %}
+
+{% block content %}
+<h1>Create a profile</h1>
+<p>Use a display name only — no surname, birth date or other personal details.</p>
+
+{% if error %}
+<p role="alert">{{ error }}</p>
+{% endif %}
+
+<form method="post" action="/people/new">
+  <label for="display_name">Display name</label>
+  <input type="text" id="display_name" name="display_name" maxlength="80" required>
+  <button type="submit">Continue to consent</button>
+</form>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — Consent{% endblock %}
+
+{% block content %}
+<h1>Consent for {{ person.display_name }}</h1>
+
+<h2>What is analyzed</h2>
+<p>
+  One selfie per analysis, taken with the guided camera or uploaded from your device. SkinLedger
+  sends it to the YouCam API by Perfect Corp only to run the skin analysis.
+</p>
+
+<h2>Where it goes</h2>
+<p>
+  Your photo goes only to the YouCam API (Perfect Corp) for the analysis. YouCam may keep the
+  uploaded photo for up to 30 days under its own terms.
+</p>
+
+<h2>What SkinLedger stores</h2>
+<p>
+  SkinLedger stores the skin scores and the analysis masks — never your photo. Your photo is held
+  in memory only while the analysis runs, then discarded.
+</p>
+
+<h2>Not a medical service</h2>
+<p>{{ disclaimer }}</p>
+
+<h2>Deleting your profile</h2>
+<p>
+  You can delete this profile at any time. That removes everything SkinLedger stores about this
+  person, including the mask files. Visitors from a shared link get 2 analyses.
+</p>
+
+{% if error %}
+<p role="alert">{{ error }}</p>
+{% endif %}
+
+<form method="post" action="/people/{{ person.id }}/consent">
+  <label>
+    <input type="checkbox" name="adult_confirmed" value="1" required>
+    I confirm this person is 18 or older
+  </label>
+  <label>
+    <input type="checkbox" name="agree" value="1" required>
+    I agree to this consent
+  </label>
+  <button type="submit">Accept consent</button>
+</form>
+
+<p><small>Consent version: {{ consent_version }}</small></p>
+{% endblock %}

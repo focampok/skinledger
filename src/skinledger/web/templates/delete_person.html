@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — Delete profile{% endblock %}
+
+{% block content %}
+<h1>Delete {{ person.display_name }}</h1>
+<p>
+  This removes the profile, its consent, every analysis score, the result data and the mask files.
+  Your original photo was never stored here.
+</p>
+
+{% if error %}
+<p role="alert">{{ error }}</p>
+{% endif %}
+
+<form method="post" action="/people/{{ person.id }}/delete">
+  <label for="confirm_name">
+    Type <strong>{{ person.display_name }}</strong> to confirm
+  </label>
+  <input type="text" id="confirm_name" name="confirm_name" autocomplete="off" required>
+  <button type="submit" class="secondary">Delete this profile</button>
+</form>
+{% endblock %}
