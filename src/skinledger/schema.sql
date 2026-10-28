@@ -1,6 +1,6 @@
 -- SkinLedger SQLite schema.
 -- Privacy: the original photo is never stored, so no table has a photo or image path column.
--- Raw scores only: aspect_scores has no ui_score column (it is discarded at parse time).
+-- Raw scores only: aspect_scores has no display-score column (discarded at parse time).
 -- Foreign keys are enabled per connection in db.connect().
 
 CREATE TABLE IF NOT EXISTS persons (

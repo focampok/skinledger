@@ -6,6 +6,7 @@ data/
 __pycache__/
 *.sqlite*
 captures/
+smoke_masks/
 *.jpg
 *.jpeg
 *.heic

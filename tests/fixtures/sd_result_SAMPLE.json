@@ -1,0 +1,109 @@
+{
+  "_label": "SAMPLE",
+  "_comment": "SAMPLE fixture shaped like the Skin Analysis docs example (results.output[] with type, display score, raw_score, mask_urls). Round, obviously-sample numbers; never from a real capture and never used for REAL data.",
+  "data": {
+    "task_id": "sample-task-opaque-id",
+    "task_status": "success",
+    "results": {
+      "output": [
+        {
+          "type": "wrinkle",
+          "ui_score": 88.0,
+          "raw_score": 61.0,
+          "mask_urls": ["https://results.example.invalid/mask/wrinkle_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "droopy_upper_eyelid",
+          "ui_score": 86.0,
+          "raw_score": 55.0,
+          "mask_urls": ["https://results.example.invalid/mask/droopy_upper_eyelid_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "droopy_lower_eyelid",
+          "ui_score": 84.0,
+          "raw_score": 53.0,
+          "mask_urls": ["https://results.example.invalid/mask/droopy_lower_eyelid_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "firmness",
+          "ui_score": 82.0,
+          "raw_score": 58.0,
+          "mask_urls": ["https://results.example.invalid/mask/firmness_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "acne",
+          "ui_score": 80.0,
+          "raw_score": 47.0,
+          "mask_urls": ["https://results.example.invalid/mask/acne_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "moisture",
+          "ui_score": 78.0,
+          "raw_score": 52.0,
+          "mask_urls": ["https://results.example.invalid/mask/moisture_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "eye_bag",
+          "ui_score": 76.0,
+          "raw_score": 49.0,
+          "mask_urls": ["https://results.example.invalid/mask/eye_bag_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "dark_circle_v2",
+          "ui_score": 74.0,
+          "raw_score": 45.0,
+          "mask_urls": ["https://results.example.invalid/mask/dark_circle_v2_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "age_spot",
+          "ui_score": 72.0,
+          "raw_score": 57.0,
+          "mask_urls": ["https://results.example.invalid/mask/age_spot_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "radiance",
+          "ui_score": 90.0,
+          "raw_score": 60.0,
+          "mask_urls": ["https://results.example.invalid/mask/radiance_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "redness",
+          "ui_score": 70.0,
+          "raw_score": 44.0,
+          "mask_urls": ["https://results.example.invalid/mask/redness_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "oiliness",
+          "ui_score": 68.0,
+          "raw_score": 63.0,
+          "mask_urls": ["https://results.example.invalid/mask/oiliness_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "pore",
+          "ui_score": 66.0,
+          "raw_score": 50.0,
+          "mask_urls": ["https://results.example.invalid/mask/pore_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "texture",
+          "ui_score": 64.0,
+          "raw_score": 54.0,
+          "mask_urls": ["https://results.example.invalid/mask/texture_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "tear_trough",
+          "ui_score": 62.0,
+          "raw_score": 48.0,
+          "mask_urls": ["https://results.example.invalid/mask/tear_trough_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "skin_type",
+          "ui_score": 60.0,
+          "raw_score": null,
+          "skin_type": "Combination",
+          "mask_urls": []
+        }
+      ]
+    }
+  }
+}
