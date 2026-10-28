@@ -7,6 +7,7 @@ import json
 import logging
 import re
 import time
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -227,6 +228,25 @@ def test_events_are_also_written_as_json_lines_without_secrets(
         "signature=",
     ):
         assert secret not in text, secret
+
+
+def test_a_test_run_does_not_touch_the_repository_log_file(env):
+    repo_log = Path(__file__).resolve().parents[1] / "logs" / logs.LOG_FILE_NAME
+
+    def snapshot():
+        if not repo_log.exists():
+            return None
+        stat = repo_log.stat()
+        return (stat.st_mtime_ns, stat.st_size)
+
+    before = snapshot()
+    logs.log_event("test.log_isolation", detail="only the sandbox may see this")
+    assert snapshot() == before
+
+    # The autouse fixture redirects the file handler rather than silencing events.
+    sandbox = env.log_dir / logs.LOG_FILE_NAME
+    assert sandbox.is_file()
+    assert "test.log_isolation" in sandbox.read_text(encoding="utf-8")
 
 
 def test_log_event_redacts_blocked_fields_secrets_and_signed_urls(env, caplog):

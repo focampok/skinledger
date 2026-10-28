@@ -40,6 +40,7 @@
   var retriedLowQuality = false;
   var videoQuality = "1080p";
   var asyncInitTimer = null;
+  var asyncInitFallback = false;
   var lastLoadingBucket = -1;
   var objectUrl = null;
   var pollTimer = null;
@@ -350,7 +351,10 @@
   }
 
   function kitIsReady() {
-    return typeof YMK !== "undefined" && Boolean(window.YMKAsyncInitFired);
+    return (
+      typeof YMK !== "undefined" &&
+      Boolean(window.YMKAsyncInitFired || asyncInitFallback)
+    );
   }
 
   function logLifecycle(name, detail) {
@@ -610,11 +614,23 @@
       if (window.YMKAsyncInitFired) {
         return;
       }
+      var hasYmk = typeof YMK !== "undefined";
       clientLog(
         "error",
         "async_init_missing",
-        "sdk=" + (window.__ymkScriptState || "pending")
+        "sdk=" + (window.__ymkScriptState || "pending") + " has_ymk=" + hasYmk
       );
+      if (hasYmk) {
+        // The global exists even though the callback never ran: the kit is usable.
+        asyncInitFallback = true;
+        clientLog(
+          "info",
+          "async_init_fallback",
+          "sdk=" + (window.__ymkScriptState || "pending")
+        );
+        registerCameraKit();
+        return;
+      }
       cameraUnavailable("Guided camera unavailable on this device.", "async_init_missing");
     }, 10000);
   }

@@ -35,7 +35,9 @@
     window.__clientLogQueue.push([level, event, detail]);
   };
   // Must exist before the Camera Kit SDK script runs. It only registers listeners.
-  window.YMKAsyncInit = function () {
+  // The shipped SDK checks `typeof window.ymkAsyncInit === "function"` (lowercase) and
+  // calls it once window.YMK exists, so the lowercase name is the one that matters.
+  window.ymkAsyncInit = function () {
     window.YMKAsyncInitFired = true;
     window.SkinLedgerClientLog(
       "info",
@@ -48,6 +50,8 @@
       window.__ymkReady = true;
     }
   };
+  // Alias for the mixed-case spelling used in the docs and by older SDK builds.
+  window.YMKAsyncInit = window.ymkAsyncInit;
 </script>
 <script
   src="https://plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"

@@ -296,9 +296,11 @@ def test_capture_js_stores_only_the_camera_language_in_local_storage():
 def test_capture_page_loads_the_camera_kit_after_the_ready_hook():
     template = (TEMPLATES / "capture.html").read_text(encoding="utf-8")
 
-    hook = template.index("window.YMKAsyncInit")
+    hook = template.index("window.ymkAsyncInit = function")
     sdk = template.index("plugins-media.makeupar.com/v2.5-camera-kit/sdk.js")
     assert hook < sdk
+    # The SDK looks for the lowercase name; the mixed-case spelling is only an alias.
+    assert "window.YMKAsyncInit = window.ymkAsyncInit;" in template
     assert 'faceDetectionMode: "skincare"' in (STATIC / "capture.js").read_text(
         encoding="utf-8"
     )
@@ -345,6 +347,22 @@ def test_guided_capture_reports_every_failure_instead_of_staying_silent():
         assert expected in source, expected
     # Ready = SDK present AND YMKAsyncInit ran; the button waits for both.
     assert "startButton.disabled = !attested || !kitReady;" in source
+
+
+def test_async_init_watchdog_falls_back_to_an_existing_ymk_global():
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+
+    assert 'var hasYmk = typeof YMK !== "undefined";' in source
+    assert '" has_ymk=" + hasYmk' in source
+    assert "async_init_fallback" in source
+    assert "window.YMKAsyncInitFired || asyncInitFallback" in source
+    # With YMK present the watchdog registers the kit instead of showing "unavailable".
+    fallback = source.index("asyncInitFallback = true;")
+    unavailable = source.index(
+        'cameraUnavailable("Guided camera unavailable on this device.", "async_init_missing")'
+    )
+    assert fallback < unavailable
+    assert "isLoaded" not in source
 
 
 def test_lifecycle_and_camera_events_are_registered_and_logged():
