@@ -45,3 +45,18 @@ DELETED_MESSAGE = (
     "Deleted from SkinLedger. Your photo was never stored here. To ask YouCam to "
     "delete the uploaded photo sooner, contact Perfect Corp (YouCam API support)."
 )
+
+PRIVACY_NOTE = (
+    "Your photo is sent to the YouCam API (Perfect Corp) for analysis and is never stored "
+    "by SkinLedger. YouCam may keep it for up to 30 days. See Privacy."
+)
+
+UPLOAD_TIP = (
+    "Use a recent, well-lit, front-facing photo of your own face, no filters. For weekly "
+    "tracking, use the guided capture — same light, same distance."
+)
+
+BASELINE_DONE = (
+    "That's how much your score moves on its own — SkinLedger only counts changes bigger "
+    "than this."
+)

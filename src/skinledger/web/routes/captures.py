@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import sqlite3
+from pathlib import PurePosixPath
 
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from skinledger import copy, guards, imaging, pipeline, usage
 from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
@@ -145,6 +146,100 @@ async def create_capture(
         conn.close()
 
 
+@router.get("/people/{person_id}/capture", response_class=HTMLResponse)
+async def capture_page(request: Request, person_id: int) -> HTMLResponse:
+    settings = get_settings()
+    conn = connect(db_path())
+    try:
+        person = guards.authorize_person(conn, request, person_id)
+        if person is None:
+            raise HTTPException(status_code=404, detail="Person not found.")
+        admin = guards.is_admin_request(request, settings)
+        if person["is_demo_public"] and not admin:
+            raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
+        if not guards.has_current_consent(conn, person_id):
+            return RedirectResponse(f"/people/{person_id}/consent", status_code=303)
+
+        successes = conn.execute(
+            "SELECT COUNT(*) FROM captures WHERE person_id = ? AND status = 'success' "
+            "AND data_label IN ('REAL', 'SAMPLE')",
+            (person_id,),
+        ).fetchone()[0]
+        has_band = conn.execute(
+            "SELECT 1 FROM noise_bands WHERE person_id = ? LIMIT 1", (person_id,)
+        ).fetchone() is not None
+        baseline_step = None
+        if not has_band and successes < 2:
+            baseline_step = int(successes) + 1
+        analyses_left = (
+            None
+            if admin
+            else guards.person_analyses_left(
+                conn, person_id, settings.max_real_analyses_per_person
+            )
+        )
+    finally:
+        conn.close()
+
+    return templates.TemplateResponse(
+        request,
+        "capture.html",
+        {
+            "person": dict(person),
+            "allow_upload": settings.allow_upload,
+            "analyses_left": analyses_left,
+            "max_analyses": settings.max_real_analyses_per_person,
+            "baseline_step": baseline_step,
+            "camera_language": settings.camera_kit_language,
+        },
+    )
+
+
+@router.get("/media/{capture_id}/{file_name}")
+async def mask_media(request: Request, capture_id: int, file_name: str) -> FileResponse:
+    """Serve one stored mask to its owner, an admin or the public demo; never a photo."""
+    if "/" in file_name or "\\" in file_name or file_name in (".", ".."):
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    settings = get_settings()
+    conn = connect(db_path())
+    try:
+        visibility = conn.execute(
+            "SELECT p.is_demo_public FROM captures c JOIN persons p ON p.id = c.person_id "
+            "WHERE c.id = ?",
+            (capture_id,),
+        ).fetchone()
+        if visibility is None:
+            raise HTTPException(status_code=404, detail="File not found.")
+        allowed = visibility["is_demo_public"] == 1 or (
+            guards.authorize_capture(conn, request, capture_id) is not None
+        )
+        if not allowed:
+            raise HTTPException(status_code=404, detail="File not found.")
+        rows = conn.execute(
+            "SELECT file_path FROM masks WHERE capture_id = ?", (capture_id,)
+        ).fetchall()
+        target = next(
+            (
+                row["file_path"]
+                for row in rows
+                if PurePosixPath(row["file_path"]).name == file_name
+            ),
+            None,
+        )
+    finally:
+        conn.close()
+
+    if target is None:
+        raise HTTPException(status_code=404, detail="File not found.")
+    path = settings.data_dir / target
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="File not found.")
+    return FileResponse(
+        path, media_type="image/png", headers={"Cache-Control": "no-store"}
+    )
+
+
 @router.get("/api/captures/{capture_id}/status", response_class=HTMLResponse)
 async def capture_status(request: Request, capture_id: int) -> HTMLResponse:
     settings = get_settings()
@@ -189,6 +284,17 @@ def _render_status(
             conn, capture["person_id"], settings.max_real_analyses_per_person
         )
     )
+    mask_rows = conn.execute(
+        "SELECT aspect, file_path FROM masks WHERE capture_id = ? ORDER BY id",
+        (capture_id,),
+    ).fetchall()
+    masks = [
+        {
+            "aspect": row["aspect"],
+            "file_name": PurePosixPath(row["file_path"]).name,
+        }
+        for row in mask_rows
+    ]
     return templates.TemplateResponse(
         request,
         "capture_status.html",
@@ -197,6 +303,7 @@ def _render_status(
             "status_label": STATUS_LABELS.get(capture["status"], capture["status"]),
             "scores": _score_rows(conn, capture_id),
             "analyses_left": analyses_left,
+            "masks": masks,
         },
         status_code=status_code,
     )

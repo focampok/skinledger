@@ -2,6 +2,7 @@
   id="capture-status"
   data-status="{{ capture.status }}"
   data-capture-id="{{ capture.id }}"
+  {% if analyses_left is not none %}data-analyses-left="{{ analyses_left }}"{% endif %}
   {% if capture.status in ['queued', 'uploading', 'running'] %}
   hx-get="/api/captures/{{ capture.id }}/status"
   hx-trigger="every 3s"
@@ -33,5 +34,13 @@
 
   {% if analyses_left is not none %}
   <p><small>You have {{ analyses_left }} analysis{{ '' if analyses_left == 1 else 'es' }} left</small></p>
+  {% endif %}
+
+  {% if masks %}
+  <ul id="capture-masks" hidden>
+    {% for mask in masks %}
+    <li data-mask-aspect="{{ mask.aspect }}" data-mask-file="{{ mask.file_name }}"></li>
+    {% endfor %}
+  </ul>
   {% endif %}
 </section>

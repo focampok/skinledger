@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — Capture{% endblock %}
+
+{% block head %}
+<style>
+  .preview-frame {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 3 / 4;
+    background: #d9d9d9;
+    overflow: hidden;
+  }
+  .preview-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  #preview-overlay {
+    pointer-events: none;
+  }
+  [data-tab-panel][hidden] {
+    display: none;
+  }
+</style>
+<script>
+  // Must exist before the Camera Kit SDK script runs.
+  window.YMKAsyncInit = function () {
+    if (window.SkinLedgerCameraKitReady) {
+      window.SkinLedgerCameraKitReady();
+    } else {
+      window.__ymkReady = true;
+    }
+  };
+</script>
+<script
+  src="https://plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"
+  async
+  onerror="window.dispatchEvent(new Event('ymk-error'))"
+></script>
+<script src="/static/capture.js" defer></script>
+{% endblock %}
+
+{% block content %}
+<div
+  id="capture-page"
+  data-person-id="{{ person.id }}"
+  data-allow-upload="{{ 1 if allow_upload else 0 }}"
+  data-baseline-step="{{ baseline_step or '' }}"
+  data-max-analyses="{{ max_analyses }}"
+  data-camera-language="{{ camera_language }}"
+>
+  <h1>Capture for {{ person.display_name }}</h1>
+
+  {% if analyses_left is not none %}
+  <p id="analyses-left">{{ analyses_left }} of {{ max_analyses }} analyses left</p>
+  {% endif %}
+
+  <label>
+    <input type="checkbox" id="attestation">
+    {{ attestation }}
+  </label>
+
+  <p><small>{{ privacy_note }} <a href="/privacy">Read the privacy page</a></small></p>
+
+  <div role="tablist">
+    <button type="button" data-tab-button="guided" aria-selected="true">
+      Guided capture (recommended for tracking)
+    </button>
+    {% if allow_upload %}
+    <button type="button" data-tab-button="upload" aria-selected="false">
+      Quick try: upload a photo
+    </button>
+    {% endif %}
+  </div>
+
+  <section data-tab-panel="guided">
+    <div id="YMK-module"></div>
+    <p id="baseline-step" {% if baseline_step is none %}hidden{% endif %}>
+      {% if baseline_step == 1 %}
+      Baseline: analysis 1 of 2
+      {% elif baseline_step == 2 %}
+      Analysis 2 of 2 (same place, same light)
+      {% endif %}
+    </p>
+    <button type="button" id="start-capture" disabled>Start capture</button>
+    <p id="camera-help" role="status"></p>
+    <label>
+      Camera language
+      <select id="camera-language">
+        <option value="enu">English</option>
+        <option value="esp">Español</option>
+      </select>
+    </label>
+  </section>
+
+  {% if allow_upload %}
+  <section data-tab-panel="upload" hidden>
+    <input type="file" id="photo" accept="image/jpeg,image/png">
+    <button type="button" id="send-upload" disabled>Analyze this photo</button>
+    <p><small>{{ upload_tip }}</small></p>
+  </section>
+  {% endif %}
+
+  <section id="preview" hidden>
+    <div class="preview-frame">
+      <img id="preview-image" alt="Your photo for this analysis">
+      <img id="preview-overlay" alt="" hidden>
+    </div>
+    <label>
+      Mask
+      <select id="mask-select" hidden></select>
+    </label>
+  </section>
+
+  <div id="capture-status-container" aria-live="polite"></div>
+
+  <p id="baseline-done" hidden>
+    {{ baseline_done }}
+    <a href="/people/{{ person.id }}/baseline">See your baseline</a>
+  </p>
+</div>
+{% endblock %}
