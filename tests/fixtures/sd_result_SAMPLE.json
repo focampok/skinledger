@@ -1,11 +1,15 @@
 {
   "_label": "SAMPLE",
-  "_comment": "SAMPLE fixture shaped like the Skin Analysis docs example (results.output[] with type, display score, raw_score, mask_urls). Round, obviously-sample numbers; never from a real capture and never used for REAL data.",
+  "_comment": "SAMPLE fixture shaped like the real v2.0 response confirmed 28 Oct 2026: output[] has resize_image, the 15 numeric aspects, three skin_type entries keyed by region, and the raw-only all and skin_age blocks. Round, obviously-sample numbers; never from a real capture and never used for REAL data.",
   "data": {
     "task_id": "sample-task-opaque-id",
     "task_status": "success",
     "results": {
       "output": [
+        {
+          "type": "resize_image",
+          "mask_urls": ["https://results.example.invalid/resized/photo_0.jpg?signature=SAMPLE-SIGNATURE"]
+        },
         {
           "type": "wrinkle",
           "ui_score": 88.0,
@@ -98,10 +102,36 @@
         },
         {
           "type": "skin_type",
+          "region": "whole",
           "ui_score": 60.0,
-          "raw_score": null,
           "skin_type": "Combination",
-          "mask_urls": []
+          "mask_urls": ["https://results.example.invalid/mask/skin_type_whole_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "skin_type",
+          "region": "t_zone",
+          "ui_score": 58.0,
+          "skin_type": "Oily",
+          "mask_urls": ["https://results.example.invalid/mask/skin_type_t_zone_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "skin_type",
+          "region": "u_zone",
+          "ui_score": 56.0,
+          "skin_type": "Dry",
+          "mask_urls": ["https://results.example.invalid/mask/skin_type_u_zone_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "all",
+          "ui_score": 66.0,
+          "score": 64.0,
+          "mask_urls": ["https://results.example.invalid/mask/all_0.png?signature=SAMPLE-SIGNATURE"]
+        },
+        {
+          "type": "skin_age",
+          "ui_score": 54.0,
+          "score": 32.0,
+          "mask_urls": ["https://results.example.invalid/mask/skin_age_0.png?signature=SAMPLE-SIGNATURE"]
         }
       ]
     }

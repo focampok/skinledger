@@ -22,6 +22,7 @@ from skinledger.aspects import SD_ACTIONS
 from skinledger.config import get_settings
 from skinledger.imaging import ImageRejected, prepare
 from skinledger.youcam import (
+    SKIN_TYPE_REGIONS,
     YouCamClient,
     YouCamConfigError,
     YouCamError,
@@ -96,7 +97,9 @@ async def run(photo_path: Path) -> int:
     print("Aspects:")
     for aspect in SD_ACTIONS:
         if aspect == "skin_type":
-            print(f"  {aspect}: {result.categorical.get(aspect, '(missing)')}")
+            for region in SKIN_TYPE_REGIONS:
+                key = f"skin_type_{region}"
+                print(f"  {key}: {result.categorical.get(key, '(missing)')}")
         else:
             score = result.scores.get(aspect)
             print(f"  {aspect}: {score if score is not None else '(missing)'}")
@@ -111,10 +114,14 @@ async def run(photo_path: Path) -> int:
             except YouCamError as exc:
                 print(f"  mask {aspect}[{index}]: download failed ({exc.user_message})")
                 continue
+            with Image.open(BytesIO(data)) as mask:
+                assert mask.mode != "RGB", (
+                    f"{aspect}[{index}] is RGB without alpha; it may embed the photo. "
+                    "Set STORE_MASKS=false and tell Francisco."
+                )
+                print(f"  mask {aspect}[{index}]: {mask.size} {mask.mode}")
             (MASK_DIR / f"{safe_aspect}_{index}.png").write_bytes(data)
             downloaded += 1
-            with Image.open(BytesIO(data)) as mask:
-                print(f"  mask {aspect}[{index}]: {mask.size} {mask.mode}")
 
     print(f"Masks downloaded: {downloaded}")
     print(f"Inspect them in: {MASK_DIR.resolve()}")

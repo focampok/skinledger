@@ -85,6 +85,11 @@ FRIENDLY_ERRORS: dict[str, str] = {
 
 GENERIC_ERROR_MESSAGE = FRIENDLY_ERRORS["unknown_internal_error"]
 
+PHOTO_ENTRY_TYPE = "resize_image"
+RAW_ONLY_TYPES = frozenset({"all", "skin_age"})
+SKIN_TYPE_REGIONS = ("whole", "t_zone", "u_zone")
+DEFAULT_SKIN_TYPE_KEY = "skin_type_whole"
+
 # Image problems detected locally or by YouCam. The UI appends
 # "This attempt didn't count toward your limit." when it shows one of these.
 IMAGE_ERROR_CODES = frozenset(
@@ -180,6 +185,19 @@ def _sanitize_raw(value: Any) -> Any:
         return [_sanitize_raw(item) for item in value]
     if isinstance(value, str) and value.startswith(("http://", "https://")) and "?" in value:
         return value.split("?", 1)[0] + "?<signed>"
+    return value
+
+
+def _drop_resize_image(value: Any) -> Any:
+    """Remove resize_image entries everywhere: they hold the user's resized photo."""
+    if isinstance(value, dict):
+        return {key: _drop_resize_image(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [
+            _drop_resize_image(item)
+            for item in value
+            if not (isinstance(item, dict) and item.get("type") == PHOTO_ENTRY_TYPE)
+        ]
     return value
 
 
@@ -486,7 +504,7 @@ class YouCamClient:
         if not isinstance(data, dict):
             data = {}
         status = str(data.get("task_status") or body.get("task_status") or "unknown")
-        raw = _sanitize_raw(body)
+        raw = _drop_resize_image(_sanitize_raw(body))
 
         scores: dict[str, float | None] = {}
         categorical: dict[str, str] = {}
@@ -504,18 +522,36 @@ class YouCamClient:
             if not isinstance(aspect, str) or not aspect:
                 continue
 
+            # resize_image is the user's resized photo: never a mask, never in raw.
+            if aspect == PHOTO_ENTRY_TYPE:
+                continue
+
+            # "all" and "skin_age" carry a combined "score"; keep them only in raw.
+            if aspect in RAW_ONLY_TYPES:
+                continue
+
+            if aspect == "skin_type":
+                # Confirmed in the real v2.0 response: one entry per region, each
+                # with a "skin_type" string; the UI defaults to the "whole" value.
+                region = item.get("region")
+                key = (
+                    f"skin_type_{region}"
+                    if isinstance(region, str) and region
+                    else DEFAULT_SKIN_TYPE_KEY
+                )
+                value = item.get("skin_type", item.get("value"))
+                if isinstance(value, dict):
+                    categorical[key] = json.dumps(value, sort_keys=True)
+                elif value is not None:
+                    categorical[key] = str(value)
+                urls = _url_list(item.get("mask_urls"))
+                if urls:
+                    mask_urls[key] = urls
+                continue
+
             urls = _url_list(item.get("mask_urls"))
             if urls:
                 mask_urls[aspect] = urls
-
-            if aspect == "skin_type":
-                # UNVERIFIED: skin_type may be categorical or carry whole/t_zone/u_zone.
-                value = item.get("skin_type", item.get("value", item.get("raw_score")))
-                if isinstance(value, dict):
-                    categorical[aspect] = json.dumps(value, sort_keys=True)
-                elif value is not None:
-                    categorical[aspect] = str(value)
-                continue
 
             raw_score = item.get("raw_score")
             if isinstance(raw_score, bool) or not isinstance(raw_score, (int, float)):
@@ -541,7 +577,7 @@ class YouCamClient:
         )
 
     def _extract_task_error_code(self, data: dict[str, Any]) -> str:
-        # UNVERIFIED: the docs do not say which field carries the error code.
+        # Confirmed in the real v2.0 response: data.error carries the error code.
         results = data.get("results")
         if not isinstance(results, dict):
             results = {}
@@ -636,6 +672,8 @@ class YouCamClient:
             if not isinstance(item, dict):
                 continue
             aspect = item.get("type") or "aspect"
+            if aspect == "skin_type":
+                aspect = f"skin_type_{item.get('region') or 'whole'}"
             count = len(_url_list(item.get("mask_urls"))) or 1
             item["mask_urls"] = [f"mock://mask/{aspect}/{index}.png" for index in range(count)]
         return body

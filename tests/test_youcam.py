@@ -15,6 +15,7 @@ from skinledger.aspects import SD_ACTIONS
 from skinledger.imaging import PreparedImage
 from skinledger.youcam import (
     AUTH_UNAVAILABLE_MESSAGE,
+    DEFAULT_SKIN_TYPE_KEY,
     FRIENDLY_ERRORS,
     YouCamAPIError,
     YouCamAuthError,
@@ -111,7 +112,7 @@ async def test_happy_four_step_flow():
     assert result.status == "success"
     assert len(result.scores) == 15
     assert result.scores["moisture"] == 52.0
-    assert result.categorical["skin_type"] == "Combination"
+    assert result.categorical["skin_type_whole"] == "Combination"
     assert result.mask_urls["acne"][0].startswith("https://results.example.invalid/mask/acne")
     assert result.error_code is None
 
@@ -332,9 +333,14 @@ async def test_expired_mask_url_refreshes_task_once():
     old_url = "https://results.unit.test/mask/acne_0.png?signature=old"
     new_url = "https://results.unit.test/mask/acne_0.png?signature=new"
     old_body = copy.deepcopy(SAMPLE_SUCCESS)
-    old_body["data"]["results"]["output"][4]["mask_urls"] = [old_url]
     new_body = copy.deepcopy(SAMPLE_SUCCESS)
-    new_body["data"]["results"]["output"][4]["mask_urls"] = [new_url]
+    for body, url in ((old_body, old_url), (new_body, new_url)):
+        acne = next(
+            item
+            for item in body["data"]["results"]["output"]
+            if item.get("type") == "acne"
+        )
+        acne["mask_urls"] = [url]
 
     task_route = respx.get(f"{TASK_URL}/task-exp").mock(
         side_effect=[
@@ -357,7 +363,66 @@ async def test_expired_mask_url_refreshes_task_once():
 
 
 @respx.mock
-async def test_categorical_skin_type_and_missing_optional_blocks_do_not_crash():
+async def test_resize_image_entry_is_never_exposed_or_stored():
+    route = respx.get(f"{TASK_URL}/task-abc").mock(
+        return_value=httpx.Response(200, json=SAMPLE_SUCCESS)
+    )
+
+    result = await make_client().get_task("task-abc")
+    stored = json.dumps(result.raw)
+
+    assert "resize_image" not in result.scores
+    assert "resize_image" not in result.mask_urls
+    assert all(
+        item.get("type") != "resize_image"
+        for item in result.raw["data"]["results"]["output"]
+    )
+    assert "resized/photo_0" not in stored
+    assert route.call_count == 1
+
+
+@respx.mock
+async def test_skin_type_regions_are_keyed_and_whole_is_the_default():
+    respx.get(f"{TASK_URL}/task-abc").mock(
+        return_value=httpx.Response(200, json=SAMPLE_SUCCESS)
+    )
+
+    result = await make_client().get_task("task-abc")
+
+    assert result.categorical == {
+        "skin_type_whole": "Combination",
+        "skin_type_t_zone": "Oily",
+        "skin_type_u_zone": "Dry",
+    }
+    assert set(result.mask_urls) >= {
+        "skin_type_whole",
+        "skin_type_t_zone",
+        "skin_type_u_zone",
+    }
+    assert DEFAULT_SKIN_TYPE_KEY == "skin_type_whole"
+
+
+@respx.mock
+async def test_all_and_skin_age_scores_stay_only_in_raw():
+    respx.get(f"{TASK_URL}/task-abc").mock(
+        return_value=httpx.Response(200, json=SAMPLE_SUCCESS)
+    )
+
+    result = await make_client().get_task("task-abc")
+    entries = {
+        item["type"]: item for item in result.raw["data"]["results"]["output"]
+    }
+
+    for raw_only in ("all", "skin_age"):
+        assert raw_only not in result.scores
+        assert raw_only not in result.mask_urls
+    assert entries["all"]["score"] == 64.0
+    assert entries["skin_age"]["score"] == 32.0
+    assert "ui_score" not in entries["all"]
+
+
+@respx.mock
+async def test_missing_optional_blocks_do_not_crash():
     body = {
         "data": {
             "task_status": "success",
@@ -365,7 +430,8 @@ async def test_categorical_skin_type_and_missing_optional_blocks_do_not_crash():
                 "output": [
                     {
                         "type": "skin_type",
-                        "skin_type": {"whole": "Oily", "t_zone": "Oily", "u_zone": "Dry"},
+                        "region": "whole",
+                        "skin_type": "Oily",
                         "mask_urls": [],
                     },
                     {"type": "moisture", "raw_score": 55, "mask_urls": []},
@@ -379,7 +445,7 @@ async def test_categorical_skin_type_and_missing_optional_blocks_do_not_crash():
 
     assert result.status == "success"
     assert result.scores == {"moisture": 55.0}
-    assert json.loads(result.categorical["skin_type"])["whole"] == "Oily"
+    assert result.categorical == {"skin_type_whole": "Oily"}
     assert "skin_age" not in result.raw["data"]["results"]
 
 
@@ -433,7 +499,7 @@ async def test_mock_mode_runs_the_whole_flow_without_network():
 
     assert result.status == "success"
     assert len(result.scores) == 15
-    assert result.categorical["skin_type"] == "Combination"
+    assert result.categorical["skin_type_whole"] == "Combination"
     assert result.raw["_label"] == "SAMPLE"
     with Image.open(io.BytesIO(mask)) as mask_image:
         assert mask_image.format == "PNG"
