@@ -25,7 +25,7 @@ from skinledger.web.routes.routine import router as routine_router
 from skinledger.web.routes.timeline import router as timeline_router
 from skinledger.web.routes.try_ import router as try_router
 from skinledger.web.routes.verdicts import router as verdicts_router
-from skinledger.web.security import REPORT_PATH, security_headers
+from skinledger.web.security import REPORT_PATH, is_capture_path, security_headers
 from skinledger.web.templating import WEB_DIR, templates
 
 configure_logging()
@@ -87,6 +87,7 @@ async def add_security_headers(request: Request, call_next):
     headers = security_headers(
         report_only=settings.csp_report_only,
         report_url=f"{origin}{REPORT_PATH}",
+        capture=is_capture_path(request.url.path),
     )
     for name, value in headers.items():
         response.headers.setdefault(name, value)

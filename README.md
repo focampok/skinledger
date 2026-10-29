@@ -98,7 +98,7 @@ The API key is read only on the server and never reaches the browser, logs or te
 | REAL / SIMULATED / SAMPLE labels and the public sample | `web/banners.py`, `seed.py`, `/demo` |
 | Responsive installable PWA | `web/static/manifest.webmanifest`, `sw.js`, `app.css` |
 | Railway + `/data` volume + custom domain | `Dockerfile`, `railway.json`, `docs/deploy.md` |
-| Security headers (strict script CSP, camera policy, HSTS, no-sniff, no framing) | `web/security.py` |
+| Security headers (strict script CSP for every page, a relaxed Kit-only CSP on the capture page, camera policy, HSTS, no-sniff, no framing) | `web/security.py` |
 | Admin usage counts without visitor data; header-only auth | `/admin/usage`, `web/routes/admin.py` |
 | Tests and copy/brand/disclaimer audit | `tests/`, `copy_audit.py` |
 

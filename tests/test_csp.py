@@ -11,15 +11,21 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
-from skinledger import config
-from skinledger.db import init_db
+from skinledger import config, copy, guards, usage
+from skinledger.db import connect, db_path, init_db
 from skinledger.web.app import app
 from skinledger.web.routes.csp import (
     MAX_BODY_BYTES,
     MAX_REPORTS_PER_WINDOW,
     reset_rate_limit,
 )
-from skinledger.web.security import content_security_policy
+from skinledger.web.security import (
+    capture_content_security_policy,
+    content_security_policy,
+    is_capture_path,
+)
+
+OWNER_TOKEN = "owner-token"
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -238,3 +244,128 @@ def test_report_only_switch_sends_the_same_policy(env, monkeypatch, web):
     )
     assert response.headers["permissions-policy"] == "camera=(self)"
     assert "csp-endpoint" in response.headers["report-to"]
+
+
+# -- P15c: the capture-page policy is scoped to that page -------------------
+
+
+def seed_person(*, name: str = "Self", consent: bool = True) -> int:
+    """A consented person owned by OWNER_TOKEN, enough to open the capture page."""
+    conn = connect(db_path())
+    try:
+        person_id = conn.execute(
+            "INSERT INTO persons (display_name, owner_token_hash, is_demo_public) "
+            "VALUES (?, ?, 0)",
+            (name, guards.owner_token_hash(OWNER_TOKEN)),
+        ).lastrowid
+        if consent:
+            conn.execute(
+                "INSERT INTO consents (person_id, consent_version, adult_confirmed, accepted_at) "
+                "VALUES (?, ?, 1, ?)",
+                (person_id, copy.CONSENT_VERSION, usage.utc_now_iso()),
+            )
+        conn.commit()
+        return int(person_id or 0)
+    finally:
+        conn.close()
+
+
+def login(client: TestClient) -> None:
+    client.cookies.set(guards.OWNER_COOKIE, guards.encode_owner_cookie(OWNER_TOKEN))
+
+
+def _directive(csp: str, name: str) -> str:
+    for part in csp.split(";"):
+        part = part.strip()
+        if part.split(" ", 1)[0] == name:
+            return part
+    raise AssertionError(f"{name} missing from CSP: {csp}")
+
+
+def test_only_the_capture_path_is_treated_as_a_capture_page():
+    assert is_capture_path("/people/7/capture")
+    assert is_capture_path("/people/7/capture/")
+    for path in (
+        "/",
+        "/demo",
+        "/privacy",
+        "/people",
+        "/people/7/timeline",
+        "/people/7/capture/status",
+        "/products/3/verdict",
+        "/try",
+        "/static/capture.js",
+    ):
+        assert not is_capture_path(path), path
+
+
+def test_strict_pages_never_get_unsafe_eval(env, web):
+    person_id = seed_person()
+    login(web)
+
+    paths = (
+        "/",
+        "/demo",
+        "/privacy",
+        "/people",
+        "/try",
+        f"/people/{person_id}/timeline",
+        "/products/1/verdict",
+    )
+    for path in paths:
+        csp = web.get(path).headers["content-security-policy"]
+        assert "'unsafe-eval'" not in csp, path
+        assert "'wasm-unsafe-eval'" not in csp, path
+        assert "https://fonts.googleapis.com" not in csp, path
+
+
+def test_capture_page_gets_the_relaxed_kit_policy(env, web):
+    person_id = seed_person()
+    login(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert response.status_code == 200
+    csp = response.headers["content-security-policy"]
+    script = _directive(csp, "script-src")
+    assert "'unsafe-eval'" in script
+    assert "'wasm-unsafe-eval'" in script
+    assert "'unsafe-inline'" not in script
+    assert "https://fonts.googleapis.com" in _directive(csp, "style-src")
+    assert "https://cdnjs.cloudflare.com" in _directive(csp, "style-src")
+    assert "https://fonts.gstatic.com" in _directive(csp, "font-src")
+    assert "https:" in _directive(csp, "img-src")
+    assert "blob:" in _directive(csp, "connect-src")
+    # Reporting and framing stay exactly as on the strict policy.
+    assert _directive(csp, "frame-ancestors") == "frame-ancestors 'none'"
+    assert _directive(csp, "object-src") == "object-src 'none'"
+    assert _directive(csp, "base-uri") == "base-uri 'self'"
+    assert "report-uri /csp-report" in csp
+    assert "report-to csp-endpoint" in csp
+
+
+def test_both_policies_share_reporting_and_framing(env):
+    strict = content_security_policy()
+    capture = capture_content_security_policy()
+
+    for directive in ("frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'"):
+        assert directive in strict
+        assert directive in capture
+    assert "report-uri /csp-report" in strict
+    assert "report-uri /csp-report" in capture
+    assert "report-to csp-endpoint" in strict
+    assert "report-to csp-endpoint" in capture
+    assert strict != capture
+
+
+def test_report_only_applies_to_the_capture_policy_too(env, monkeypatch, web):
+    monkeypatch.setattr(config.settings, "csp_report_only", True)
+    person_id = seed_person()
+    login(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert "Content-Security-Policy" not in response.headers
+    report_only = response.headers["content-security-policy-report-only"]
+    assert "'unsafe-eval'" in report_only
+    assert report_only == capture_content_security_policy()

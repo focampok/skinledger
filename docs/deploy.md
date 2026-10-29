@@ -80,14 +80,28 @@ never its value. The API key and tokens are never printed.
 
 ## 5. Security headers and logs
 
-`src/skinledger/web/security.py` adds a CSP without `'unsafe-inline'` for
-scripts. Scripts are external files under `/static/` plus the Camera Kit SDK;
-the Kit origins live in one constant in `src/skinledger/config.py`
-(`CAMERA_KIT_ORIGINS`) and are marked **unverified** — adjust them from the
-browser console if the Kit reports a CSP violation. The same module sets
-`img-src 'self' blob: data:`, `Permissions-Policy: camera=(self)`, HSTS,
-`Referrer-Policy: same-origin`, `X-Content-Type-Options: nosniff` and
-`frame-ancestors 'none'`.
+`src/skinledger/web/security.py` builds **two** policies. The strict one covers
+every page and has no `'unsafe-inline'` and no `'unsafe-eval'` for scripts:
+scripts are external files under `/static/` plus the Camera Kit SDK, and the Kit
+origins live in one constant in `src/skinledger/config.py`
+(`CAMERA_KIT_ORIGINS`). The module also sets `img-src 'self' blob: data:`,
+`Permissions-Policy: camera=(self)`, HSTS, `Referrer-Policy: same-origin`,
+`X-Content-Type-Options: nosniff` and `frame-ancestors 'none'`.
+
+The capture policy applies **only to the guided capture page**
+(`/people/{id}/capture`, matched by `is_capture_path()`), the single page that
+loads the Kit. Report-only logs on production showed the SDK needs it: it
+evaluates strings as JS (`'unsafe-eval'`, 1000+ violations), compiles
+WebAssembly (`'wasm-unsafe-eval'`), and loads its own stylesheets from
+`https://fonts.googleapis.com` and `https://cdnjs.cloudflare.com`, webfonts from
+`https://fonts.gstatic.com`, and images from arbitrary HTTPS origins. So that
+page's policy adds those to `script-src`, `style-src`, `font-src` and `img-src`.
+It still forbids `'unsafe-inline'` for scripts, and `frame-ancestors`,
+`object-src 'none'`, `base-uri`, `form-action`, `report-uri` and `report-to` are
+identical to the strict policy. Every other page — including `/try`, which only
+renders the invite form — keeps the strict policy. If the Kit needs another
+origin, add it to the capture policy and its constants here rather than
+loosening the strict one.
 
 The policy carries `report-uri /csp-report` and `report-to csp-endpoint`; the
 `Report-To` response header defines that group. `POST /csp-report` accepts
@@ -95,8 +109,9 @@ The policy carries `report-uri /csp-report` and `report-to csp-endpoint`; the
 rate-limits per client IP and always returns 204. It logs `csp.violation` with
 only the violated directive, the blocked URI reduced to scheme+host (or
 `inline`/`eval`/`blob`/`data`) and the page path — never the body, query strings
-or source samples. `'wasm-unsafe-eval'` is not in `script-src`; add it only if
-these logs show the Camera Kit SDK needs it.
+or source samples. Watch these logs after changing either policy: the strict one
+must stay free of `'unsafe-eval'`, and any report coming from a page other than
+`/people/{id}/capture` means an origin was added to the wrong policy.
 
 Uvicorn access logging is off (`--no-access-log`) so query strings can never be
 logged. The JSONL application event log is unchanged. `--proxy-headers` and
