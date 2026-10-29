@@ -20,8 +20,19 @@ RUN useradd --create-home --uid 10001 appuser \
     && mkdir -p /data \
     && chown -R appuser:appuser /app /data
 
-USER appuser
+# setpriv re-execs the app as uid 10001; util-linux ships it, install only if missing.
+RUN if ! command -v setpriv >/dev/null; then \
+        apt-get update \
+        && apt-get install -y --no-install-recommends util-linux \
+        && rm -rf /var/lib/apt/lists/*; \
+    fi
+
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod 755 /usr/local/bin/entrypoint.sh
+
 EXPOSE 8000
 
+# No USER line: the image starts as root so scripts/entrypoint.sh can chown the mounted
+# volume, and the entrypoint re-execs uvicorn as uid 10001 before the app runs.
 # Access logging is off so invite codes in query strings can never reach a log.
-CMD ["sh", "-c", "uvicorn skinledger.web.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*' --no-access-log"]
+CMD ["/usr/local/bin/entrypoint.sh"]

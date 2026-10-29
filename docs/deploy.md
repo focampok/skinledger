@@ -18,10 +18,25 @@ Service → **Volumes** → **Add volume**, mount path **`/data`**. The SQLite f
 and `masks/` live there. Photos are never written; without the volume every
 redeploy wipes the data.
 
-The image runs as uid `10001` and creates `/data` owned by that user. A Railway
-volume initialized from the image inherits that ownership; if your volume is
-mounted root-owned, make `/data` writable by uid `10001` before the first
-deploy.
+The image has no `USER` line and starts as root, but only long enough to fix
+volume ownership. `scripts/entrypoint.sh` chowns `DATA_DIR` and `LOG_DIR` to uid
+`10001`, then re-execs uvicorn as uid `10001` with
+`setpriv --reuid=10001 --regid=10001 --init-groups`. The application process
+therefore never runs as root, even when the container does.
+
+Railway mounts the volume root-owned, so set the service variable
+**`RAILWAY_RUN_UID=0`**: with it the entrypoint can chown the volume on every
+boot, which is what makes `/data` writable for the SQLite file. Without the
+variable the container starts as uid `10001` directly, the entrypoint execs
+uvicorn as-is, and an empty root-owned volume fails with
+`sqlite3.OperationalError: unable to open database file`.
+
+Started as a non-root user, the entrypoint skips the chown and execs uvicorn
+directly, so local `docker run --user 10001` still works.
+
+HEAD requests are answered like GET (same status, same headers, same
+`Content-Length`, empty body) by a middleware in `src/skinledger/web/app.py`, so
+uptime monitors can probe `/healthz` with either method.
 
 ## 3. Variables (names only — set the values in Railway, never in the repo)
 
@@ -48,6 +63,7 @@ deploy.
 | `CAMERA_KIT_LANGUAGE` | Camera Kit language (`enu`). |
 | `SEED_SAMPLE_ON_START` | `true` creates the public sample profile on boot if missing (idempotent); default `false`. |
 | `RAILWAY_ENVIRONMENT` | Set by Railway. When present the app refuses to start if `YOUCAM_MOCK` is true or `INVITE_CODE`/`ADMIN_TOKEN` is empty. |
+| `RAILWAY_RUN_UID` | `0`. Starts the container as root so `scripts/entrypoint.sh` can chown the volume; the entrypoint then drops to uid `10001` before running uvicorn. |
 | `CSP_REPORT_ONLY` | `true` sends the same policy as `Content-Security-Policy-Report-Only` instead of enforcing it; default `false`. |
 
 The startup check logs only the variable **name** that is missing or invalid,

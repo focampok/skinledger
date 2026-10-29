@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -49,6 +50,34 @@ def test_healthz_returns_only_ok(web):
 
     assert response.status_code == 200
     assert response.json() == {"ok": True}
+
+
+def test_head_answers_like_get_without_a_body(web):
+    for path in ("/healthz", "/demo", "/people", "/try"):
+        get = web.get(path)
+        head = web.head(path)
+
+        assert get.status_code == head.status_code == 200, path
+        assert head.content == b"", path
+        assert head.headers["content-type"] == get.headers["content-type"], path
+        assert head.headers["content-length"] == get.headers["content-length"], path
+        # The security middleware still runs for HEAD.
+        assert "content-security-policy" in head.headers, path
+
+
+def test_image_starts_as_root_only_to_drop_to_uid_10001():
+    dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
+    entrypoint = (ROOT / "scripts" / "entrypoint.sh").read_text(encoding="utf-8")
+
+    assert "\nUSER " not in dockerfile
+    assert 'CMD ["/usr/local/bin/entrypoint.sh"]' in dockerfile
+    assert os.access(ROOT / "scripts" / "entrypoint.sh", os.X_OK)
+
+    assert "APP_UID=10001" in entrypoint
+    assert "setpriv --reuid=\"$APP_UID\" --regid=\"$APP_GID\" --init-groups" in entrypoint
+    assert entrypoint.count("--forwarded-allow-ips='*'") == 2
+    assert entrypoint.count("--no-access-log") == 2
+    assert entrypoint.count("--proxy-headers") == 2
 
 
 def test_security_headers_are_strict(web):
@@ -296,8 +325,6 @@ def test_dockerfile_and_railway_use_the_deploy_settings():
 
     assert "python:3.12-slim" in dockerfile
     assert "DATA_DIR=/data" in dockerfile
-    assert "USER appuser" in dockerfile
-    assert "--proxy-headers" in dockerfile
-    assert "--forwarded-allow-ips='*'" in dockerfile
-    assert "--no-access-log" in dockerfile
+    # The entrypoint owns the drop to uid 10001, so the image intentionally has no USER.
+    assert "USER appuser" not in dockerfile
     assert '"/healthz"' in railway

@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from skinledger import copy, seed, usage
@@ -91,6 +91,25 @@ async def add_security_headers(request: Request, call_next):
     for name, value in headers.items():
         response.headers.setdefault(name, value)
     return response
+
+
+@app.middleware("http")
+async def head_answers_like_get(request: Request, call_next):
+    """Answer HEAD with GET's status and headers but no body.
+
+    Registered after the security middleware so it wraps it and the headers survive.
+    Every page route is declared GET-only, so without this a HEAD probe gets 405.
+    """
+    if request.method != "HEAD":
+        return await call_next(request)
+    request.scope["method"] = "GET"
+    response = await call_next(request)
+    body = b"".join([chunk async for chunk in response.body_iterator])
+    headers = {k: v for k, v in response.headers.items() if k.lower() != "content-length"}
+    out = Response(status_code=response.status_code, headers=headers)
+    # HEAD must advertise the length GET would return, but send no body.
+    out.headers["content-length"] = str(len(body))
+    return out
 
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
