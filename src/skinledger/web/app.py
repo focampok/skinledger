@@ -17,6 +17,7 @@ from skinledger.web.home import home_context
 from skinledger.web.routes.admin import router as admin_router
 from skinledger.web.routes.captures import router as captures_router
 from skinledger.web.routes.client_log import router as client_log_router
+from skinledger.web.routes.csp import router as csp_router
 from skinledger.web.routes.demo import router as demo_router
 from skinledger.web.routes.persons import router as persons_router
 from skinledger.web.routes.products import router as products_router
@@ -24,7 +25,7 @@ from skinledger.web.routes.routine import router as routine_router
 from skinledger.web.routes.timeline import router as timeline_router
 from skinledger.web.routes.try_ import router as try_router
 from skinledger.web.routes.verdicts import router as verdicts_router
-from skinledger.web.security import SECURITY_HEADERS
+from skinledger.web.security import REPORT_PATH, security_headers
 from skinledger.web.templating import WEB_DIR, templates
 
 configure_logging()
@@ -81,7 +82,13 @@ app = FastAPI(title="SkinLedger", lifespan=lifespan)
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
-    for name, value in SECURITY_HEADERS.items():
+    settings = get_settings()
+    origin = str(request.base_url).rstrip("/")
+    headers = security_headers(
+        report_only=settings.csp_report_only,
+        report_url=f"{origin}{REPORT_PATH}",
+    )
+    for name, value in headers.items():
         response.headers.setdefault(name, value)
     return response
 
@@ -90,6 +97,7 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.include_router(admin_router)
 app.include_router(captures_router)
 app.include_router(client_log_router)
+app.include_router(csp_router)
 app.include_router(demo_router)
 app.include_router(persons_router)
 app.include_router(products_router)

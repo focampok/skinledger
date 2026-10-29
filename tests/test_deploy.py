@@ -68,6 +68,9 @@ def test_security_headers_are_strict(web):
             assert origin in directives["script-src"]
         assert directives["img-src"] == "img-src 'self' blob: data:"
         assert directives["frame-ancestors"] == "frame-ancestors 'none'"
+        assert "report-uri /csp-report" in csp
+        assert "report-to csp-endpoint" in csp
+        assert "csp-endpoint" in headers["report-to"]
         assert headers["permissions-policy"] == "camera=(self)"
         assert "max-age=31536000" in headers["strict-transport-security"]
         assert headers["referrer-policy"] == "same-origin"

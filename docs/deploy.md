@@ -48,6 +48,7 @@ deploy.
 | `CAMERA_KIT_LANGUAGE` | Camera Kit language (`enu`). |
 | `SEED_SAMPLE_ON_START` | `true` creates the public sample profile on boot if missing (idempotent); default `false`. |
 | `RAILWAY_ENVIRONMENT` | Set by Railway. When present the app refuses to start if `YOUCAM_MOCK` is true or `INVITE_CODE`/`ADMIN_TOKEN` is empty. |
+| `CSP_REPORT_ONLY` | `true` sends the same policy as `Content-Security-Policy-Report-Only` instead of enforcing it; default `false`. |
 
 The startup check logs only the variable **name** that is missing or invalid,
 never its value. The API key and tokens are never printed.
@@ -71,6 +72,15 @@ browser console if the Kit reports a CSP violation. The same module sets
 `img-src 'self' blob: data:`, `Permissions-Policy: camera=(self)`, HSTS,
 `Referrer-Policy: same-origin`, `X-Content-Type-Options: nosniff` and
 `frame-ancestors 'none'`.
+
+The policy carries `report-uri /csp-report` and `report-to csp-endpoint`; the
+`Report-To` response header defines that group. `POST /csp-report` accepts
+`application/csp-report` and `application/reports+json`, caps the body at 8 KB,
+rate-limits per client IP and always returns 204. It logs `csp.violation` with
+only the violated directive, the blocked URI reduced to scheme+host (or
+`inline`/`eval`/`blob`/`data`) and the page path — never the body, query strings
+or source samples. `'wasm-unsafe-eval'` is not in `script-src`; add it only if
+these logs show the Camera Kit SDK needs it.
 
 Uvicorn access logging is off (`--no-access-log`) so query strings can never be
 logged. The JSONL application event log is unchanged. `--proxy-headers` and

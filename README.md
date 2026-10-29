@@ -83,7 +83,7 @@ Dockerfile build, a persistent volume mounted at `/data`, healthcheck `/healthz`
 Production behaviour: `SEED_SAMPLE_ON_START=true` creates the read-only public sample once (idempotent); `/demo` explains it for judges; `/admin/usage` accepts only the `X-Admin-Token` header (missing/wrong → 404); Uvicorn access logging is off; the app refuses to start when `RAILWAY_ENVIRONMENT` is set and `YOUCAM_MOCK` is true or `INVITE_CODE`/`ADMIN_TOKEN` is empty.
 
 ## Environment variables (names only)
-`YOUCAM_API_KEY`, `YOUCAM_BASE_URL`, `YOUCAM_SKIN_VERSION`, `YOUCAM_MOCK`, `YOUCAM_POLL_INTERVAL_S`, `YOUCAM_POLL_TIMEOUT_S`, `DATA_DIR`, `LOG_DIR`, `LOG_LEVEL`, `PUBLIC_URL`, `INVITE_CODE`, `ADMIN_TOKEN`, `MAX_REAL_ANALYSES_PER_PERSON`, `DAILY_UNIT_CAP`, `TOTAL_UNIT_CAP`, `UNITS_PER_ANALYSIS`, `ALLOW_UPLOAD`, `STORE_MASKS`, `CAMERA_KIT_LANGUAGE`, `SEED_SAMPLE_ON_START`, `RAILWAY_ENVIRONMENT`.
+`YOUCAM_API_KEY`, `YOUCAM_BASE_URL`, `YOUCAM_SKIN_VERSION`, `YOUCAM_MOCK`, `YOUCAM_POLL_INTERVAL_S`, `YOUCAM_POLL_TIMEOUT_S`, `DATA_DIR`, `LOG_DIR`, `LOG_LEVEL`, `PUBLIC_URL`, `INVITE_CODE`, `ADMIN_TOKEN`, `MAX_REAL_ANALYSES_PER_PERSON`, `DAILY_UNIT_CAP`, `TOTAL_UNIT_CAP`, `UNITS_PER_ANALYSIS`, `ALLOW_UPLOAD`, `STORE_MASKS`, `CAMERA_KIT_LANGUAGE`, `SEED_SAMPLE_ON_START`, `RAILWAY_ENVIRONMENT`, `CSP_REPORT_ONLY`.
 The API key is read only on the server and never reaches the browser, logs or templates.
 
 ## Requirements matrix

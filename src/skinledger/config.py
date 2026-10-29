@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     camera_kit_language: str = "enu"
     seed_sample_on_start: bool = False
     railway_environment: str | None = None
+    csp_report_only: bool = False
 
 
 @lru_cache
