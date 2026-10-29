@@ -157,7 +157,10 @@ def test_capture_page_has_exact_copy_and_baseline_step(env, web):
     assert "2 of 2 analyses left" in response.text
     assert "Baseline: analysis 1 of 2" in response.text
     assert 'id="YMK-module"' in response.text
-    assert "plugins-media.makeupar.com/v2.5-camera-kit/sdk.js" in response.text
+    assert 'src="/static/capture_boot.js"' in response.text
+    assert "plugins-media.makeupar.com/v2.5-camera-kit/sdk.js" in (
+        STATIC / "capture_boot.js"
+    ).read_text(encoding="utf-8")
 
 
 def test_upload_tab_is_hidden_when_upload_is_disabled(env, web):
@@ -295,12 +298,17 @@ def test_capture_js_stores_only_the_camera_language_in_local_storage():
 
 def test_capture_page_loads_the_camera_kit_after_the_ready_hook():
     template = (TEMPLATES / "capture.html").read_text(encoding="utf-8")
+    boot = (STATIC / "capture_boot.js").read_text(encoding="utf-8")
 
-    hook = template.index("window.ymkAsyncInit = function")
-    sdk = template.index("plugins-media.makeupar.com/v2.5-camera-kit/sdk.js")
+    assert 'src="/static/capture_boot.js"' in template
+    assert template.index("/static/capture_boot.js") < template.index(
+        "/static/capture.js"
+    )
+    hook = boot.index("window.ymkAsyncInit = function")
+    sdk = boot.index("plugins-media.makeupar.com/v2.5-camera-kit/sdk.js")
     assert hook < sdk
     # The SDK looks for the lowercase name; the mixed-case spelling is only an alias.
-    assert "window.YMKAsyncInit = window.ymkAsyncInit;" in template
+    assert "window.YMKAsyncInit = window.ymkAsyncInit;" in boot
     assert 'faceDetectionMode: "skincare"' in (STATIC / "capture.js").read_text(
         encoding="utf-8"
     )
@@ -396,12 +404,18 @@ def test_lifecycle_and_camera_events_are_registered_and_logged():
 
 def test_capture_template_defines_the_sdk_hooks_before_the_script():
     template = (TEMPLATES / "capture.html").read_text(encoding="utf-8")
+    boot = (STATIC / "capture_boot.js").read_text(encoding="utf-8")
 
-    assert "window.__ymkScriptState" in template
-    assert "window.__ymkScriptLoadedAt" in template
-    assert "onload=" in template
-    assert "onerror=" in template
-    assert '"async_init"' in template
-    assert template.index("window.SkinLedgerClientLog") < template.index(
+    assert 'src="/static/capture_boot.js"' in template
+    assert "window.__ymkScriptState" in boot
+    assert "window.__ymkScriptLoadedAt" in boot
+    assert 'addEventListener("load"' in boot
+    assert 'addEventListener("error"' in boot
+    assert '"async_init"' in boot
+    assert boot.index("window.SkinLedgerClientLog") < boot.index(
         "plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"
     )
+    # CSP: no inline script blocks or inline event handlers.
+    assert "<script>" not in template
+    assert " onload=" not in template
+    assert " onerror=" not in template

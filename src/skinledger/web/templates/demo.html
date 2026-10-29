@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — {{ demo_title }}{% endblock %}
+
+{% block content %}
+<h1>{{ demo_title }}</h1>
+<p>{{ demo_intro }}</p>
+
+{% if demo_person_id %}
+<p><a href="/people/{{ demo_person_id }}/timeline" role="button">{{ demo_sample_link }}</a></p>
+{% else %}
+<p><a href="/people" role="button">{{ demo_sample_link }}</a></p>
+{% endif %}
+
+<p><a href="/try">{{ demo_try_link }}</a></p>
+<p>{{ demo_invite_note }}</p>
+<p><small>{{ demo_privacy_note }} <a href="/privacy">Privacy</a></small></p>
+{% endblock %}

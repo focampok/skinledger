@@ -6,6 +6,16 @@ from pathlib import Path
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Camera Kit origins. UNVERIFIED: the Kit may call additional Perfect Corp
+# origins; adjust this tuple from the browser console if the Kit reports a CSP
+# violation. Keep every Kit domain here so the CSP has one source of truth.
+CAMERA_KIT_ORIGINS: tuple[str, ...] = (
+    "https://plugins-media.makeupar.com",
+    "https://plugins-media.perfectcorp.com",
+    "https://yce-api-01.makeupar.com",
+    "https://yce-api-01.perfectcorp.com",
+)
+
 
 class Settings(BaseSettings):
     """Runtime configuration. Secret values are never shown by `repr` or `str`."""
@@ -35,6 +45,8 @@ class Settings(BaseSettings):
     allow_upload: bool = True
     store_masks: bool = True
     camera_kit_language: str = "enu"
+    seed_sample_on_start: bool = False
+    railway_environment: str | None = None
 
 
 @lru_cache

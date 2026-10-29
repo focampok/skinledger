@@ -192,6 +192,62 @@ SAMPLE_PROFILE_BANNER = "Sample profile: all data is SIMULATED."
 
 TRY_SAMPLE_LINK = "Open the sample profile (all data is SIMULATED)"
 
+TRY_DEMO_LINK = "Judges: how this demo works"
+
+DEMO_TITLE = "SkinLedger demo"
+
+DEMO_INTRO = (
+    "The public sample profile is Sample user (SIMULATED). All its data is "
+    "SIMULATED, so anyone can browse it without an invite code."
+)
+
+DEMO_SAMPLE_LINK = "Open the sample profile"
+
+DEMO_TRY_LINK = "Try it with your own face"
+
+DEMO_INVITE_NOTE = (
+    "An invite code is required to analyze your own face; it is in the Devpost "
+    "testing instructions. 2 analyses per person."
+)
+
+DEMO_PRIVACY_NOTE = "Your photo is never stored. Read the Privacy page."
+
+FOOTER_DEMO_LINK = "Demo"
+
+# -- Admin usage page ---------------------------------------------------------
+
+ADMIN_USAGE_TITLE = "Admin usage"
+
+ADMIN_VISITOR_ANALYSES_TODAY = "Visitor analyses today"
+
+ADMIN_VISITOR_ANALYSES_TOTAL = "Visitor analyses since deploy"
+
+ADMIN_VISITOR_UNITS_TODAY = "Visitor units today"
+
+ADMIN_VISITOR_UNITS_TOTAL = "Visitor units since deploy"
+
+ADMIN_UNITS = "Admin units (your own analyses)"
+
+ADMIN_ANALYSES_LEFT = "Analyses left in the visitor pool"
+
+ADMIN_DAILY_CAP = "Daily unit cap"
+
+ADMIN_TOTAL_CAP = "Total unit cap"
+
+ADMIN_PER_PERSON_CAP = "Analyses per person"
+
+ADMIN_ALLOW_UPLOAD = "Photo upload allowed"
+
+ADMIN_BALANCE = "YouCam balance"
+
+ADMIN_FILES_OUTSIDE = "Files outside masks/ in DATA_DIR (must be 0)"
+
+ADMIN_REJECTED_TITLE = "Rejected (0-unit) attempts by error code"
+
+ADMIN_REJECTED_NONE = "None."
+
+ADMIN_UNAVAILABLE = "unavailable"
+
 # -- P12 routine and shopping list -------------------------------------------
 
 ROUTINE_TITLE = "Your AM/PM routine"

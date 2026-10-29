@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from skinledger import copy, guards, logs
 from skinledger.config import get_settings
-from skinledger.db import connect, db_path
+from skinledger.web.demo import sample_person_id
 from skinledger.web.forms import read_urlencoded_form
 from skinledger.web.templating import templates
 
@@ -41,21 +41,10 @@ def _recent_failures(ip: str, now: float) -> list[float]:
     return attempts
 
 
-def _demo_person_id() -> int | None:
-    conn = connect(db_path())
-    try:
-        row = conn.execute(
-            "SELECT id FROM persons WHERE is_demo_public = 1 ORDER BY id LIMIT 1"
-        ).fetchone()
-        return int(row["id"]) if row is not None else None
-    finally:
-        conn.close()
-
-
 @router.get("/try", response_class=HTMLResponse)
 async def try_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
-        request, "try.html", {"error": None, "demo_person_id": _demo_person_id()}
+        request, "try.html", {"error": None, "demo_person_id": sample_person_id()}
     )
 
 
@@ -93,6 +82,6 @@ async def submit_invite(request: Request):
     return templates.TemplateResponse(
         request,
         "try.html",
-        {"error": copy.INVALID_INVITE, "demo_person_id": _demo_person_id()},
+        {"error": copy.INVALID_INVITE, "demo_person_id": sample_person_id()},
         status_code=400,
     )

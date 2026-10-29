@@ -26,39 +26,7 @@
     display: none;
   }
 </style>
-<script>
-  // Queue client logs until capture.js installs the real sender.
-  window.__clientLogQueue = [];
-  window.__ymkScriptState = "pending";
-  window.__ymkScriptLoadedAt = null;
-  window.SkinLedgerClientLog = function (level, event, detail) {
-    window.__clientLogQueue.push([level, event, detail]);
-  };
-  // Must exist before the Camera Kit SDK script runs. It only registers listeners.
-  // The shipped SDK checks `typeof window.ymkAsyncInit === "function"` (lowercase) and
-  // calls it once window.YMK exists, so the lowercase name is the one that matters.
-  window.ymkAsyncInit = function () {
-    window.YMKAsyncInitFired = true;
-    window.SkinLedgerClientLog(
-      "info",
-      "async_init",
-      "fired capture_ready=" + Boolean(window.SkinLedgerCameraKitReady)
-    );
-    if (window.SkinLedgerCameraKitReady) {
-      window.SkinLedgerCameraKitReady();
-    } else {
-      window.__ymkReady = true;
-    }
-  };
-  // Alias for the mixed-case spelling used in the docs and by older SDK builds.
-  window.YMKAsyncInit = window.ymkAsyncInit;
-</script>
-<script
-  src="https://plugins-media.makeupar.com/v2.5-camera-kit/sdk.js"
-  async
-  onload="window.__ymkScriptState = 'loaded'; window.__ymkScriptLoadedAt = Date.now(); window.SkinLedgerClientLog('info', 'sdk_load', 'script loaded'); window.dispatchEvent(new Event('ymk-loaded'));"
-  onerror="window.__ymkScriptState = 'failed'; window.SkinLedgerClientLog('error', 'sdk_fail', 'script failed to load'); window.dispatchEvent(new Event('ymk-error'));"
-></script>
+<script src="/static/capture_boot.js"></script>
 <script src="/static/capture.js" defer></script>
 {% endblock %}
 

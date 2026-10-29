@@ -684,7 +684,7 @@
   }
   window.addEventListener("ymk-loaded", startAsyncInitWatch);
   window.addEventListener("ymk-error", function () {
-    // The template already logged sdk_fail; explain it on screen too.
+    // The boot script already logged sdk_fail; explain it on screen too.
     cameraUnavailable("Guided camera unavailable on this device.", "sdk_failed");
   });
   if (window.__ymkScriptState === "failed" && !window.YMKAsyncInitFired) {

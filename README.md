@@ -66,17 +66,41 @@ Shared-link guards: invite code, 2 analyses per person, daily and total unit cap
 ```bash
 uv sync
 cp .env.example .env          # edit .env yourself; keep YOUCAM_MOCK=true for development
-YOUCAM_MOCK=true uv run uvicorn skinledger.web.app:app --reload
+YOUCAM_MOCK=true uv run uvicorn skinledger.web.app:app --reload --no-access-log
 uv run pytest
 ```
 With `YOUCAM_MOCK=true` the app uses a fixture labelled SAMPLE and spends no API units. Camera Kit needs HTTPS except on `localhost`.
 
+Optional container check (the container owns its own `/data`; no host volume):
+```bash
+docker build -t skinledger .
+docker run --rm -p 8000:8000 --env-file .env -e DATA_DIR=/data skinledger
+```
+
 ## Deploy (Railway)
-Dockerfile build, a persistent volume mounted at `/data`, healthcheck `/healthz`, and the variables below set in Railway. The service listens on `$PORT`.
+Dockerfile build, a persistent volume mounted at `/data`, healthcheck `/healthz`, and the variables below set in Railway. The service listens on `$PORT`. Full steps, the variable table and the acceptance checklist are in **[docs/deploy.md](docs/deploy.md)**.
+
+Production behaviour: `SEED_SAMPLE_ON_START=true` creates the read-only public sample once (idempotent); `/demo` explains it for judges; `/admin/usage` accepts only the `X-Admin-Token` header (missing/wrong → 404); Uvicorn access logging is off; the app refuses to start when `RAILWAY_ENVIRONMENT` is set and `YOUCAM_MOCK` is true or `INVITE_CODE`/`ADMIN_TOKEN` is empty.
 
 ## Environment variables (names only)
-`YOUCAM_API_KEY`, `YOUCAM_BASE_URL`, `YOUCAM_SKIN_VERSION`, `YOUCAM_MOCK`, `YOUCAM_POLL_INTERVAL_S`, `YOUCAM_POLL_TIMEOUT_S`, `DATA_DIR`, `PUBLIC_URL`, `INVITE_CODE`, `ADMIN_TOKEN`, `MAX_REAL_ANALYSES_PER_PERSON`, `DAILY_UNIT_CAP`, `TOTAL_UNIT_CAP`, `UNITS_PER_ANALYSIS`, `ALLOW_UPLOAD`, `STORE_MASKS`, `CAMERA_KIT_LANGUAGE`.
+`YOUCAM_API_KEY`, `YOUCAM_BASE_URL`, `YOUCAM_SKIN_VERSION`, `YOUCAM_MOCK`, `YOUCAM_POLL_INTERVAL_S`, `YOUCAM_POLL_TIMEOUT_S`, `DATA_DIR`, `LOG_DIR`, `LOG_LEVEL`, `PUBLIC_URL`, `INVITE_CODE`, `ADMIN_TOKEN`, `MAX_REAL_ANALYSES_PER_PERSON`, `DAILY_UNIT_CAP`, `TOTAL_UNIT_CAP`, `UNITS_PER_ANALYSIS`, `ALLOW_UPLOAD`, `STORE_MASKS`, `CAMERA_KIT_LANGUAGE`, `SEED_SAMPLE_ON_START`, `RAILWAY_ENVIRONMENT`.
 The API key is read only on the server and never reaches the browser, logs or templates.
+
+## Requirements matrix
+| Requirement | Where it is implemented |
+|---|---|
+| YouCam AI Skin Analysis API (SD, 15 numeric scores + skin type, 4-step async flow) | `src/skinledger/youcam.py`, `pipeline.py` |
+| Guided Camera Kit capture + quick upload, never storing the photo | `web/static/capture_boot.js`, `capture.js`, `imaging.py`, `web/routes/captures.py` |
+| Personal day-1 noise band and unstable aspects | `noise.py` |
+| Keep / No measurable change / Worse verdict at day 14/28 | `verdict.py`, `/products/{id}/verdict` |
+| Generic AM/PM routine and shopping list | `routine.py`, `shopping.py`, `/people/{id}/routine` |
+| Consent, delete, shared-link invite and unit caps | `web/routes/persons.py`, `guards.py`, `usage.py` |
+| REAL / SIMULATED / SAMPLE labels and the public sample | `web/banners.py`, `seed.py`, `/demo` |
+| Responsive installable PWA | `web/static/manifest.webmanifest`, `sw.js`, `app.css` |
+| Railway + `/data` volume + custom domain | `Dockerfile`, `railway.json`, `docs/deploy.md` |
+| Security headers (strict script CSP, camera policy, HSTS, no-sniff, no framing) | `web/security.py` |
+| Admin usage counts without visitor data; header-only auth | `/admin/usage`, `web/routes/admin.py` |
+| Tests and copy/brand/disclaimer audit | `tests/`, `copy_audit.py` |
 
 ## Honest limitations
 - The two-capture noise band is a rough estimate of measurement noise, not a statistical guarantee.

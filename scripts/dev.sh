@@ -39,7 +39,7 @@ if [[ "$MODE" == "tunnel" ]]; then
 fi
 
 # --proxy-headers so the /try rate limit sees the real client IP behind the tunnel.
-uv run uvicorn skinledger.web.app:app --port "$PORT" --reload \
+uv run uvicorn skinledger.web.app:app --port "$PORT" --reload --no-access-log \
   --proxy-headers --forwarded-allow-ips 127.0.0.1 &
 pids+=($!)
 

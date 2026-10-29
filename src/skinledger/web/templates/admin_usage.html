@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — {{ admin_usage_title }}{% endblock %}
+
+{% block content %}
+<h1>{{ admin_usage_title }}</h1>
+
+<table>
+  <tbody>
+    <tr><th>{{ admin_visitor_analyses_today }}</th><td>{{ visitor_analyses_today }}</td></tr>
+    <tr><th>{{ admin_visitor_analyses_total }}</th><td>{{ visitor_analyses_total }}</td></tr>
+    <tr><th>{{ admin_visitor_units_today }}</th><td>{{ visitor_units_today }}</td></tr>
+    <tr><th>{{ admin_visitor_units_total }}</th><td>{{ visitor_units_total }}</td></tr>
+    <tr><th>{{ admin_units }}</th><td>{{ admin_units }} units · {{ admin_analyses }} analyses</td></tr>
+    <tr><th>{{ admin_analyses_left }}</th><td>{{ analyses_left }}</td></tr>
+    <tr><th>{{ admin_daily_cap }}</th><td>{{ daily_cap }}</td></tr>
+    <tr><th>{{ admin_total_cap }}</th><td>{{ total_cap }}</td></tr>
+    <tr><th>{{ admin_per_person_cap }}</th><td>{{ per_person_cap }}</td></tr>
+    <tr><th>{{ admin_allow_upload }}</th><td>{{ allow_upload }}</td></tr>
+    <tr><th>{{ admin_balance }}</th><td>{{ balance }}</td></tr>
+    <tr><th>{{ admin_files_outside }}</th><td>{{ files_outside }}</td></tr>
+  </tbody>
+</table>
+
+<h2>{{ admin_rejected_title }}</h2>
+{% if rejected %}
+<table>
+  <thead><tr><th>Error code</th><th>Count</th></tr></thead>
+  <tbody>
+    {% for row in rejected %}
+    <tr><td>{{ row.error_code }}</td><td>{{ row.count }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>{{ admin_rejected_none }}</p>
+{% endif %}
+{% endblock %}

@@ -317,6 +317,19 @@ def create_sample_person(
     return person_id, products
 
 
+def ensure_sample_person(
+    conn: sqlite3.Connection, today: date, rng: random.Random | None = None
+) -> int:
+    """Startup helper: create the public sample only when it is missing."""
+    row = conn.execute(
+        "SELECT id FROM persons WHERE is_demo_public = 1 ORDER BY id LIMIT 1"
+    ).fetchone()
+    if row is not None:
+        return int(row["id"])
+    person_id, _ = create_sample_person(conn, today, rng or random.Random(SEED_RNG))
+    return person_id
+
+
 def _scores_for(conn: sqlite3.Connection, capture_id: int) -> dict[str, float]:
     rows = conn.execute(
         "SELECT aspect, raw_score FROM aspect_scores "
