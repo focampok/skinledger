@@ -1,0 +1,169 @@
+"""Verdict screen (P11): compute on read and render the frozen outcome."""
+
+from __future__ import annotations
+
+import sqlite3
+from datetime import date, timedelta
+from pathlib import PurePosixPath
+
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import HTMLResponse
+
+from skinledger import copy, guards, logs, verdict_store
+from skinledger.aspects import ASPECT_LABELS
+from skinledger.db import connect, db_path
+from skinledger.verdict import TargetResult, Verdict
+from skinledger.web.templating import templates
+
+router = APIRouter()
+
+
+def _authorized_product(
+    conn: sqlite3.Connection, request: Request, product_id: int
+) -> tuple[sqlite3.Row, sqlite3.Row]:
+    """The same owner/admin rules as the timeline; the demo stays closed until P14."""
+    product = conn.execute(
+        "SELECT * FROM products WHERE id = ?", (product_id,)
+    ).fetchone()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found.")
+    person = guards.authorize_person(conn, request, int(product["person_id"]))
+    if person is None:
+        raise HTTPException(status_code=404, detail="Person not found.")
+    if person["is_demo_public"] and not guards.is_admin_request(request):
+        raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
+    return product, person
+
+
+def _score(value: float | None) -> str:
+    return "—" if value is None else f"{float(value):.1f}"
+
+
+def _arrow(delta: float) -> str:
+    return "↑" if delta > 0 else "↓" if delta < 0 else "→"
+
+
+def _change(delta: float | None) -> str:
+    if delta is None:
+        return "—"
+    value = float(delta)
+    sign = "+" if value > 0 else ""
+    return f"{sign}{value:.1f} {_arrow(value)}"
+
+
+def _outside(target: TargetResult) -> str:
+    if target.status == "unstable":
+        return copy.VERDICT_UNSTABLE_NOT_USED
+    if target.status in ("improved", "worse"):
+        return "✓"
+    if target.status == "within_noise":
+        return "—"
+    if target.status == "no_band":
+        return copy.VERDICT_NO_BAND_CELL
+    if target.status == "pending":
+        return copy.VERDICT_PENDING_CELL
+    return copy.VERDICT_NO_SCORE
+
+
+def _target_rows(computed: Verdict) -> list[dict[str, object]]:
+    return [
+        {
+            "aspect": target.aspect,
+            "label": ASPECT_LABELS.get(target.aspect, target.aspect),
+            "baseline": _score(target.baseline),
+            "checkin": _score(target.checkin),
+            "change": _change(target.delta),
+            "band": "—" if target.band is None else f"{float(target.band):.1f}",
+            "outside": _outside(target),
+            "unstable": target.status == "unstable",
+        }
+        for target in computed.targets
+    ]
+
+
+def _top_rows(computed: Verdict) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for change in computed.top_changes:
+        delta = float(change["delta"])
+        if change["band"] is None:
+            outside = copy.VERDICT_NO_BAND_CELL
+        elif change["outside_band"]:
+            outside = copy.VERDICT_OUTSIDE_NOISE
+        else:
+            outside = copy.VERDICT_WITHIN_NOISE
+        rows.append(
+            {
+                "label": change["label"],
+                "delta": f"{'+' if delta > 0 else ''}{delta:.1f}",
+                "arrow": _arrow(delta),
+                "outside": outside,
+            }
+        )
+    return rows
+
+
+def _mask_rows(computed: Verdict) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for pair in computed.mask_pairs:
+        rows.append(
+            {
+                "label": ASPECT_LABELS.get(str(pair["aspect"]), str(pair["aspect"])),
+                "before_capture_id": int(pair["before_capture_id"]),
+                "after_capture_id": int(pair["after_capture_id"]),
+                "before_file": PurePosixPath(str(pair["before_path"])).name,
+                "after_file": PurePosixPath(str(pair["after_path"])).name,
+            }
+        )
+    return rows
+
+
+@router.get("/products/{product_id}/verdict", response_class=HTMLResponse)
+async def verdict_page(request: Request, product_id: int) -> HTMLResponse:
+    conn = connect(db_path())
+    try:
+        product, person = _authorized_product(conn, request, product_id)
+        product_data = dict(product)
+        person_data = dict(person)
+        computed = verdict_store.compute_for_product(conn, product_id)
+        if computed is None:
+            raise HTTPException(status_code=404, detail="Product not found.")
+    finally:
+        conn.close()
+
+    logs.log_event(
+        "verdict.viewed", product_id=product_id, outcome=computed.outcome
+    )
+
+    window_label = (
+        copy.VERDICT_DAY_14 if computed.window == "d14" else copy.VERDICT_DAY_28
+    )
+    window_days = 14 if computed.window == "d14" else 28
+    started = date.fromisoformat(product_data["started_on"])
+    window_date = computed.checkin_date or (
+        started + timedelta(days=window_days)
+    ).isoformat()
+
+    return templates.TemplateResponse(
+        request,
+        "verdict.html",
+        {
+            "product": product_data,
+            "person": person_data,
+            "verdict": computed,
+            "outcome_label": copy.verdict_outcome_label(computed.outcome),
+            "window_label": window_label,
+            "window_date": window_date,
+            "target_rows": _target_rows(computed),
+            "top_change_rows": _top_rows(computed),
+            "mask_rows": _mask_rows(computed),
+            "unstable_rows": [
+                {
+                    "label": ASPECT_LABELS.get(
+                        str(target["aspect"]), str(target["aspect"])
+                    ),
+                    "band": target["band"],
+                }
+                for target in computed.unstable_targets
+            ],
+        },
+    )

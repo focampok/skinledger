@@ -109,3 +109,79 @@ PRODUCT_TARGETS_REQUIRED = "Pick 1 to 4 target aspects."
 PRODUCT_TOO_MANY_TARGETS = "Choose up to 4 target aspects."
 
 PRODUCT_UNKNOWN_TARGET = "Unknown target aspect. Choose from the 15 listed aspects."
+
+# -- P11 verdict screen and home cards ---------------------------------------
+
+VERDICT_OUTCOME_LABELS = {
+    "keep": "Keep",
+    "no_change": "No measurable change",
+    "worse": "Worse",
+    "too_early": "Too early",
+    "no_band": "No verdict yet",
+    "need_checkin": "Check-in needed",
+}
+
+
+def verdict_outcome_label(outcome: str) -> str:
+    return VERDICT_OUTCOME_LABELS.get(outcome, outcome)
+
+
+VERDICT_TITLE_PREFIX = "Verdict for"
+
+VERDICT_SIMULATED_BANNER = "Demo: day 14/28 check-ins are SIMULATED. Day 1 is real."
+
+VERDICT_MASKS_REAL_ONLY = "Masks are only shown for real captures."
+
+VERDICT_NO_MASKS = "No masks are stored for these captures."
+
+VERDICT_UNSTABLE_NOT_USED = "Unstable, not used"
+
+VERDICT_TAKE_CHECKIN = "Take check-in now"
+
+VERDICT_TARGETS_TITLE = "Target aspects"
+
+VERDICT_TOP_CHANGES_TITLE = "Biggest changes"
+
+VERDICT_MASKS_TITLE = "Before and after masks"
+
+VERDICT_COL_ASPECT = "Target aspect"
+
+VERDICT_COL_BASELINE = "Baseline"
+
+VERDICT_COL_CHECKIN = "Check-in"
+
+VERDICT_COL_CHANGE = "Change"
+
+VERDICT_COL_BAND = "Noise band"
+
+VERDICT_COL_OUTSIDE = "Outside noise?"
+
+VERDICT_DAY_14 = "Day 14"
+
+VERDICT_DAY_28 = "Day 28"
+
+VERDICT_OUTSIDE_NOISE = "Outside noise"
+
+VERDICT_WITHIN_NOISE = "Within noise"
+
+VERDICT_NO_BAND_CELL = "No band"
+
+VERDICT_PENDING_CELL = "Check-in not taken"
+
+VERDICT_NO_SCORE = "No score"
+
+VERDICT_BEFORE = "Before"
+
+VERDICT_AFTER = "After"
+
+VERDICT_MASK_BEFORE_ALT = "Before mask for"
+
+VERDICT_MASK_AFTER_ALT = "After mask for"
+
+HOME_ACTIVE_TITLE = "Your active products"
+
+HOME_NEXT_CHECKIN = "Next check-in"
+
+HOME_BOTH_PASSED = "Both check-in windows have passed."
+
+HOME_NO_ACTIVE = "No active products yet."

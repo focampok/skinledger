@@ -12,4 +12,30 @@
   <a href="/try" role="button">Try it</a>
   <a href="/people">My people</a>
 </p>
+
+{% if show_home_products %}
+<section class="home-products">
+  <h2>{{ home_active_title }}</h2>
+  {% if product_cards %}
+  <div class="home-product-grid">
+    {% for card in product_cards %}
+    <article class="home-product-card home-verdict-{{ card.outcome }}"
+             data-product-id="{{ card.product_id }}" data-outcome="{{ card.outcome }}">
+      <h3><a href="/products/{{ card.product_id }}/verdict">{{ card.name }}</a></h3>
+      <p class="home-product-outcome">{{ card.outcome_label }}</p>
+      <p><small>{{ card.message }}</small></p>
+      {% if card.next_checkin_date %}
+      <p><small>{{ home_next_checkin }}: {{ card.next_checkin_label }} · {{ card.next_checkin_date }}</small></p>
+      {% else %}
+      <p><small>{{ home_both_passed }}</small></p>
+      {% endif %}
+      <p><small>{{ card.person_name }} · {{ card.label }}</small></p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>{{ home_no_active }}</p>
+  {% endif %}
+</section>
+{% endif %}
 {% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — {{ verdict_title_prefix }} {{ product.name }}{% endblock %}
+
+{% block content %}
+<div id="verdict-page" data-product-id="{{ product.id }}" data-outcome="{{ verdict.outcome }}">
+  <p class="verdict-links">
+    <a href="/people/{{ person.id }}/products">Products</a> ·
+    <a href="/people/{{ person.id }}/timeline">Timeline</a>
+  </p>
+
+  {% if verdict.label == "SIMULATED" %}
+  <p class="verdict-banner" role="status">{{ verdict_simulated_banner }}</p>
+  {% endif %}
+
+  <article class="verdict-card verdict-{{ verdict.outcome }}">
+    <header class="verdict-header">
+      <h1>{{ verdict_title_prefix }} {{ product.name }}</h1>
+      <p class="verdict-outcome">{{ outcome_label }}</p>
+    </header>
+    <p class="verdict-action">{{ verdict.message }}</p>
+    <p class="verdict-window"><strong>{{ window_label }}</strong> · {{ window_date }}</p>
+
+    {% if target_rows %}
+    <h2>{{ verdict_targets_title }}</h2>
+    <div class="verdict-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ verdict_col_aspect }}</th>
+            <th>{{ verdict_col_baseline }}</th>
+            <th>{{ verdict_col_checkin }}</th>
+            <th>{{ verdict_col_change }}</th>
+            <th>{{ verdict_col_band }}</th>
+            <th>{{ verdict_col_outside }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in target_rows %}
+          <tr data-target-aspect="{{ row.aspect }}"{% if row.unstable %} data-unstable="true"{% endif %}>
+            <td>{{ row.label }}</td>
+            <td>{{ row.baseline }}</td>
+            <td>{{ row.checkin }}</td>
+            <td>{{ row.change }}</td>
+            <td>{{ row.band }}</td>
+            <td>{{ row.outside }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if unstable_rows %}
+    <p class="verdict-unstable">
+      <strong>{{ verdict_unstable_not_used }}:</strong>
+      {% for target in unstable_rows %}
+      {{ target.label }}{% if target.band is not none %} ({{ verdict_col_band }} {{ target.band }}){% endif %}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+    {% endif %}
+
+    {% if top_change_rows %}
+    <h2>{{ verdict_top_changes_title }}</h2>
+    <ul class="verdict-changes">
+      {% for change in top_change_rows %}
+      <li>
+        <span class="verdict-arrow">{{ change.arrow }}</span>
+        {{ change.label }} <strong>{{ change.delta }}</strong> · {{ change.outside }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% for warning in verdict.warnings %}
+    <p class="verdict-warning">{{ warning }}</p>
+    {% endfor %}
+
+    <h2>{{ verdict_masks_title }}</h2>
+    {% if mask_rows %}
+    <div class="verdict-masks">
+      {% for pair in mask_rows %}
+      <figure>
+        <img src="/media/{{ pair.before_capture_id }}/{{ pair.before_file }}"
+             alt="{{ verdict_mask_before_alt }} {{ pair.label }}" loading="lazy">
+        <figcaption>{{ verdict_before }}</figcaption>
+      </figure>
+      <figure>
+        <img src="/media/{{ pair.after_capture_id }}/{{ pair.after_file }}"
+             alt="{{ verdict_mask_after_alt }} {{ pair.label }}" loading="lazy">
+        <figcaption>{{ verdict_after }}</figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    {% elif verdict.label != "REAL" %}
+    <p>{{ verdict_masks_real_only }}</p>
+    {% else %}
+    <p>{{ verdict_no_masks }}</p>
+    {% endif %}
+
+    <p class="verdict-checkin">
+      <a href="/people/{{ person.id }}/capture" role="button">{{ verdict_take_checkin }}</a>
+    </p>
+    <p class="verdict-disclaimer"><small>{{ disclaimer }}</small></p>
+  </article>
+</div>
+{% endblock %}

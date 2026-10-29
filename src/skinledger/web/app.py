@@ -10,12 +10,14 @@ from fastapi.staticfiles import StaticFiles
 from skinledger.db import init_db
 from skinledger.logs import configure_logging
 from skinledger.pipeline import resume_pending
+from skinledger.web.home import home_context
 from skinledger.web.routes.captures import router as captures_router
 from skinledger.web.routes.client_log import router as client_log_router
 from skinledger.web.routes.persons import router as persons_router
 from skinledger.web.routes.products import router as products_router
 from skinledger.web.routes.timeline import router as timeline_router
 from skinledger.web.routes.try_ import router as try_router
+from skinledger.web.routes.verdicts import router as verdicts_router
 from skinledger.web.templating import WEB_DIR, templates
 
 configure_logging()
@@ -39,6 +41,7 @@ app.include_router(persons_router)
 app.include_router(products_router)
 app.include_router(timeline_router)
 app.include_router(try_router)
+app.include_router(verdicts_router)
 
 
 @app.get("/healthz")
@@ -49,7 +52,7 @@ async def healthz() -> dict[str, bool]:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "index.html")
+    return templates.TemplateResponse(request, "index.html", home_context(request))
 
 
 @app.get("/offline", response_class=HTMLResponse)

@@ -160,3 +160,156 @@ main.container {
 .product-error {
   color: #8a1c1c;
 }
+
+/* -- P11 verdict screen and home cards ------------------------------------- */
+
+.verdict-card {
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: 1rem;
+  border-left: 6px solid #5f6368;
+}
+
+.verdict-header h1 {
+  margin-bottom: 0.25rem;
+}
+
+.verdict-outcome {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.verdict-action {
+  font-size: 1.05rem;
+}
+
+.verdict-keep {
+  border-left-color: #1f6f5c;
+  background: #eef7f2;
+}
+
+.verdict-no_change {
+  border-left-color: #b26a00;
+  background: #fff6e5;
+}
+
+.verdict-worse {
+  border-left-color: #b3261e;
+  background: #fdeeee;
+}
+
+.verdict-too_early,
+.verdict-no_band,
+.verdict-need_checkin {
+  border-left-color: #5f6368;
+  background: #f1f3f4;
+}
+
+.verdict-banner {
+  border-left: 4px solid #b26a00;
+  background: #fff6e5;
+  padding: 0.75rem 1rem;
+  margin-inline: auto;
+  max-width: 46rem;
+}
+
+.verdict-table-wrap {
+  overflow-x: auto;
+}
+
+.verdict-table-wrap table {
+  font-size: 0.9rem;
+}
+
+.verdict-unstable {
+  font-size: 0.9rem;
+}
+
+.verdict-warning {
+  color: #7a4b00;
+}
+
+.verdict-changes {
+  padding-left: 1.1rem;
+}
+
+.verdict-arrow {
+  display: inline-block;
+  min-width: 1.1em;
+  font-weight: 700;
+}
+
+.verdict-masks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.verdict-masks figure {
+  margin: 0;
+  padding: 0.5rem;
+  background: #f1f3f4;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.verdict-masks img {
+  max-width: 100%;
+  height: auto;
+  background: #e8eaed;
+}
+
+.verdict-masks figcaption {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.verdict-checkin {
+  margin-top: 1.25rem;
+}
+
+.verdict-disclaimer {
+  margin-top: 0.75rem;
+  opacity: 0.85;
+}
+
+.home-product-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .home-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.home-product-card {
+  margin: 0;
+  padding: 0.9rem;
+  border-left: 4px solid #5f6368;
+}
+
+.home-product-card.home-verdict-keep {
+  border-left-color: #1f6f5c;
+}
+
+.home-product-card.home-verdict-no_change {
+  border-left-color: #b26a00;
+}
+
+.home-product-card.home-verdict-worse {
+  border-left-color: #b3261e;
+}
+
+.home-product-card h3 {
+  margin-bottom: 0.35rem;
+}
+
+.home-product-outcome {
+  margin: 0;
+  font-weight: 700;
+}

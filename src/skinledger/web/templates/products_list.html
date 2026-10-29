@@ -31,6 +31,7 @@
           </td>
           <td><small>day 14: {{ product.checkin_14 }}<br>day 28: {{ product.checkin_28 }}</small></td>
           <td>
+            <a href="/products/{{ product.id }}/verdict">Verdict</a>
             {% if product.active %}
             <form method="post" action="/people/{{ person.id }}/products/{{ product.id }}/end"
                   hx-post="/people/{{ person.id }}/products/{{ product.id }}/end"
