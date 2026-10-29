@@ -313,3 +313,64 @@ main.container {
   margin: 0;
   font-weight: 700;
 }
+
+/* -- P12 routine and shopping list ----------------------------------------- */
+
+.routine-card {
+  margin: 0 0 1rem;
+  padding: 0.9rem;
+}
+
+.routine-table-wrap {
+  overflow-x: auto;
+}
+
+.routine-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .routine-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.routine-week th,
+.routine-week td {
+  font-size: 0.85rem;
+}
+
+.routine-note {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.routine-data {
+  opacity: 0.85;
+}
+
+.routine-keep {
+  color: #1f6f5c;
+}
+
+.routine-shopping {
+  list-style: none;
+  padding-left: 0;
+}
+
+.routine-shopping li {
+  margin-block: 0.3rem;
+}
+
+.routine-acne-disclaimer {
+  border-left: 4px solid #b26a00;
+  background: #fff6e5;
+  padding: 0.75rem 1rem;
+}
+
+.routine-footer {
+  margin-top: 1rem;
+  opacity: 0.85;
+}

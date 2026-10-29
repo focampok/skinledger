@@ -11,6 +11,8 @@
 
   {% if verdict.label == "SIMULATED" %}
   <p class="verdict-banner" role="status">{{ verdict_simulated_banner }}</p>
+  {% elif verdict.label == "SAMPLE" %}
+  <p class="verdict-banner" role="status">{{ verdict_sample_banner }}</p>
   {% endif %}
 
   <article class="verdict-card verdict-{{ verdict.outcome }}">

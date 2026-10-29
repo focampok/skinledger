@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — {{ routine_title }}{% endblock %}
+
+{% block head %}
+  <script src="/static/routine.js" defer></script>
+{% endblock %}
+
+{% block content %}
+<div id="routine-page" data-person-id="{{ person.id }}">
+  <h1>{{ routine_title }} for {{ person.display_name }}</h1>
+  <p>
+    <a href="/people/{{ person.id }}/timeline">Timeline</a> ·
+    <a href="/people/{{ person.id }}/products">Products</a> ·
+    <a href="/people/{{ person.id }}/capture">{{ routine_take_capture }}</a>
+  </p>
+
+  {% if routine.capture_id is none %}
+  <p>{{ routine_no_capture }} <a href="/people/{{ person.id }}/capture">{{ routine_take_capture }}</a></p>
+  {% else %}
+  <p class="routine-data"><small>{{ routine_data_prefix }}: {{ routine.data_label }}</small></p>
+
+  {% if keep_using %}
+  <p class="routine-keep"><strong>{{ routine_keep_using }}:</strong> {{ keep_using|join(", ") }}</p>
+  {% endif %}
+
+  <section class="routine-card">
+    <h2>{{ routine_lowest_title }}</h2>
+    {% if routine.lowest %}
+    <div class="routine-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ routine_col_aspect }}</th>
+            <th>{{ routine_col_score }}</th>
+            <th>{{ routine_col_band }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in routine.lowest %}
+          <tr data-aspect="{{ item.aspect }}">
+            <td>{{ item.label }}</td>
+            <td>{{ '%.1f'|format(item.score) }}</td>
+            <td>{% if item.band is not none %}{{ '%.1f'|format(item.band) }}{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {% for note in routine.notes %}
+    <p class="routine-note">{{ note }}</p>
+    {% endfor %}
+  </section>
+
+  <section class="routine-columns">
+    <article class="routine-card">
+      <h2>{{ routine_am_title }}</h2>
+      <ul>
+        {% for item in routine.am %}
+        <li>{{ item.name }}
+          {% if item.aspect_label %}<small>{{ item.aspect_label }}</small>{% else %}<small>{{ routine_always }}</small>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+    <article class="routine-card">
+      <h2>{{ routine_pm_title }}</h2>
+      <ul>
+        {% for item in routine.pm %}
+        <li>{{ item.name }}
+          {% if item.aspect_label %}<small>{{ item.aspect_label }}</small>{% else %}<small>{{ routine_always }}</small>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+  </section>
+
+  <section class="routine-card">
+    <h2>{{ routine_week_title }}</h2>
+    <div class="routine-table-wrap">
+      <table class="routine-week">
+        <thead>
+          <tr>
+            <th></th>
+            <th>{{ routine_day_am }}</th>
+            <th>{{ routine_day_pm }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for day in routine.week %}
+          <tr>
+            <th>{{ day.day }}</th>
+            <td>{{ day.am|join(" · ") }}</td>
+            <td>{{ day.pm|join(" · ") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="routine-card">
+    <h2>{{ routine_shopping_title }}</h2>
+    <p><small>{{ routine_shopping_note }}</small></p>
+    {% if shopping_items %}
+    <ul class="routine-shopping" id="shopping-list">
+      {% for item in shopping_items %}
+      <li>
+        <label>
+          <input type="checkbox" checked value="{{ item.name }}">
+          {{ item.name }}
+        </label>
+      </li>
+      {% endfor %}
+    </ul>
+    <button type="button" id="copy-list" class="secondary"
+            data-copied="{{ routine_copied }}" data-empty="{{ routine_copy_empty }}">
+      {{ routine_copy_button }}
+    </button>
+    {% else %}
+    <p>{{ routine_no_shopping }}</p>
+    {% endif %}
+  </section>
+
+  {% if routine.acne_lowest %}
+  <p class="routine-acne-disclaimer">{{ disclaimer }}</p>
+  {% endif %}
+  {% endif %}
+
+  <p class="routine-footer"><small>{{ routine_footer }}</small></p>
+</div>
+{% endblock %}

@@ -15,6 +15,7 @@ from skinledger.web.routes.captures import router as captures_router
 from skinledger.web.routes.client_log import router as client_log_router
 from skinledger.web.routes.persons import router as persons_router
 from skinledger.web.routes.products import router as products_router
+from skinledger.web.routes.routine import router as routine_router
 from skinledger.web.routes.timeline import router as timeline_router
 from skinledger.web.routes.try_ import router as try_router
 from skinledger.web.routes.verdicts import router as verdicts_router
@@ -39,6 +40,7 @@ app.include_router(captures_router)
 app.include_router(client_log_router)
 app.include_router(persons_router)
 app.include_router(products_router)
+app.include_router(routine_router)
 app.include_router(timeline_router)
 app.include_router(try_router)
 app.include_router(verdicts_router)

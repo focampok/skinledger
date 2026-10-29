@@ -185,3 +185,106 @@ HOME_NEXT_CHECKIN = "Next check-in"
 HOME_BOTH_PASSED = "Both check-in windows have passed."
 
 HOME_NO_ACTIVE = "No active products yet."
+
+VERDICT_SAMPLE_BANNER = "Sample data for testing, not a real result."
+
+# -- P12 routine and shopping list -------------------------------------------
+
+ROUTINE_TITLE = "Your AM/PM routine"
+
+ROUTINE_LOWEST_TITLE = "Your 3 lowest aspects"
+
+ROUTINE_AM_TITLE = "Morning (AM)"
+
+ROUTINE_PM_TITLE = "Evening (PM)"
+
+ROUTINE_WEEK_TITLE = "Your week"
+
+ROUTINE_SHOPPING_TITLE = "Shopping list"
+
+ROUTINE_COPY_BUTTON = "Copy list"
+
+ROUTINE_COPIED = "Copied"
+
+ROUTINE_COPY_EMPTY = "Select at least one item."
+
+ROUTINE_FOOTER = "General cosmetic heuristics, not personal medical advice."
+
+ROUTINE_ONE_CAPTURE = (
+    "Based on one capture; take your 2 baseline captures for a steadier routine."
+)
+
+ROUTINE_FEW_STABLE = (
+    "Fewer than 3 stable aspects are available; the routine uses the ones that are."
+)
+
+ROUTINE_ALL_UNSTABLE = (
+    "All your aspects are too noisy in your setup to build a specific routine."
+)
+
+ROUTINE_UNSTABLE_EXCLUDED = "Unstable aspects are excluded from the lowest 3."
+
+ROUTINE_NO_CAPTURE = "Take a capture first."
+
+ROUTINE_TAKE_CAPTURE = "Take a capture"
+
+ROUTINE_DATA_PREFIX = "Data"
+
+ROUTINE_KEEP_USING = "Keep using"
+
+ROUTINE_NO_SHOPPING = (
+    "Nothing to add: your active products already cover these categories."
+)
+
+ROUTINE_SHOPPING_NOTE = "Generic categories only; no brands."
+
+ROUTINE_COL_ASPECT = "Aspect"
+
+ROUTINE_COL_SCORE = "Score"
+
+ROUTINE_COL_BAND = "Noise band"
+
+ROUTINE_DAY_AM = "AM"
+
+ROUTINE_DAY_PM = "PM"
+
+ROUTINE_ALWAYS = "Every day"
+
+ROUTINE_DAYS = (
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+)
+
+# Generic ingredient categories from plan §13; no brands and no doses.
+ROUTINE_ITEM_NIACINAMIDE = "Niacinamide serum"
+
+ROUTINE_ITEM_GEL = "Lightweight gel moisturizer"
+
+ROUTINE_ITEM_CERAMIDE = "Ceramide or hyaluronic acid moisturizer"
+
+ROUTINE_ITEM_SPF = "Broad-spectrum SPF 30+"
+
+ROUTINE_ITEM_VITAMIN_C = "Vitamin C serum"
+
+ROUTINE_ITEM_FRAGRANCE_FREE = "Fragrance-free gentle cleanser"
+
+ROUTINE_ITEM_SOOTHING = "Soothing moisturizer"
+
+ROUTINE_ITEM_AVOID_TONERS = "Avoid alcohol-heavy toners"
+
+ROUTINE_ITEM_BHA = "Salicylic acid (BHA) cleanser"
+
+ROUTINE_ITEM_AHA = "Gentle exfoliant (AHA/PHA)"
+
+ROUTINE_ITEM_RETINOL = "Retinol serum"
+
+ROUTINE_ITEM_CAFFEINE = "Caffeine eye cream"
+
+ROUTINE_ITEM_CLEANSER = "Gentle cleanser"
+
+ROUTINE_ITEM_MOISTURIZER = "Moisturizer"

@@ -272,6 +272,17 @@ def test_a_simulated_verdict_shows_the_demo_banner(env, web):
     assert copy.VERDICT_SIMULATED_BANNER in response.text
 
 
+def test_a_sample_verdict_shows_the_sample_banner(env, web):
+    _, product_id, _, _ = seed_product(env)
+    login(web)
+
+    response = web.get(f"/products/{product_id}/verdict")
+
+    assert response.status_code == 200
+    assert copy.VERDICT_SAMPLE_BANNER in response.text
+    assert copy.VERDICT_SIMULATED_BANNER not in response.text
+
+
 def test_a_product_without_targets_shows_the_pick_a_target_message(env, web):
     _, product_id, _, _ = seed_product(env, targets=())
     login(web)
