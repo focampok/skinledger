@@ -1,0 +1,52 @@
+<div id="product-panel">
+  {% if notice %}<p class="product-notice" role="status">{{ notice }}</p>{% endif %}
+  {% if error %}<p class="product-error" role="alert">{{ error }}</p>{% endif %}
+
+  {% if products %}
+  <div class="product-table-wrap">
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Started</th>
+          <th>Days</th>
+          <th>Targets</th>
+          <th>Check-ins</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr data-product-id="{{ product.id }}" data-active="{{ 'true' if product.active else 'false' }}">
+          <td>{{ product.name }} <small>{{ product.data_label }}</small></td>
+          <td>{{ product.category_label }}</td>
+          <td>
+            {{ product.started_on }}
+            {% if product.ended_on %}<br><small>ended {{ product.ended_on }}</small>{% endif %}
+          </td>
+          <td>{{ product.days_elapsed }} day{{ '' if product.days_elapsed == 1 else 's' }}</td>
+          <td>
+            {% for target in product.targets %}{{ target.label }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}
+          </td>
+          <td><small>day 14: {{ product.checkin_14 }}<br>day 28: {{ product.checkin_28 }}</small></td>
+          <td>
+            {% if product.active %}
+            <form method="post" action="/people/{{ person.id }}/products/{{ product.id }}/end"
+                  hx-post="/people/{{ person.id }}/products/{{ product.id }}/end"
+                  hx-target="#product-panel" hx-swap="outerHTML">
+              <button type="submit" class="secondary">End</button>
+            </form>
+            {% else %}
+            <small>Ended</small>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>No products yet. Add the one you're testing.</p>
+  {% endif %}
+</div>

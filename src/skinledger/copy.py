@@ -85,3 +85,25 @@ TIMELINE_UNSTABLE_NOTE = (
     "This score moved more than 10 points between your two day-1 captures, so "
     "SkinLedger won't use it for verdicts."
 )
+
+PRODUCT_NAME_PLACEHOLDER = "e.g. Niacinamide serum"
+
+PRODUCT_NAME_NOTE = "Use a generic name; no brand needed"
+
+PRODUCT_UNSTABLE_HINT = (
+    "Unstable for your setup — it won't count in this product's verdict."
+)
+
+PRODUCT_NAME_REQUIRED = "Please enter a product name."
+
+PRODUCT_NAME_TOO_LONG = "Please use 80 characters or fewer."
+
+PRODUCT_CATEGORY_INVALID = "Choose one of the listed categories."
+
+PRODUCT_DATE_INVALID = "Use dates like 2026-10-29."
+
+PRODUCT_DATE_ORDER = "End date can't be before the start date."
+
+PRODUCT_TOO_MANY_TARGETS = "Choose up to 4 target aspects."
+
+PRODUCT_UNKNOWN_TARGET = "Unknown target aspect. Choose from the 15 listed aspects."

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — Products{% endblock %}
+
+{% block content %}
+<div id="products-page" data-person-id="{{ person.id }}">
+  <h1>Products for {{ person.display_name }}</h1>
+  <p>
+    <a href="/people/{{ person.id }}/timeline">Timeline</a> ·
+    <a href="/people/{{ person.id }}/baseline">Day-1 baseline</a> ·
+    <a href="/people/{{ person.id }}/capture">New capture</a>
+  </p>
+
+  <article class="product-form">
+    <h2>Add a product</h2>
+    <form method="post" action="/people/{{ person.id }}/products"
+          hx-post="/people/{{ person.id }}/products"
+          hx-target="#product-panel" hx-swap="outerHTML">
+      <label for="product-name">Product name</label>
+      <input id="product-name" name="name" type="text" maxlength="80" required
+             placeholder="{{ name_placeholder }}" value="{{ form.name }}">
+      <small>{{ name_note }}</small>
+
+      <label for="product-category">Category</label>
+      <select id="product-category" name="category">
+        {% for category in categories %}
+        <option value="{{ category.key }}"{% if form.category == category.key %} selected{% endif %}>
+          {{ category.label }}
+        </option>
+        {% endfor %}
+      </select>
+
+      <div class="product-dates">
+        <label>Start date
+          <input name="started_on" type="date" value="{{ form.started_on }}" required>
+        </label>
+        <label>End date (optional)
+          <input name="ended_on" type="date" value="{{ form.ended_on }}">
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>Target aspects (up to 4)</legend>
+        {% for aspect in aspects %}
+        <label class="product-aspect">
+          <input type="checkbox" name="target_aspects" value="{{ aspect.key }}"
+                 {% if aspect.key in form.targets %}checked{% endif %}>
+          <span>{{ aspect.label }}</span>
+          {% if aspect.unstable %}
+          <small class="product-unstable">{{ unstable_hint }}</small>
+          {% endif %}
+        </label>
+        {% endfor %}
+      </fieldset>
+
+      <button type="submit">Add product</button>
+    </form>
+  </article>
+
+  {% include "products_list.html" %}
+</div>
+{% endblock %}
