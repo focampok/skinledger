@@ -9,7 +9,9 @@
     <a href="/people/{{ person.id }}/timeline">Timeline</a>
   </p>
 
-  {% if verdict.label == "SIMULATED" %}
+  {% if demo_banner %}
+  <p class="verdict-banner" role="status">{{ demo_banner }}</p>
+  {% elif verdict.label == "SIMULATED" %}
   <p class="verdict-banner" role="status">{{ verdict_simulated_banner }}</p>
   {% elif verdict.label == "SAMPLE" %}
   <p class="verdict-banner" role="status">{{ verdict_sample_banner }}</p>
@@ -100,9 +102,11 @@
     <p>{{ verdict_no_masks }}</p>
     {% endif %}
 
+    {% if can_write %}
     <p class="verdict-checkin">
       <a href="/people/{{ person.id }}/capture" role="button">{{ verdict_take_checkin }}</a>
     </p>
+    {% endif %}
     <p class="verdict-disclaimer"><small>{{ disclaimer }}</small></p>
   </article>
 </div>

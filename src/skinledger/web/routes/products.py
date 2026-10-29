@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from skinledger import copy, guards, logs, noise, usage
 from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
 from skinledger.db import connect, db_path
+from skinledger.web import banners
 from skinledger.web.forms import read_urlencoded_form_all
 from skinledger.web.templating import templates
 
@@ -32,12 +33,24 @@ MAX_NAME = 80
 DATA_LABEL = "REAL"
 
 
-def _authorized_person(
+def _authorized_person_read(
     conn: sqlite3.Connection, request: Request, person_id: int
 ) -> sqlite3.Row:
-    """The same guard as /people/{id}/timeline: owner or admin, 404 otherwise."""
+    """Owner/admin, or anyone for the read-only public demo; 404 otherwise."""
+    person = guards.authorize_person_read(conn, request, person_id)
+    if person is None:
+        raise HTTPException(status_code=404, detail="Person not found.")
+    return person
+
+
+def _authorized_person_write(
+    conn: sqlite3.Connection, request: Request, person_id: int
+) -> sqlite3.Row:
+    """Owner or admin; the public demo is read-only (403)."""
     person = guards.authorize_person(conn, request, person_id)
     if person is None:
+        if guards.demo_person(conn, person_id) is not None:
+            raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
         raise HTTPException(status_code=404, detail="Person not found.")
     if person["is_demo_public"] and not guards.is_admin_request(request):
         raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
@@ -188,6 +201,8 @@ def _page_context(
     conn: sqlite3.Connection,
     person: sqlite3.Row,
     *,
+    can_write: bool,
+    demo_banner: str | None = None,
     notice: str | None = None,
     error: str | None = None,
     values: dict[str, object] | None = None,
@@ -195,6 +210,8 @@ def _page_context(
     today = usage.guatemala_today()
     return {
         "person": dict(person),
+        "can_write": can_write,
+        "demo_banner": demo_banner,
         "products": _product_rows(conn, int(person["id"]), today),
         "categories": [
             {"key": category, "label": category.title()} for category in CATEGORIES
@@ -218,7 +235,10 @@ async def products_page(
 ) -> HTMLResponse:
     conn = connect(db_path())
     try:
-        person = _authorized_person(conn, request, person_id)
+        person = _authorized_person_read(conn, request, person_id)
+        admin = guards.is_admin_request(request)
+        can_write = not person["is_demo_public"] or admin
+        demo_banner = banners.for_person(conn, person)
         notice = None
         if created is not None:
             row = conn.execute(
@@ -234,7 +254,13 @@ async def products_page(
             ).fetchone()
             if row is not None and row["ended_on"]:
                 notice = f"Product ended on {row['ended_on']}."
-        context = _page_context(conn, person, notice=notice)
+        context = _page_context(
+            conn,
+            person,
+            can_write=can_write,
+            demo_banner=demo_banner,
+            notice=notice,
+        )
     finally:
         conn.close()
     return templates.TemplateResponse(request, "products.html", context)
@@ -244,10 +270,17 @@ async def products_page(
 async def create_product(request: Request, person_id: int):
     conn = connect(db_path())
     try:
-        person = _authorized_person(conn, request, person_id)
+        person = _authorized_person_write(conn, request, person_id)
         values, error = _read_form(await read_urlencoded_form_all(request))
         if error is not None:
-            context = _page_context(conn, person, error=error, values=values)
+            context = _page_context(
+                conn,
+                person,
+                can_write=True,
+                demo_banner=banners.for_person(conn, person),
+                error=error,
+                values=values,
+            )
             if _is_htmx(request):
                 return templates.TemplateResponse(
                     request, "products_list.html", context
@@ -275,7 +308,11 @@ async def create_product(request: Request, person_id: int):
 
         if _is_htmx(request):
             context = _page_context(
-                conn, person, notice=_checkin_notice(str(values["started_on"]))
+                conn,
+                person,
+                can_write=True,
+                demo_banner=banners.for_person(conn, person),
+                notice=_checkin_notice(str(values["started_on"])),
             )
             return templates.TemplateResponse(
                 request, "products_list.html", context
@@ -291,7 +328,7 @@ async def create_product(request: Request, person_id: int):
 async def end_product(request: Request, person_id: int, product_id: int):
     conn = connect(db_path())
     try:
-        person = _authorized_person(conn, request, person_id)
+        person = _authorized_person_write(conn, request, person_id)
         row = conn.execute(
             "SELECT id, ended_on FROM products WHERE id = ? AND person_id = ?",
             (product_id, person_id),
@@ -312,7 +349,13 @@ async def end_product(request: Request, person_id: int, product_id: int):
             notice = f"Product ended on {today}."
 
         if _is_htmx(request):
-            context = _page_context(conn, person, notice=notice)
+            context = _page_context(
+                conn,
+                person,
+                can_write=True,
+                demo_banner=banners.for_person(conn, person),
+                notice=notice,
+            )
             return templates.TemplateResponse(
                 request, "products_list.html", context
             )

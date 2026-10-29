@@ -11,6 +11,9 @@
 <div id="timeline-page" data-person-id="{{ person.id }}" data-has-band="{{ 'true' if has_band else 'false' }}">
   <h1>{{ timeline_title }}</h1>
   <p>{{ person.display_name }}</p>
+  {% if demo_banner %}
+  <p class="demo-banner" role="status">{{ demo_banner }}</p>
+  {% endif %}
 
   {% if has_band %}
   <p class="timeline-legend">{{ band_legend }}</p>
@@ -60,8 +63,8 @@
   <p class="timeline-links">
     <a href="/people/{{ person.id }}/baseline">Day-1 baseline</a> ·
     <a href="/people/{{ person.id }}/products">Products</a> ·
-    <a href="/people/{{ person.id }}/routine">Routine</a> ·
-    <a href="/people/{{ person.id }}/capture">New capture</a>
+    <a href="/people/{{ person.id }}/routine">Routine</a>{% if can_write %} ·
+    <a href="/people/{{ person.id }}/capture">New capture</a>{% endif %}
   </p>
 </div>
 {% endblock %}

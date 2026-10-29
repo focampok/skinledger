@@ -42,13 +42,13 @@ DELETE_CONFIRM_MISMATCH = "Type the profile name exactly to confirm."
 DEMO_READ_ONLY = "This sample profile is read-only."
 
 DELETED_MESSAGE = (
-    "Deleted from SkinLedger. Your photo was never stored here. To ask Perfect Corp to "
-    "delete the uploaded photo sooner, contact their API support."
+    "Deleted from SkinLedger. Your photo was never stored here. To ask for the uploaded "
+    "photo to be deleted sooner, contact YouCam API support (Perfect Corp)."
 )
 
 PRIVACY_NOTE = (
-    "Your photo is sent to our skin-analysis provider for analysis and is never stored "
-    "by SkinLedger. It may be kept for up to 30 days. See Privacy."
+    "Your photo is sent to the YouCam API (Perfect Corp) for analysis and is never stored "
+    "by SkinLedger. YouCam may keep it for up to 30 days. See Privacy."
 )
 
 UPLOAD_TIP = (
@@ -188,6 +188,10 @@ HOME_NO_ACTIVE = "No active products yet."
 
 VERDICT_SAMPLE_BANNER = "Sample data for testing, not a real result."
 
+SAMPLE_PROFILE_BANNER = "Sample profile: all data is SIMULATED."
+
+TRY_SAMPLE_LINK = "Open the sample profile (all data is SIMULATED)"
+
 # -- P12 routine and shopping list -------------------------------------------
 
 ROUTINE_TITLE = "Your AM/PM routine"
@@ -300,7 +304,8 @@ PRIVACY_TEXT = (
     "When you run an analysis, your photo is held in memory only long enough to send it "
     "to the YouCam API (Perfect Corp) for skin analysis, then discarded. We keep your "
     "display name, consent, the 15 skin scores plus skin type and the analysis masks, "
-    "linked to a cookie in your browser; nobody else can see them. YouCam may keep the "
+    "linked to a cookie in your browser; only you and the person running this demo can "
+    "see them, except the public sample profile. YouCam may keep the "
     "uploaded photo for up to 30 days under its own terms. Your photo is never sent to "
     "any other AI or service and is never used for training. Only analyze your own face. "
     "Delete your profile at any time from the People page; that removes everything "

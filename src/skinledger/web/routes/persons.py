@@ -12,6 +12,7 @@ from skinledger import copy, guards, logs, noise, pipeline, usage
 from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
 from skinledger.config import get_settings
 from skinledger.db import connect, db_path
+from skinledger.web import banners
 from skinledger.web.forms import read_urlencoded_form
 from skinledger.web.templating import templates
 
@@ -157,6 +158,8 @@ async def accept_consent(request: Request, person_id: int):
     try:
         person = guards.authorize_person(conn, request, person_id)
         if person is None:
+            if guards.demo_person(conn, person_id) is not None:
+                raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
             raise HTTPException(status_code=404, detail="Person not found.")
         admin = guards.is_admin_request(request)
         if person["is_demo_public"] and not admin:
@@ -199,12 +202,11 @@ async def baseline_page(request: Request, person_id: int) -> HTMLResponse:
     """Show the day-1 noise band: both captures, the band per aspect and how stable it is."""
     conn = connect(db_path())
     try:
-        person = guards.authorize_person(conn, request, person_id)
+        person = guards.authorize_person_read(conn, request, person_id)
         if person is None:
             raise HTTPException(status_code=404, detail="Person not found.")
-        admin = guards.is_admin_request(request)
-        if person["is_demo_public"] and not admin:
-            raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
+        demo_banner = banners.for_person(conn, person)
+        can_write = not person["is_demo_public"] or guards.is_admin_request(request)
         report = noise.read_band_report(person_id, conn=conn)
     finally:
         conn.close()
@@ -221,6 +223,8 @@ async def baseline_page(request: Request, person_id: int) -> HTMLResponse:
             "baseline_intro": copy.BASELINE_INTRO,
             "unstable_hint": copy.BASELINE_UNSTABLE_HINT,
             "no_band_yet": copy.NO_BAND_YET,
+            "demo_banner": demo_banner,
+            "can_write": can_write,
         },
     )
 
@@ -280,6 +284,8 @@ async def delete_person(request: Request, person_id: int) -> HTMLResponse:
     try:
         person = guards.authorize_person(conn, request, person_id)
         if person is None:
+            if guards.demo_person(conn, person_id) is not None:
+                raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
             raise HTTPException(status_code=404, detail="Person not found.")
         admin = guards.is_admin_request(request)
         if person["is_demo_public"] and not admin:

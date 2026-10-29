@@ -12,6 +12,7 @@ from skinledger import copy, guards, imaging, logs, noise, pipeline, usage
 from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
 from skinledger.config import Settings, get_settings
 from skinledger.db import connect, db_path
+from skinledger.web import banners
 from skinledger.web.templating import templates
 from skinledger.youcam import (
     YouCamConfigError,
@@ -119,6 +120,15 @@ async def create_capture(
     try:
         person = guards.authorize_person(conn, request, person_id)
         if person is None:
+            if guards.demo_person(conn, person_id) is not None:
+                _reject_guard(
+                    guard="demo_read_only",
+                    status_code=403,
+                    detail=copy.DEMO_READ_ONLY,
+                    settings=settings,
+                    person_id=person_id,
+                    source=source,
+                )
             _reject_guard(
                 guard="person_access",
                 status_code=404,
@@ -308,6 +318,7 @@ async def capture_page(request: Request, person_id: int) -> HTMLResponse:
         if not guards.has_current_consent(conn, person_id):
             return RedirectResponse(f"/people/{person_id}/consent", status_code=303)
 
+        demo_banner = banners.for_person(conn, person)
         successes = conn.execute(
             "SELECT COUNT(*) FROM captures WHERE person_id = ? AND status = 'success' "
             "AND data_label IN ('REAL', 'SAMPLE')",
@@ -339,6 +350,7 @@ async def capture_page(request: Request, person_id: int) -> HTMLResponse:
             "max_analyses": settings.max_real_analyses_per_person,
             "baseline_step": baseline_step,
             "camera_language": settings.camera_kit_language,
+            "demo_banner": demo_banner,
         },
     )
 

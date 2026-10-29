@@ -7,10 +7,11 @@ import sqlite3
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
-from skinledger import copy, guards, logs, noise, shopping, verdict_store
+from skinledger import guards, logs, noise, shopping, verdict_store
 from skinledger import routine as routine_engine
 from skinledger.db import connect, db_path
 from skinledger.verdict import KEEP
+from skinledger.web import banners
 from skinledger.web.templating import templates
 
 router = APIRouter()
@@ -19,12 +20,10 @@ router = APIRouter()
 def _authorized_person(
     conn: sqlite3.Connection, request: Request, person_id: int
 ) -> sqlite3.Row:
-    """The same guard as /people/{id}/timeline: owner or admin, 404 otherwise."""
-    person = guards.authorize_person(conn, request, person_id)
+    """Owner/admin, or anyone for the read-only public demo; 404 otherwise."""
+    person = guards.authorize_person_read(conn, request, person_id)
     if person is None:
         raise HTTPException(status_code=404, detail="Person not found.")
-    if person["is_demo_public"] and not guards.is_admin_request(request):
-        raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
     return person
 
 
@@ -87,6 +86,8 @@ async def routine_page(request: Request, person_id: int) -> HTMLResponse:
     try:
         person = _authorized_person(conn, request, person_id)
         person_data = dict(person)
+        demo_banner = banners.for_person(conn, person)
+        can_write = not person["is_demo_public"] or guards.is_admin_request(request)
         capture = _latest_capture(conn, person_id)
         bands = noise.get_bands(person_id, conn=conn)
         active_categories = _active_categories(conn, person_id)
@@ -109,5 +110,7 @@ async def routine_page(request: Request, person_id: int) -> HTMLResponse:
             "routine": plan,
             "shopping_items": shopping_items,
             "keep_using": keep_using,
+            "demo_banner": demo_banner,
+            "can_write": can_write,
         },
     )

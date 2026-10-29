@@ -6,10 +6,15 @@
 <div id="baseline-page" data-person-id="{{ person.id }}">
   <h1>Day-1 baseline for {{ person.display_name }}</h1>
   <p><a href="/people/{{ person.id }}/timeline">See your timeline</a></p>
+  {% if demo_banner %}
+  <p class="demo-banner" role="status">{{ demo_banner }}</p>
+  {% endif %}
 
   {% if report is none %}
   <p>{{ no_band_yet }}</p>
+  {% if can_write %}
   <p><a href="/people/{{ person.id }}/capture">Take your 2 baseline captures</a></p>
+  {% endif %}
   {% else %}
   <p>{{ baseline_intro }}</p>
   <p><small>Data: {{ report.data_label }}</small></p>

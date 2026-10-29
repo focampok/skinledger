@@ -48,6 +48,11 @@ DEFAULT_BANNED_BRANDS = (
 
 POWERED_BY = "Powered by YouCam API"
 YOUCAM = "YouCam"
+PERFECT_CORP = "Perfect Corp"
+# These exact strings are allowed anywhere: the attribution, the capture-page
+# privacy note and the delete-page message. The consent and privacy pages are
+# allowed file-wide.
+ALLOWED_VENDOR_TEXT = (POWERED_BY, copy.PRIVACY_NOTE, copy.DELETED_MESSAGE)
 YOUCAM_ALLOWED_FILES = frozenset({"consent.html", "privacy.html"})
 
 
@@ -81,22 +86,25 @@ def scan_text(
     brands: Iterable[str] = (),
     allow_youcam: bool = False,
 ) -> list[Finding]:
-    """Find banned stems, brands and disallowed YouCam mentions with line numbers."""
+    """Find banned stems, brands and disallowed YouCam/Perfect Corp mentions."""
     brand_list = tuple(dict.fromkeys((*DEFAULT_BANNED_BRANDS, *brands)))
     brand_patterns = tuple((brand, _brand_pattern(brand)) for brand in brand_list)
     findings: list[Finding] = []
     for number, raw_line in enumerate(text.splitlines(), start=1):
         line = raw_line.replace(copy.DISCLAIMER, "")
+        for allowed in ALLOWED_VENDOR_TEXT:
+            line = line.replace(allowed, "")
         for stem, pattern in _BANNED_PATTERNS:
             if pattern.search(line):
                 findings.append(Finding(file, number, stem, raw_line))
         for brand, pattern in brand_patterns:
             if pattern.search(line):
                 findings.append(Finding(file, number, brand, raw_line))
-        if not allow_youcam and YOUCAM in line:
-            stripped = line.replace(POWERED_BY, "")
-            if YOUCAM in stripped:
+        if not allow_youcam:
+            if YOUCAM in line:
                 findings.append(Finding(file, number, YOUCAM, raw_line))
+            if PERFECT_CORP in line:
+                findings.append(Finding(file, number, PERFECT_CORP, raw_line))
     return findings
 
 

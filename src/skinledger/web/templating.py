@@ -42,6 +42,8 @@ templates.env.globals.update(
     home_next_checkin=copy.HOME_NEXT_CHECKIN,
     home_both_passed=copy.HOME_BOTH_PASSED,
     home_no_active=copy.HOME_NO_ACTIVE,
+    try_sample_link=copy.TRY_SAMPLE_LINK,
+    demo_read_only=copy.DEMO_READ_ONLY,
     routine_title=copy.ROUTINE_TITLE,
     routine_lowest_title=copy.ROUTINE_LOWEST_TITLE,
     routine_am_title=copy.ROUTINE_AM_TITLE,

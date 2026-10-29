@@ -9,10 +9,13 @@
 {% block content %}
 <div id="routine-page" data-person-id="{{ person.id }}">
   <h1>{{ routine_title }} for {{ person.display_name }}</h1>
+  {% if demo_banner %}
+  <p class="demo-banner" role="status">{{ demo_banner }}</p>
+  {% endif %}
   <p>
     <a href="/people/{{ person.id }}/timeline">Timeline</a> ·
-    <a href="/people/{{ person.id }}/products">Products</a> ·
-    <a href="/people/{{ person.id }}/capture">{{ routine_take_capture }}</a>
+    <a href="/people/{{ person.id }}/products">Products</a>{% if can_write %} ·
+    <a href="/people/{{ person.id }}/capture">{{ routine_take_capture }}</a>{% endif %}
   </p>
 
   {% if routine.capture_id is none %}

@@ -158,6 +158,28 @@ def authorize_person(
     return person
 
 
+def authorize_person_read(
+    conn: sqlite3.Connection, request: Request, person_id: int
+) -> sqlite3.Row | None:
+    """The person for a read page: owner, admin, or any visitor for the public demo."""
+    person = conn.execute("SELECT * FROM persons WHERE id = ?", (person_id,)).fetchone()
+    if person is None:
+        return None
+    if person["is_demo_public"]:
+        return person
+    return authorize_person(conn, request, person_id)
+
+
+def demo_person(
+    conn: sqlite3.Connection, person_id: int
+) -> sqlite3.Row | None:
+    """The person when it is the public demo, so write routes can answer 403."""
+    person = conn.execute("SELECT * FROM persons WHERE id = ?", (person_id,)).fetchone()
+    if person is not None and person["is_demo_public"]:
+        return person
+    return None
+
+
 def authorize_capture(
     conn: sqlite3.Connection, request: Request, capture_id: int
 ) -> sqlite3.Row | None:

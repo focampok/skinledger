@@ -8,7 +8,11 @@
   SkinLedger measures 15 skin aspects plus skin type from one selfie and tells you whether a
   product is really working, against your own measurement noise. {{ powered_by }}.
 </p>
+{% if demo_person_id %}
+<p><a href="/people/{{ demo_person_id }}/timeline">{{ try_sample_link }}</a> — no invite code needed.</p>
+{% else %}
 <p><a href="/people">Browse the sample profile</a> — no invite code needed.</p>
+{% endif %}
 
 {% if error %}
 <p role="alert">{{ error }}</p>

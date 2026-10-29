@@ -16,6 +16,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from skinledger import copy, guards, logs, noise
 from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
 from skinledger.db import connect, db_path
+from skinledger.web import banners
 from skinledger.web.templating import templates
 from skinledger.youcam import SKIN_TYPE_REGIONS
 
@@ -28,12 +29,10 @@ SKIN_TYPE_KEYS = tuple(f"skin_type_{region}" for region in SKIN_TYPE_REGIONS)
 def _authorized_person(
     conn: sqlite3.Connection, request: Request, person_id: int
 ) -> sqlite3.Row:
-    """The same guard as /people/{id}/baseline: owner or admin, 404 otherwise."""
-    person = guards.authorize_person(conn, request, person_id)
+    """Owner/admin, or anyone for the read-only public demo; 404 otherwise."""
+    person = guards.authorize_person_read(conn, request, person_id)
     if person is None:
         raise HTTPException(status_code=404, detail="Person not found.")
-    if person["is_demo_public"] and not guards.is_admin_request(request):
-        raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
     return person
 
 
@@ -216,6 +215,8 @@ async def timeline_page(request: Request, person_id: int) -> HTMLResponse:
     try:
         person = _authorized_person(conn, request, person_id)
         person_data = dict(person)
+        demo_banner = banners.for_person(conn, person)
+        can_write = not person["is_demo_public"] or guards.is_admin_request(request)
         series = build_series(conn, person_id)
     finally:
         conn.close()
@@ -236,6 +237,8 @@ async def timeline_page(request: Request, person_id: int) -> HTMLResponse:
             "unstable_chip": copy.TIMELINE_UNSTABLE_CHIP,
             "unstable_note": copy.TIMELINE_UNSTABLE_NOTE,
             "no_band_yet": copy.NO_BAND_YET,
+            "demo_banner": demo_banner,
+            "can_write": can_write,
         },
     )
 

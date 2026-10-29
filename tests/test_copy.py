@@ -191,6 +191,35 @@ def test_youcam_is_only_allowed_in_the_listed_contexts():
     )
 
 
+def test_perfect_corp_follows_the_same_allowed_contexts():
+    assert copy_audit.scan_text("<p>Perfect Corp</p>", file="x.html")
+    assert (
+        copy_audit.scan_text(
+            f"<p>{copy.PRIVACY_NOTE}</p>", file="capture.html"
+        )
+        == []
+    )
+    assert (
+        copy_audit.scan_text(
+            f"<p>{copy.DELETED_MESSAGE}</p>", file="person_deleted.html"
+        )
+        == []
+    )
+    assert (
+        copy_audit.scan_text(
+            "<p>Perfect Corp</p>", file="privacy.html", allow_youcam=True
+        )
+        == []
+    )
+
+
+def test_privacy_text_names_the_demo_exception():
+    assert (
+        "only you and the person running this demo can see them, "
+        "except the public sample profile" in copy.PRIVACY_TEXT
+    )
+
+
 def test_the_brand_list_is_configurable():
     findings = copy_audit.scan_text("Try Acme Skin.", file="x.html", brands=["acme skin"])
 

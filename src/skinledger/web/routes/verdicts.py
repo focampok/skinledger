@@ -13,6 +13,7 @@ from skinledger import copy, guards, logs, verdict_store
 from skinledger.aspects import ASPECT_LABELS
 from skinledger.db import connect, db_path
 from skinledger.verdict import TargetResult, Verdict
+from skinledger.web import banners
 from skinledger.web.templating import templates
 
 router = APIRouter()
@@ -21,17 +22,15 @@ router = APIRouter()
 def _authorized_product(
     conn: sqlite3.Connection, request: Request, product_id: int
 ) -> tuple[sqlite3.Row, sqlite3.Row]:
-    """The same owner/admin rules as the timeline; the demo stays closed until P14."""
+    """Owner/admin, or anyone for the read-only public demo; 404 otherwise."""
     product = conn.execute(
         "SELECT * FROM products WHERE id = ?", (product_id,)
     ).fetchone()
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found.")
-    person = guards.authorize_person(conn, request, int(product["person_id"]))
+    person = guards.authorize_person_read(conn, request, int(product["person_id"]))
     if person is None:
         raise HTTPException(status_code=404, detail="Person not found.")
-    if person["is_demo_public"] and not guards.is_admin_request(request):
-        raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
     return product, person
 
 
@@ -124,6 +123,8 @@ async def verdict_page(request: Request, product_id: int) -> HTMLResponse:
         product, person = _authorized_product(conn, request, product_id)
         product_data = dict(product)
         person_data = dict(person)
+        demo_banner = banners.for_person(conn, person)
+        can_write = not person["is_demo_public"] or guards.is_admin_request(request)
         computed = verdict_store.compute_for_product(conn, product_id)
         if computed is None:
             raise HTTPException(status_code=404, detail="Product not found.")
@@ -150,6 +151,8 @@ async def verdict_page(request: Request, product_id: int) -> HTMLResponse:
             "product": product_data,
             "person": person_data,
             "verdict": computed,
+            "demo_banner": demo_banner,
+            "can_write": can_write,
             "outcome_label": copy.verdict_outcome_label(computed.outcome),
             "window_label": window_label,
             "window_date": window_date,

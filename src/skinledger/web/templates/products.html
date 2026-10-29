@@ -5,12 +5,19 @@
 {% block content %}
 <div id="products-page" data-person-id="{{ person.id }}">
   <h1>Products for {{ person.display_name }}</h1>
+  {% if demo_banner %}
+  <p class="demo-banner" role="status">{{ demo_banner }}</p>
+  {% endif %}
   <p>
     <a href="/people/{{ person.id }}/timeline">Timeline</a> ·
-    <a href="/people/{{ person.id }}/baseline">Day-1 baseline</a> ·
-    <a href="/people/{{ person.id }}/capture">New capture</a>
+    <a href="/people/{{ person.id }}/baseline">Day-1 baseline</a>{% if can_write %} ·
+    <a href="/people/{{ person.id }}/capture">New capture</a>{% endif %}
   </p>
 
+  {% if not can_write %}
+  <p class="product-notice">{{ demo_read_only }}</p>
+  {% endif %}
+  {% if can_write %}
   <article class="product-form">
     <h2>Add a product</h2>
     <form method="post" action="/people/{{ person.id }}/products"
@@ -56,6 +63,7 @@
       <button type="submit">Add product</button>
     </form>
   </article>
+  {% endif %}
 
   {% include "products_list.html" %}
 </div>

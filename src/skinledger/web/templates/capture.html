@@ -72,6 +72,9 @@
   data-camera-language="{{ camera_language }}"
 >
   <h1>Capture for {{ person.display_name }}</h1>
+  {% if demo_banner %}
+  <p class="demo-banner" role="status">{{ demo_banner }}</p>
+  {% endif %}
 
   {% if analyses_left is not none %}
   <p id="analyses-left">{{ analyses_left }} of {{ max_analyses }} analyses left</p>

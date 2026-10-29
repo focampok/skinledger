@@ -10,7 +10,10 @@
   <li>
     <strong>{{ person.display_name }}</strong>
     {% if person.is_demo_public %}
-    <small>Sample profile · SIMULATED · read-only</small>
+    <small>
+      Sample profile · SIMULATED · read-only ·
+      <a href="/people/{{ person.id }}/timeline">View sample timeline</a>
+    </small>
     {% else %}
     <small>
       <a href="/people/{{ person.id }}/timeline">Timeline</a> ·
