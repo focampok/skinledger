@@ -5,7 +5,7 @@ Responsive web app + installable PWA for the YouCam API Skin AI hackathon (Devpo
 Mon 2 Nov 2026 10:45 GT). Tagline: "Is it working or not? Know before you rebuy."
 A person captures a guided selfie with the YouCam JS Camera Kit (recommended for tracking) or
 uploads a photo (quick try from a shared link), the server runs YouCam AI Skin Analysis (SD,
-16 aspects), stores raw_score per aspect, and after 14/28 days of using a skincare product
+15 numeric aspects plus skin type), stores raw_score per aspect, and after 14/28 days of using a skincare product
 SkinLedger says Keep / No measurable change / Worse — only if the change beats that person's own
 measurement noise band (2 captures on day 1).
 Source docs: docs/skinledger-plan.md (scope, privacy §10, verdict engine §12, routine rules §13),
@@ -24,7 +24,8 @@ https://skinledger.focampo.com. No Node build, no React, no LLM, no other AI ser
   headers → POST /s2s/v2.0/task/skin-analysis → GET /s2s/v2.0/task/skin-analysis/{task_id}.
 - SD actions only (never mix with hd_*): wrinkle, droopy_upper_eyelid, droopy_lower_eyelid, firmness,
   acne, moisture, eye_bag, dark_circle_v2, age_spot, radiance, redness, oiliness, pore, texture,
-  tear_trough, skin_type. 16 actions = 16 units. Errors do not consume units.
+  tear_trough, skin_type (16 actions = 15 numeric aspects plus skin type). 16 actions = 16 units.
+  Errors do not consume units.
 - Rate limit 250 requests / 300 s per IP and per token, ~5 QPS; 429 → back off and retry.
 - file_id and task_id valid 30 days; result download URLs valid 2 h (re-GET the task to get fresh ones).
 - [unverified] exact JSON shape of skin_type / all / skin_age with format=json, where the error
@@ -63,6 +64,7 @@ https://skinledger.focampo.com. No Node build, no React, no LLM, no other AI ser
    "Cosmetic skin insights, not a medical diagnosis. Scores are AI estimates and vary with lighting.
    See a dermatologist for persistent acne, changing moles, rashes or pain."
 11. Product UI text is English. Code comments in English.
+12. Bands come only from noise.py; unstable aspects (band > 10) are never used in verdicts.
 
 ## Way of working
 - Do only the step you were given. Before editing, list the files you will touch and how you'll test.

@@ -1,6 +1,16 @@
 # SkinLedger: plan for the YouCam API Skin AI & eCommerce VTO Hackathon
 
-*Written Monday 26 Oct 2026, ~20:10 GT (Guatemala time, UTC−6); rewritten in English and updated ~20:30 GT with Francisco's photo-handling decision (production keeps a photo upload path; original photos are never stored). Single source of truth for scope. Sources: `HANDOFF.md` and `extract.md` (same folder), plus the official docs re-read today: the Skin Analysis and JS Camera Kit reference (https://docs.perfectcorp.com/reference/ai_skin_analysis), the `/develop/` pages (quick start, API server, error codes, rate limit, webhook, file retention, debugging guide, FAQ, MCP, agent skills) and the official repo `github.com/YouCam-API/skills`. Differences from extract.md are in §5.1. Stack and accounts: `skinledger-stack-setup.md`. Prompts for your coding agent: `skinledger-prompts.md`. Nothing has been built, no accounts or keys were created and no units were spent.*
+*Written Monday 26 Oct 2026, ~20:10 GT (Guatemala time, UTC−6); rewritten in English and updated ~20:30 GT with Francisco's photo-handling decision (production keeps a photo upload path; original photos are never stored). Single source of truth for scope. Sources: `HANDOFF.md` and `extract.md` (same folder), plus the official docs re-read today: the Skin Analysis and JS Camera Kit reference (https://docs.perfectcorp.com/reference/ai_skin_analysis), the `/develop/` pages (quick start, API server, error codes, rate limit, webhook, file retention, debugging guide, FAQ, MCP, agent skills) and the official repo `github.com/YouCam-API/skills`. Differences from extract.md are in §5.1. Stack and accounts: `skinledger-stack-setup.md`. Prompts for your coding agent: `skinledger-prompts.md`. This is the original 26 Oct text, kept in sync with the build; the current state is in the **Status** section below.*
+
+## Status (29 Oct 2026, 06:40 GT)
+- **Done, P00–P07 (154 tests green):** 355eeca P00 · 36857dd P01 · 17582fc P02 · 25ee2ec P03b · 6da8a10 P04 · a0da119 P05 · 118fab3 P05c · e1c90ba P05d · 00d0863 P06 · 5ba01e8 P07.
+- **In progress:** P08 per-aspect timeline (Chart.js vendored under `src/skinledger/web/static/vendor/`).
+- **Next:** P09–P14, P15 deploy, a UI polish pass (list in plan §16; it can go before the P15 deploy once the main flow is complete), and P17–P20 on Saturday.
+- **Real data:** the real day-1 baseline pair is person 7, captures 2 and 3 (guided Camera Kit, same light, 3 minutes apart). Measured noise: pore +17.3 and acne +15.0 (both unstable, band > 10), radiance -7.9, oiliness +7.5, firmness +6.7, droopy upper eyelid -6.2, tear trough -5.5, droopy lower eyelid +5.2; every other aspect moved 3.5 or less; skin type identical.
+- **Cleanup before recording:** the orphan test profile, person 6, must be deleted.
+- **Units:** 64 of 1,040 used.
+- **Schedule (decided 29 Oct):** everything submitted by **Sat 31 Oct 21:00 GT** (hard deadline Mon 2 Nov 10:45 GT); submission checklist Sat 31 Oct 14:00 GT; kill switch Sat 31 Oct 20:00 GT. Sunday is buffer only, Monday is margin only.
+- **Paths:** all `web/...` paths in these docs live under `src/skinledger/` (for example `src/skinledger/web/static/`).
 
 **Legend:** **[verified 26 Oct]** = read today in the official docs. **[unverified]** = not in any official source I read; the code must tolerate it and you confirm it during the build. **[confirm]** = your decision is pending (only two minor notes remain, at the end of §15).
 
@@ -9,8 +19,9 @@
 - **Stack:** FastAPI + Jinja + HTMX, SQLite, httpx, Chart.js, JS Camera Kit from the CDN (`skincare` mode, `qualityLevel: 'strict'`, UI `enu`/`esp`). No LLM. Details in stack-setup.
 - **Deploy:** Railway at **`skinledger.focampo.com`** (no separate landing page). The YouCam key lives only in environment variables.
 - **Local folder:** `~/Proyectos/skinledger` ✔. Public repo `focampok/skinledger`, MIT ✔ (confirmed 26 Oct).
-- **Decided 26 Oct, ~20:12 GT (Francisco):** 18+ profiles only; schedule Wed 28 and Thu 29 evenings + Sat 31 and Sun 1; optional extras only "Before you buy" and the Fitzpatrick sunscreen reminder; polling only (no webhooks); endpoint `v2.0` with the version in a variable; noise-band floor 3.0 points; no `/admin/backup` endpoint.
+- **Decided 26 Oct, ~20:12 GT (Francisco):** 18+ profiles only; schedule Wed 28 and Thu 29 evenings + Sat 31 (the Sunday submission target was superseded on 29 Oct, see below); optional extras only "Before you buy" and the Fitzpatrick sunscreen reminder; polling only (no webhooks); endpoint `v2.0` with the version in a variable; noise-band floor 3.0 points; no `/admin/backup` endpoint.
 - **Decided 26 Oct, ~20:24 GT (Francisco) — photos:** production keeps **two ways in**: the **Camera Kit** (recommended for weekly tracking, because it keeps captures consistent) and a **photo upload** (the quick "try it" path for friends, coworkers and family from a shared link — the "wow" moment). **The original photo is never stored anywhere we control:** the server holds it in memory, validates it, sends it to YouCam (file upload + signed PUT) and discards the bytes. No R2/S3, no photos on disk. Only `raw_score`s, the result JSON (no `ui_score`, no signed URLs) and masks are stored. The shared link is protected by an **invite code**, **2 real analyses per person**, a **daily unit cap** and a **hard total unit cap**, plus a required **"This is my own face and I am 18 or older."** checkbox.
+- **Decided 29 Oct (Francisco):** everything submitted by **Sat 31 Oct 21:00 GT** or earlier. Kill switch stays Sat 31 Oct 20:00 GT. Checklist Sat 31 Oct 14:00 GT. Sunday is buffer only; Monday is margin only (energy for the 3 Nov kickoff).
 - **Frozen idea:** SkinLedger, *"Is it working or not?"*, with a per-product verdict before you rebuy.
 - **YouCam account created and code redeemed today (26 Oct):** 1,000 units, valid ~90 days (until ~24 Jan 2027). Only the API key is left (stack-setup, Part 2).
 
@@ -30,7 +41,7 @@ Product tagline: ***"Is it working or not? Know before you rebuy."***
 ## 3. User flow (P0)
 1. **Profile** → create a person → **consent** screen (adult 18+, what is sent to YouCam, how long YouCam keeps it, that we never store the photo, how to delete) → accept.
 2. **Analyze:** choose **Guided capture (Camera Kit)** — recommended for tracking — or **Upload a photo** (quick try). Before each analysis, tick **"This is my own face and I am 18 or older."** The photo goes from memory to YouCam and is discarded; `raw_score`s and masks are stored **immediately**.
-3. **Day-1 baseline:** 2 analyses in a row (same place, same light) → per-aspect **noise band**. For a visitor from the shared link, these 2 analyses are their whole allowance and the "wow": 16 scores, masks, and "how much your score moves on its own".
+3. **Day-1 baseline:** 2 analyses in a row (same place, same light) → per-aspect **noise band**. For a visitor from the shared link, these 2 analyses are their whole allowance and the "wow": 15 scores plus skin type, masks, and "how much your score moves on its own".
 4. **Products:** "Started a niacinamide serum on 28 Oct" (generic name, category, date, target aspects suggested by rules).
 5. **Timeline:** one chart per aspect with the shaded noise band; REAL and SIMULATED points look different.
 6. **Check-in (day 14 and 28):** 1 capture → per-product **verdict**: **Keep** / **No measurable change → reconsider before rebuying** / **Worse → pause & consult**, with the aspects that changed most and before/after masks.
@@ -44,12 +55,12 @@ Product tagline: ***"Is it working or not? Know before you rebuy."***
 |---|---|---|
 | P0.1 | **Profiles + consent + delete** | Adults only (18+ checkbox). Per-person consent with text version and date. "Delete this person" removes rows and mask files from the volume. |
 | P0.2 | **Capture: Camera Kit + photo upload** | Camera Kit: `faceDetectionMode: 'skincare'`, `qualityLevel: 'strict'`, `language: 'enu'` or `'esp'`, `videoQuality: '1080p'`, `imageFormat: 'blob'` **[verified 26 Oct]** — recommended for weekly tracking. Upload: JPG/PNG < 10 MB, short side ≥ 480 px — the quick try. Both send the image bytes as the raw request body (no multipart temp files) and require the own-face/18+ checkbox. Captures record `source` = `camera_kit` or `upload`. |
-| P0.3 | **Skin Analysis SD client, 16 aspects, 4-step async flow** | `POST /s2s/v2.0/file` → `PUT` to the signed URL → `POST /s2s/v2.0/task/skin-analysis` with `src_file_id` and `dst_actions` → `GET …/skin-analysis/{task_id}` until `success` or `error` **[verified 26 Oct]**. Mocked tests. |
+| P0.3 | **Skin Analysis SD client, 15 numeric aspects plus skin type (16 SD actions), 4-step async flow** | `POST /s2s/v2.0/file` → `PUT` to the signed URL → `POST /s2s/v2.0/task/skin-analysis` with `src_file_id` and `dst_actions` → `GET …/skin-analysis/{task_id}` until `success` or `error` **[verified 26 Oct]**. Mocked tests. |
 | P0.4 | **Never persist the photo; store `raw_score` + masks immediately** | The image lives only in memory during the request and is discarded once YouCam has it. Never `ui_score` (not stored, shown or charted). Result URLs last 2 h (renewable via the `task_id`, valid 30 days): masks are downloaded in the same job. |
 | P0.5 | **Per-aspect timeline** | Chart.js, one chart per aspect, shaded noise band, REAL/SIMULATED badge per point, upload vs. Camera Kit shown in the tooltip. |
-| P0.6 | **Day-1 noise band (2 captures)** | Band per aspect = max(\|A − B\|, 3.0 points). The 3.0 floor is a **product heuristic**, not a YouCam figure; the UI says so ("estimated from 2 captures"). |
+| P0.6 | **Day-1 noise band (2 captures)** | Band per aspect = max(\|A − B\|, 3.0 points). The 3.0 floor is a **product heuristic**, not a YouCam figure; the UI says so ("estimated from 2 captures"). An aspect whose band is above `UNSTABLE_BAND = 10.0` is **unstable for that person's setup**: derived on read (never stored), shown as an "Unstable for your setup" chip, and **never used in verdicts**. Bands come only from `noise.py` (`get_bands`, `is_unstable`). |
 | P0.7 | **Product log** | Generic name, category, start, optional end, target aspects. |
-| P0.8 | **14/28-day verdict per product** | Keep / No measurable change → reconsider before rebuying / Worse → pause & consult; "Too early" before day 12; warning if another product started in the same window. Top changed aspects + before/after masks (REAL captures only). |
+| P0.8 | **14/28-day verdict per product** | Keep / No measurable change → reconsider before rebuying / Worse → pause & consult; "Too early" before day 12; warning if another product started in the same window. Unstable aspects are excluded and reported as "unstable, not used". Top changed aspects + before/after masks (REAL captures only). |
 | P0.9 | **AM/PM routine + generic shopping list** | Fixed rules, no brands, no medicines. Uses the 3 aspects with the lowest `raw_score` in the latest capture. |
 | P0.10 | **Disclaimer** | Exact text in the footer of every page and on the verdict screen. |
 | P0.11 | **Deploy + shared-link guards** | Railway + persistent volume + `skinledger.focampo.com`; invite code to analyze; 2 real analyses per person; daily and total unit caps (env vars); friendly "demo limit reached" message. |
@@ -77,8 +88,8 @@ Native app or APK, HD, real multi-user accounts with passwords, LLM, brand or na
 
 ## 5. API facts the plan relies on
 - **Endpoints [verified 26 Oct]:** base `https://yce-api-01.makeupar.com`. `POST /s2s/v2.0/file` with `{"files":[{"content_type","file_name","file_size"}]}` → `data.files[0].file_id` and `data.files[0].requests[0]` (`method: PUT`, `url`, `headers`). `PUT` the bytes with those headers. `POST /s2s/v2.0/task/skin-analysis` with `src_file_id`, `dst_actions`, `format: "json"` → `data.task_id`. `GET /s2s/v2.0/task/skin-analysis/{task_id}` → `data.task_status` (`running`/`success`/`error`) and `data.results.output[]` with `type`, `ui_score`, `raw_score`, `mask_urls`.
-- **The 16 SD aspects [verified 26 Oct]:** `wrinkle, droopy_upper_eyelid, droopy_lower_eyelid, firmness, acne, moisture, eye_bag, dark_circle_v2, age_spot, radiance, redness, oiliness, pore, texture, tear_trough, skin_type`. SD and HD are never mixed (400 `InvalidParameters`).
-- **[unverified]:** the exact shape of `skin_type` (categorical, with `whole/t_zone/u_zone`), `all` and `skin_age` in `format: json`, and which field carries the error code when `task_status = error`. Also **whether the mask images contain any of the face photo** (we request per-aspect masks with `enable_mask_overlay` off; if the first real result shows masks embed the photo, set `STORE_MASKS=false` and keep scores only). The parser treats them as optional and stores the raw JSON for auditing.
+- **The 16 SD actions (15 numeric aspects plus `skin_type`) [verified 26 Oct]:** `wrinkle, droopy_upper_eyelid, droopy_lower_eyelid, firmness, acne, moisture, eye_bag, dark_circle_v2, age_spot, radiance, redness, oiliness, pore, texture, tear_trough, skin_type`. SD and HD are never mixed (400 `InvalidParameters`).
+- **[unverified]:** the exact shape of `skin_type` (categorical, with `whole/t_zone/u_zone`), `all` and `skin_age` in `format: json`, and which field carries the error code when `task_status = error`. Also **whether the mask images contain any of the face photo** (we request per-aspect masks with `enable_mask_overlay` off; if the first real result shows masks embed the photo, set `STORE_MASKS=false` and keep scores only). The parser handles them as optional and stores the raw JSON for auditing.
 - **Image errors [verified 26 Oct]:** `error_below_min_image_size`, `error_exceed_max_image_size`, `error_src_face_too_small`, `error_src_face_out_of_bound`, `error_lighting_dark`. General [verified 26 Oct, /develop/error_codes]: `error_no_face`, `error_large_face_angle`, `error_multiple_people`, `error_decode_image`, `error_download_image`, `exceed_max_filesize`, `invalid_parameter`, `error_face_parsing`, `error_inference`, `unknown_internal_error`. An `error` **does not consume units**, so rejected uploads (no face, several people, etc.) are free.
 - **Image requirements:** JPG/PNG < 10 MB, short side ≥ 480 px for SD, face > 60% of the width, frontal, good light. The Camera Kit in `strict` requires ≥ 75% face and lighting 0.8–0.9 **[verified 26 Oct]**. Uploads do not get this guidance, which is why the Camera Kit is the recommended path for tracking.
 - **Retention [verified 26 Oct, /develop/file_retention_period]:** `file_id` and `task_id` are valid **30 days**; the result download URL lasts **2 h**, but a fresh link can be requested with the `task_id`; everything uploaded and generated is deleted after 30 days. (The Skin Analysis reference still says "retained for 24 hours": we design for the strict case and store everything immediately.) Consent text: "YouCam may keep the uploaded photo for up to 30 days; SkinLedger never stores it."
@@ -99,10 +110,10 @@ Native app or APK, HD, real multi-user accounts with passwords, LLM, brand or na
 | Webhooks | "also available" (no detail) | Standard Webhooks, HMAC-SHA256 with a `whsec_…` secret, configured in the console (up to 10), payload `{task_id, task_status}` | Decided: polling only, no webhooks |
 | MCP | `/mcp/beauty` only | 3 servers (`beauty`, `fashion`, `creators`); `beauty` includes `AI_Skin_Analysis`, `AI_Skin_simulation`, `AI_Fitzpatrick_Skin_Type_Analysis`, `Get_Feature_Cost`, `Get_Running_Task_Status` | MCP cut (post-hackathon) |
 | Balance | Not mentioned | Free balance endpoint (official repo) | `/admin/usage` shows the real balance |
-| Camera Kit | CDN, `skincare`, `esp` | Global `YMK`, `YMKAsyncInit`, `qualityLevel` (`strict` = face ≥ 75%, light 0.8–0.9, yaw ±5°), `videoQuality` up to `1920p`, events `faceDetectionCaptured`/`cameraFailed`/`faceQualityChanged`; HTTPS except on localhost | Prompt P05 uses the real API |
+| Camera Kit | CDN, `skincare`, `esp` | Global `YMK`, `YMKAsyncInit` (**as shipped: the SDK checks `window.ymkAsyncInit`, lowercase; the page defines both**), `qualityLevel` (`strict` = face ≥ 75%, light 0.8–0.9, yaw ±5°), `videoQuality` up to `1920p`, events `faceDetectionCaptured`/`cameraFailed`/`faceQualityChanged`; HTTPS except on localhost | Prompt P05 uses the real API |
 | Official skills | — | `YouCam-API/skills` "Skin Analysis Expert" reports `ui_score` | SkinLedger deliberately does the opposite (`raw_score`) and says so in the README |
 
-## 6. Unit budget (1,000 units; SD 16 aspects = 16 units → ≈ 62 analyses)
+## 6. Unit budget (1,000 units redeemed; one SD analysis = 16 actions = 16 units → ≈ 62 analyses)
 | Use | Analyses | Units |
 |---|---|---|
 | Client smoke test (Wednesday) | 2 | 32 |
@@ -120,19 +131,18 @@ Native app or APK, HD, real multi-user accounts with passwords, LLM, brand or na
 - Optional: +500 units per platform for posting the video (max 2), using the form in extract.md §4, before Mon 2 Nov 10:45 GT.
 - **Redeemed 26 Oct:** expires around **24 Jan 2027**.
 
-## 7. Schedule (≈ 16 h spread over evenings + weekend)
-| Day | Hours | Prompts | Gate |
-|---|---|---|---|
-| Mon 26 (today) | 0 | — | ✔ YouCam account created and code redeemed (1,000 units). API key pending |
-| Tue 27 | 0 (optional 0.5) | Setup prep only (stack-setup Part 4, steps 1–4) | — |
-| **Wed 28, evening** | ~3 | Create the API key first · P00–P03 | Client passes mocked tests and **1 real analysis** stores 16 `raw_score`s and masks |
-| **Thu 29, evening** | ~3 | P04–P07 | From the phone (HTTPS tunnel): consent → Camera Kit **and** upload → analysis stored, no photo on disk → noise band |
-| Fri 30 | 0 (buffer) | Only if behind: P08 | — |
-| **Sat 31** | ~6 (10:00–17:30 with breaks) | P08–P16 | **20:00 GT: kill switch** (below) |
-| **Sun 1 Nov** | ~4 (13:00–20:00) | P17–P20 (+ P21–P22, P1, only if time allows) | **Submit before 21:00 GT.** Checklist at 16:00 |
-| Mon 2 Nov | 0 | — | Margin only until 10:45 GT. No planned work: save energy for the Vultr kickoff (Tue 3, 09:00) |
+## 7. Schedule (updated 29 Oct: submit Saturday)
+| Day | Prompts | Gate |
+|---|---|---|
+| Mon 26 | — | ✔ YouCam account created and code redeemed (1,000 units) |
+| Wed 28, evening | API key · P00–P03 | ✔ Client passes mocked tests; real analyses stored |
+| **Thu 29** | P04–P07 done (see Status); **P08 timeline in progress**, then P09 onward through the UI | From the phone over the HTTPS tunnel: consent → real Camera Kit capture → analysis stored → baseline pair and noise band ✔ |
+| Fri 30 | Buffer: continue P09–P14 and the UI polish pass (plan §16), no units spent | — |
+| **Sat 31** | P15 deploy → P16 phone test → P17–P20 | **14:00 GT: submission checklist (P20).** **20:00 GT: kill switch.** **Submit by 21:00 GT.** |
+| Sun 1 Nov | Buffer only (leftovers, no planned work) | — |
+| Mon 2 Nov | — | Margin only until 10:45 GT. No planned work: save energy for the Vultr kickoff (Tue 3, 09:00) |
 
-**Schedule confirmed by Francisco (26 Oct):** Wednesday and Thursday evenings + Saturday and Sunday.
+**Schedule decided by Francisco on 29 Oct:** target = everything submitted by Sat 31 Oct 21:00 GT or earlier; hard deadline Mon 2 Nov 10:45 GT. The kill switch stays at Sat 31 Oct 20:00 GT.
 
 **Kill switch, Saturday 31 Oct, 20:00 GT.** On `https://skinledger.focampo.com`, from your phone: profile with consent → Camera Kit capture → real `success` → `raw_score`s and masks stored, no photo file on the volume → point on the timeline → product logged → verdict computed (on a labelled SIMULATED check-in, since there are no real 14 days) → one **upload** analysis through the invite-code flow shows the friendly result and counts against the caps. **If it doesn't work end to end → GO-lite:** keep the app for personal or family use and don't submit.
 
@@ -140,7 +150,7 @@ Native app or APK, HD, real multi-user accounts with passwords, LLM, brand or na
 | Criterion (equal weight; tie → technical) | How SkinLedger covers it | What to show in the video |
 |---|---|---|
 | **Stage 1: theme + correct API use** | Skin AI, the "deciding whether a product is working" moment. Official 4-step flow + Camera Kit. | Say "YouCam AI Skin Analysis API" and "JS Camera Kit". |
-| **Technical implementation** | Full async pipeline, 16 aspects, `raw_score` instead of `ui_score`, masks stored, photos never stored, noise band, tested verdict engine, unit caps, real delete. Not a wrapper. | The "only counts if it beats the noise band" moment. |
+| **Technical implementation** | Full async pipeline, 15 numeric aspects plus skin type, `raw_score` instead of `ui_score`, masks stored, photos never stored, noise band, tested verdict engine, unit caps, real delete. Not a wrapper. | The "only counts if it beats the noise band" moment. |
 | **Design (complete product)** | Installable PWA; profile → capture/upload → timeline → verdict → routine; useful image-error messages; shareable try-it link. | Home-screen icon and the flow on the phone. |
 | **Potential impact** | Saves money on products that don't work; honest rebuy decision; anyone can try it from a link with consent. | "Reconsider before rebuying". |
 | **Quality of the idea** | Non-obvious use: measuring the noise of the measurement itself and refusing to claim fake improvements. | Shaded band + an honest "No measurable change". |
@@ -172,10 +182,11 @@ Native app or APK, HD, real multi-user accounts with passwords, LLM, brand or na
 ## 12. Verdict engine (frozen definition)
 - **Product baseline** = mean of the person's captures in the 7 days before the product start (or the 2 day-1 captures if the product started on day 1).
 - **Check-in** = the capture closest to day 14 (window 12–20) or day 28 (window 26–35) from the start.
-- **Per target aspect:** Δ = check-in − baseline (higher = better). *Improved* if Δ > band; *Worse* if Δ < −band; otherwise *within noise*.
+- **Unstable aspects are skipped.** Bands come only from `noise.py`. A target aspect with `is_unstable=True` (band > 10) is excluded from the evaluation and reported as "unstable, not used". If **all** target aspects are unstable, the outcome is `no_band` with the message "Your target aspects are too noisy in your setup to judge; retake the baseline in steadier light" and the flag `all_targets_unstable=True` (the `verdicts.outcome` CHECK allows only keep/no_change/worse/too_early/no_band).
+- **Per (stable) target aspect:** Δ = check-in − baseline (higher = better). *Improved* if Δ > band; *Worse* if Δ < −band; otherwise *within noise*.
 - **Verdict:** if any target aspect got worse → **Worse → pause & consult**. Otherwise, if at least one improved → **Keep**. If none left the band → **No measurable change → reconsider before rebuying**. Before day 12 → **Too early to tell**. No noise band → no verdict ("Take 2 baseline captures first").
 - **Warnings:** if another product started or ended in the window → *"Another product changed in this window; this verdict can't isolate one product."* If the compared captures mix REAL/SIMULATED → SIMULATED badge on the verdict. If they mix upload and Camera Kit → note *"Captured different ways; differences may be larger."*
-- Shows the 3 aspects with the largest \|Δ\| (across the 15 numeric aspects, not only targets) with arrows and, if both captures are REAL, their masks side by side.
+- Shows the 3 aspects with the largest \|Δ\| (across the stable ones of the 15 numeric aspects, not only targets) with arrows and, if both captures are REAL, their masks side by side.
 
 ## 13. Routine rules (fixed table, no brands)
 | Low aspect (among the 3 lowest) | Ingredient category | When |
@@ -205,9 +216,9 @@ Conflict rules: retinol and AHA/BHA never on the same night (alternate); if `red
 | Judges find the visitor pool exhausted | Check `/admin/usage` before submitting; keep ≥ 8 analyses for judges; raise the cap from the margin or rotate the code; the public SAMPLE/SIMULATED profile works without units. |
 | Railway loses the database on redeploy | SQLite and masks on a **volume** (`/data`); redeploy test on Saturday. |
 | Heavy competition (~1,300) | Polished design and honesty (noise band) as the differentiator; the try-it link as the wow; the video tells the story in 30 s. |
-| Energy for 3 Nov | Submit Sunday before 21:00; Monday is margin only. |
+| Energy for 3 Nov | Submit Saturday 31 Oct before 21:00 GT; Sunday is buffer, Monday is margin only. |
 
-## 15. Checklist before Wednesday 28
+## 15. Checklist before Wednesday 28 (historical; current state is in the Status section)
 - [x] Devpost registration (26 Oct, per Hack).
 - [x] YouCam account created and code redeemed (26 Oct; 1,000 units until ~24 Jan 2027).
 - [ ] Create the API key on Wednesday 28 first thing (shown only once) and put it straight into `.env`.
@@ -222,5 +233,14 @@ Conflict rules: retinol and AHA/BHA never on the same night (alternate); if `red
 - `skinledger-plan.md`: this document.
 - `skinledger-stack-setup.md`: accounts, variables, local setup, repo, local HTTPS, Railway, DNS, shared-link and judge access, licence, secrets.
 - `skinledger-prompts.md`: P00–P22 for your coding agent (P21–P22 optional), with acceptance criteria.
+- `devpost.md`, `video-script.md`, `screenshots.md`, `requirements-matrix.md`: submission material (drafts updated against what shipped, P17–P20); `requirements-matrix.md` ends with the open items before submission. The repo `README.md` is at the repo root.
 
 **Minor open notes (not blocking):** which YouTube account to use for the video; and whether to set up a private family instance after 2 Nov.
+
+## 16. UI polish pass (after the main flow is complete; can go before the P15 deploy)
+- [ ] **Capture page tabs vs. the real button:** the blue "Guided capture" tab looks like the action button while the real button is "Start capture". Make "Start capture" the prominent primary button and make the tabs look like tabs (radio-style selector).
+- [ ] **Fetch timeout and error message:** when the analysis request is slow or the network drops, show a clear timeout/error message with a retry, instead of a spinner that never ends.
+- [ ] **Upload re-sends the Kit blob as `source=upload`:** a photo already taken with the Camera Kit must not be resent as an upload; keep the capture `source=camera_kit`.
+- [ ] **Stuck "still loading" help text:** when the Camera Kit stays on "loading", show help (reload, allow camera, use HTTPS, or "Upload a photo instead").
+- [ ] **`try.html` copy:** change "16 skin aspects" to "15 skin scores plus skin type".
+- [ ] Re-check all remaining copy for the same "15 scores plus skin type" wording.

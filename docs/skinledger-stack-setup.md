@@ -1,6 +1,6 @@
 # SkinLedger: stack, accounts and setup guide
 
-*Written Monday 26 Oct 2026, ~20:10 GT (Guatemala time, UTC−6); rewritten in English and updated ~20:30 GT with Francisco's photo-handling decision (production upload path, original photos never stored, invite code and unit caps). Format decided today: **responsive web app + installable PWA over HTTPS**. Includes today's progress (YouCam account created, 1,000 units redeemed) and the official `/develop/` docs re-read today. Decisions of 26 Oct ~20:12 GT applied: folder and repo confirmed, 18+ only, polling only, `v2.0`, floor 3.0, no `/admin/backup`, no landing page. Nothing was installed on your computer, no accounts or keys were created and no project code was written.*
+*Written Monday 26 Oct 2026, ~20:10 GT (Guatemala time, UTC−6); rewritten in English and updated ~20:30 GT with Francisco's photo-handling decision (production upload path, original photos never stored, invite code and unit caps). Format decided today: **responsive web app + installable PWA over HTTPS**. Includes today's progress (YouCam account created, 1,000 units redeemed) and the official `/develop/` docs re-read today. Decisions of 26 Oct ~20:12 GT applied: folder and repo confirmed, 18+ only, polling only, `v2.0`, floor 3.0, no `/admin/backup`, no landing page. This is the original 26 Oct text, updated 29 Oct to match the build and the Saturday-submission schedule.*
 
 Companion to `skinledger-plan.md` (scope, schedule, kill switch) and `skinledger-prompts.md` (rules for the coding agents and ordered prompts). **[verified 26 Oct]** = read today in the official docs; **[unverified]** = confirm during the build; **[confirm]** = your decision.
 
@@ -35,14 +35,14 @@ Criteria: fits in ~16 h, few moving parts, no frontend build, the Camera Kit nee
 skinledger/
   AGENTS.md  CLAUDE.md  .cursor/rules/  .roo/rules/  .claude/settings.json  .cursorignore  .rooignore
   LICENSE  README.md  pyproject.toml  uv.lock  .gitignore  .env.example  Dockerfile  railway.json
-  docs/ (skinledger-plan.md, skinledger-stack-setup.md, skinledger-prompts.md, video-script.md, devpost.md)
+  docs/ (skinledger-plan.md, skinledger-stack-setup.md, skinledger-prompts.md, video-script.md, devpost.md, screenshots.md, requirements-matrix.md)
   src/skinledger/
     config.py  db.py  schema.sql  models.py
     youcam.py          # 4-step client (the only place that knows the key)
     imaging.py         # in-memory validation + EXIF strip (Pillow), never writes to disk
     pipeline.py        # bytes in memory → YouCam → store raw_score + masks (job polls)
     guards.py          # invite code, attestation, per-person cap, daily/total unit caps
-    aspects.py         # the 16 SD aspects, English labels
+    aspects.py         # the 16 SD actions (15 numeric aspects plus skin type), English labels
     noise.py  verdict.py  routine.py  shopping.py  usage.py  seed.py  copy_audit.py
     web/app.py  web/routes/{persons,captures,products,timeline,routine,admin,try_}.py
     web/templates/{base.html, ...}
@@ -57,9 +57,9 @@ skinledger/
 | **Devpost** | ✔ Registered (26 Oct) | — |
 | **YouCam API console** https://yce.perfectcorp.com/ai-api | ✔ Account created (26 Oct) | — |
 | **Code redemption** | ✔ Redeemed (26 Oct): 1,000 units | Expire ~**24 Jan 2027** (90 days from redemption). |
-| **API key** | **Pending (the only step left)** | See step 2.1. |
+| **API key** | ✔ Created (kept only in `.env` and, later, Railway Variables) | If it ever leaks, see 2.1 step 4. |
 | **GitHub** (`focampok`) | You have it | Public repo `focampok/skinledger`, MIT ✔ (confirmed 26 Oct). |
-| **Railway** | You have it (paid account) | New project `skinledger` on Thu 29 or Sat 31. |
+| **Railway** | You have it (paid account) | New project `skinledger` on Sat 31 (P15); earlier only if time allows. |
 | **Cloudflare** (zone `focampo.com`) | You have it | Confirm `skinledger` doesn't exist yet. |
 | **YouTube** | Minor note: choose the account (not blocking) | Unlisted or public video, 1–3 min. |
 
@@ -91,7 +91,7 @@ ADMIN_TOKEN=                      # for /admin/usage, the seed and your own unca
 MAX_REAL_ANALYSES_PER_PERSON=2    # matches the day-1 noise-band pair
 DAILY_UNIT_CAP=96                 # visitor units per GT day (96 = 6 analyses)
 TOTAL_UNIT_CAP=480                # hard cap on all visitor units since deploy (480 = 30 analyses)
-UNITS_PER_ANALYSIS=16             # SD, 16 aspects [verified 26 Oct]
+UNITS_PER_ANALYSIS=16             # SD, 16 actions (15 numeric aspects plus skin type) [verified 26 Oct]
 ALLOW_UPLOAD=true                 # photo upload path in production (the quick try); Camera Kit is always on
 STORE_MASKS=true                  # set false if the first real result shows masks contain the photo [unverified]
 CAMERA_KIT_LANGUAGE=enu           # enu | esp
@@ -187,8 +187,10 @@ cloudflared tunnel --url http://localhost:8000     # prints https://<something>.
 | Step | When |
 |---|---|
 | YouCam account and redemption | ✔ done (Mon 26) |
-| Railway and Cloudflare checked | **now** (Mon 26–Tue 27) |
-| Create the API key (step 2.1), repo, P00–P03 | **Wed 28** |
-| HTTPS tunnel and phone test (Camera Kit + upload) | **Thu 29** |
-| Railway + volume + domain + invite code and caps | **Sat 31** (before 20:00) |
-| Video, Devpost, submission | **Sun 1 Nov** before 21:00 GT |
+| Railway and Cloudflare checked | ✔ before the build |
+| Create the API key (step 2.1), repo, P00–P03 | ✔ **Wed 28** |
+| HTTPS tunnel and phone test (Camera Kit + upload) | ✔ Camera Kit capture done 28 Oct; upload check as needed |
+| Railway + volume + domain + invite code and caps (P15) | **Sat 31** (before the 14:00 checklist and the 20:00 kill switch) |
+| Submission checklist | **Sat 31 Oct, 14:00 GT** |
+| Kill switch | **Sat 31 Oct, 20:00 GT** |
+| Video, Devpost, submission | **Sat 31 Oct** before 21:00 GT (hard deadline Mon 2 Nov 10:45 GT; Sunday is buffer) |
