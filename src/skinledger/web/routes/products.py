@@ -127,6 +127,8 @@ def _read_form(form: dict[str, list[str]]) -> tuple[dict[str, object], str | Non
             return values, copy.PRODUCT_DATE_INVALID
         if ended < started:
             return values, copy.PRODUCT_DATE_ORDER
+    if not targets:
+        return values, copy.PRODUCT_TARGETS_REQUIRED
     if len(targets) > MAX_TARGETS:
         return values, copy.PRODUCT_TOO_MANY_TARGETS
     if any(target not in NUMERIC_ASPECTS for target in targets):

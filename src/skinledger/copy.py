@@ -104,6 +104,8 @@ PRODUCT_DATE_INVALID = "Use dates like 2026-10-29."
 
 PRODUCT_DATE_ORDER = "End date can't be before the start date."
 
+PRODUCT_TARGETS_REQUIRED = "Pick 1 to 4 target aspects."
+
 PRODUCT_TOO_MANY_TARGETS = "Choose up to 4 target aspects."
 
 PRODUCT_UNKNOWN_TARGET = "Unknown target aspect. Choose from the 15 listed aspects."

@@ -228,6 +228,17 @@ def test_an_unknown_category_is_rejected(env, web):
 # -- target validation -------------------------------------------------------
 
 
+def test_a_product_needs_at_least_one_target(env, web):
+    person_id = seed_person()
+    login(web)
+
+    response = create_product(web, person_id, targets=[])
+
+    assert response.status_code == 400
+    assert "Pick 1 to 4 target aspects." in response.text
+    assert product_count() == 0
+
+
 def test_more_than_four_targets_is_rejected(env, web):
     person_id = seed_person()
     login(web)
