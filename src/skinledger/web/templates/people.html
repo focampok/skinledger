@@ -13,6 +13,7 @@
     <small>Sample profile · SIMULATED · read-only</small>
     {% else %}
     <small>
+      <a href="/people/{{ person.id }}/timeline">Timeline</a> ·
       <a href="/people/{{ person.id }}/capture">Capture</a> ·
       <a href="/people/{{ person.id }}/consent">Consent</a> ·
       <a href="/people/{{ person.id }}/delete">Delete</a>

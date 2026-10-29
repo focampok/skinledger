@@ -19,3 +19,102 @@ body > footer {
 main.container {
   padding-block: 1.5rem;
 }
+
+/* -- P08 timeline ---------------------------------------------------------- */
+
+.timeline-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .timeline-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .timeline-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.timeline-card {
+  margin: 0;
+  padding: 0.9rem;
+  min-width: 0;
+}
+
+.timeline-card header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.timeline-card h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.timeline-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  min-width: 0;
+}
+
+.timeline-chart-wrap canvas {
+  max-width: 100%;
+}
+
+.timeline-legend {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.timeline-banner {
+  border-left: 4px solid var(--sl-accent);
+  padding: 0.75rem 1rem;
+}
+
+.timeline-banner p,
+.timeline-banner a {
+  margin: 0;
+}
+
+.timeline-note {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-block: 0.4rem;
+}
+
+.timeline-status {
+  color: #8a4b08;
+}
+
+.timeline-links {
+  margin-top: 1.5rem;
+}
+
+.sl-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(31, 111, 92, 0.12);
+  color: #1f6f5c;
+  font-size: 0.78rem;
+}
+
+.sl-chip-unstable {
+  background: #e8eaed;
+  color: #3c4043;
+}
+
+.sl-chip small {
+  opacity: 0.75;
+}

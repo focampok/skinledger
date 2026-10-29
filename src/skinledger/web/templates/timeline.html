@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}SkinLedger — {{ timeline_title }}{% endblock %}
+
+{% block head %}
+  <script src="/static/vendor/chart.umd.min.js" defer></script>
+  <script src="/static/charts.js" defer></script>
+{% endblock %}
+
+{% block content %}
+<div id="timeline-page" data-person-id="{{ person.id }}" data-has-band="{{ 'true' if has_band else 'false' }}">
+  <h1>{{ timeline_title }}</h1>
+  <p>{{ person.display_name }}</p>
+
+  {% if has_band %}
+  <p class="timeline-legend">{{ band_legend }}</p>
+  {% else %}
+  <article class="timeline-banner" role="status">
+    <a href="/people/{{ person.id }}/capture">{{ no_band_yet }}</a>
+  </article>
+  {% endif %}
+
+  <p class="timeline-skin-type">
+    <span class="sl-chip" data-skin-type="{{ skin_type.value if skin_type else '' }}">
+      Skin type:
+      <strong>{{ skin_type.value if skin_type else '—' }}</strong>
+      {% if skin_type %}<small>{{ skin_type.data_label }}</small>{% endif %}
+    </span>
+  </p>
+
+  <p id="timeline-chart-status" class="timeline-status" hidden>
+    Charts could not load. Refresh to try again.
+  </p>
+
+  <div class="timeline-grid">
+    {% for card in cards %}
+    <article
+      class="timeline-card{% if card.unstable %} timeline-card-unstable{% endif %}"
+      data-timeline-aspect="{{ card.aspect }}"
+      data-order-group="{{ card.group }}"
+      data-unstable="{{ 'true' if card.unstable else 'false' }}"
+      {% if card.band is not none %}data-band="{{ '%.1f'|format(card.band) }}"{% endif %}>
+      <header>
+        <h2>{{ card.label }}</h2>
+        {% if card.unstable %}
+        <span class="sl-chip sl-chip-unstable">{{ unstable_chip }}</span>
+        {% endif %}
+      </header>
+      {% if card.unstable %}
+      <p class="timeline-note">{{ unstable_note }}</p>
+      {% endif %}
+      <div class="timeline-chart-wrap">
+        <canvas id="chart-{{ card.aspect }}" role="img"
+                aria-label="{{ card.label }} scores over time"></canvas>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <p class="timeline-links">
+    <a href="/people/{{ person.id }}/baseline">Day-1 baseline</a> ·
+    <a href="/people/{{ person.id }}/capture">New capture</a>
+  </p>
+</div>
+{% endblock %}

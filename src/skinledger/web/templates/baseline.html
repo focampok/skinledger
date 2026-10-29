@@ -5,6 +5,7 @@
 {% block content %}
 <div id="baseline-page" data-person-id="{{ person.id }}">
   <h1>Day-1 baseline for {{ person.display_name }}</h1>
+  <p><a href="/people/{{ person.id }}/timeline">See your timeline</a></p>
 
   {% if report is none %}
   <p>{{ no_band_yet }}</p>

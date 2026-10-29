@@ -72,3 +72,16 @@ BASELINE_UNSTABLE_HINT = (
 )
 
 NO_BAND_YET = "Take 2 baseline captures first."
+
+TIMELINE_TITLE = "Your skin, measured against your own noise"
+
+TIMELINE_BAND_LEGEND = (
+    "Shaded band = your day-1 measurement noise. Only changes outside it count."
+)
+
+TIMELINE_UNSTABLE_CHIP = "Unstable for your setup"
+
+TIMELINE_UNSTABLE_NOTE = (
+    "This score moved more than 10 points between your two day-1 captures, so "
+    "SkinLedger won't use it for verdicts."
+)

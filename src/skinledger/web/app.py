@@ -13,6 +13,7 @@ from skinledger.pipeline import resume_pending
 from skinledger.web.routes.captures import router as captures_router
 from skinledger.web.routes.client_log import router as client_log_router
 from skinledger.web.routes.persons import router as persons_router
+from skinledger.web.routes.timeline import router as timeline_router
 from skinledger.web.routes.try_ import router as try_router
 from skinledger.web.templating import WEB_DIR, templates
 
@@ -34,6 +35,7 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.include_router(captures_router)
 app.include_router(client_log_router)
 app.include_router(persons_router)
+app.include_router(timeline_router)
 app.include_router(try_router)
 
 
