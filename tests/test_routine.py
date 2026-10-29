@@ -118,7 +118,9 @@ def test_wrinkle_acne_moisture_never_puts_retinol_and_bha_on_the_same_night():
     )
 
     assert "Retinol serum" in names(routine.pm)
-    assert "Salicylic acid (BHA) cleanser" in names(routine.pm)
+    cleanser = next(item for item in routine.pm if item.category == "cleanser")
+    assert "Salicylic acid (BHA) cleanser" in cleanser.alternatives
+    assert "Salicylic acid (BHA) cleanser" in cleanser.display
     retinol_nights = [day for day in routine.week if "Retinol serum" in day.pm]
     bha_nights = [
         day for day in routine.week if "Salicylic acid (BHA) cleanser" in day.pm
@@ -194,6 +196,45 @@ def test_acne_as_the_lowest_sets_the_disclaimer_flag():
 # -- shopping list -----------------------------------------------------------
 
 
+def test_no_slot_has_two_items_of_the_same_category():
+    scenarios = (
+        sample_scores(80, oiliness=20, moisture=25, redness=30),
+        sample_scores(80, wrinkle=20, acne=25, texture=30),
+        sample_scores(80, redness=20, texture=25, dark_circle_v2=30),
+    )
+    for scores in scenarios:
+        routine = routine_engine.build_routine(sample_capture(scores), stable_bands())
+        for slot in (routine.am, routine.pm):
+            categories = [item.category for item in slot]
+            assert len(categories) == len(set(categories))
+
+
+def test_spf_is_the_last_am_item():
+    routine = routine_engine.build_routine(
+        sample_capture(sample_scores(80, wrinkle=20, acne=25, moisture=30)),
+        stable_bands(),
+    )
+
+    assert routine.am[-1].name == copy.ROUTINE_ITEM_SPF
+    assert routine.am[-1].category == "sunscreen"
+
+
+def test_advice_is_a_note_and_never_a_shopping_item():
+    routine = routine_engine.build_routine(
+        sample_capture(
+            sample_scores(80, redness=20, texture=25, dark_circle_v2=30)
+        ),
+        stable_bands(),
+    )
+    items = shopping.build_shopping_list([*routine.am, *routine.pm], [])
+
+    assert copy.ROUTINE_ITEM_AVOID_TONERS in routine.am_notes
+    assert copy.ROUTINE_ITEM_AVOID_TONERS in routine.pm_notes
+    assert copy.ROUTINE_EYE_NOTE in routine.am_notes
+    assert copy.ROUTINE_ITEM_AVOID_TONERS not in names(items)
+    assert copy.ROUTINE_EYE_NOTE not in names(items)
+
+
 def test_the_shopping_list_drops_categories_covered_by_active_products():
     routine = routine_engine.build_routine(
         sample_capture(sample_scores(80, oiliness=20, pore=25, texture=30)),
@@ -226,10 +267,13 @@ def test_routine_and_shopping_outputs_have_no_banned_word_or_brand():
     )
     items = shopping.build_shopping_list([*routine.am, *routine.pm], [])
     texts = (
-        [item.name for item in routine.am]
-        + [item.name for item in routine.pm]
+        [item.display for item in routine.am]
+        + [item.display for item in routine.pm]
+        + [alt for item in (*routine.am, *routine.pm) for alt in item.alternatives]
         + [item.name for item in items]
         + routine.notes
+        + routine.am_notes
+        + routine.pm_notes
         + [copy.ROUTINE_FOOTER]
     )
 

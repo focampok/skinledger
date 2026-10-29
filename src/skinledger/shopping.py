@@ -12,6 +12,16 @@ from dataclasses import dataclass
 
 from skinledger.routine import RoutineItem
 
+CATEGORY_ORDER = (
+    "cleanser",
+    "serum",
+    "retinoid",
+    "exfoliant",
+    "eye cream",
+    "moisturizer",
+    "sunscreen",
+)
+
 
 @dataclass(slots=True)
 class ShoppingItem:
@@ -22,15 +32,21 @@ class ShoppingItem:
 def build_shopping_list(
     items: Iterable[RoutineItem], active_categories: Iterable[str]
 ) -> list[ShoppingItem]:
-    """Deduplicated categories, minus what the person's active products cover."""
+    """One line per product category, minus what active products already cover."""
     active = {str(category) for category in active_categories}
-    seen: set[str] = set()
-    result: list[ShoppingItem] = []
+    by_category: dict[str, list[str]] = {}
     for item in items:
         if not item.category or item.category in active:
             continue
-        if item.name in seen:
-            continue
-        seen.add(item.name)
-        result.append(ShoppingItem(name=item.name, category=item.category))
-    return result
+        names = by_category.setdefault(item.category, [])
+        for name in (item.name, *item.alternatives):
+            if name not in names:
+                names.append(name)
+
+    order = {category: index for index, category in enumerate(CATEGORY_ORDER)}
+    return [
+        ShoppingItem(name=" or ".join(names), category=category)
+        for category, names in sorted(
+            by_category.items(), key=lambda pair: order.get(pair[0], len(order))
+        )
+    ]

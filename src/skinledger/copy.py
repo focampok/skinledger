@@ -277,6 +277,8 @@ ROUTINE_ITEM_SOOTHING = "Soothing moisturizer"
 
 ROUTINE_ITEM_AVOID_TONERS = "Avoid alcohol-heavy toners"
 
+ROUTINE_EYE_NOTE = "Sleep and hydration also help."
+
 ROUTINE_ITEM_BHA = "Salicylic acid (BHA) cleanser"
 
 ROUTINE_ITEM_AHA = "Gentle exfoliant (AHA/PHA)"

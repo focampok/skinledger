@@ -2,12 +2,15 @@
 
 Pure functions: the latest capture's raw scores and the noise bands (already
 computed by noise.get_bands) are passed in. Unstable aspects are never chosen.
+Items are merged to one per category per slot, ordered by skincare step, and
+limited-night treatments carry their schedule. Advice is a slot note, never an
+item and never a shopping-list entry.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from skinledger import copy
 from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
@@ -16,35 +19,45 @@ from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
 # categories so the shopping list can drop what an active product already covers.
 Rule = tuple[str, str, str]
 
+_BHA = copy.ROUTINE_ITEM_BHA
+_AHA = copy.ROUTINE_ITEM_AHA
+_RETINOL = copy.ROUTINE_ITEM_RETINOL
+_GENTLE = copy.ROUTINE_ITEM_CLEANSER
+_MOISTURIZER = copy.ROUTINE_ITEM_MOISTURIZER
+_FRAGRANCE_FREE = copy.ROUTINE_ITEM_FRAGRANCE_FREE
+_SOOTHING = copy.ROUTINE_ITEM_SOOTHING
+_CERAMIDE = copy.ROUTINE_ITEM_CERAMIDE
+_GEL = copy.ROUTINE_ITEM_GEL
+_SPF = copy.ROUTINE_ITEM_SPF
+
 _OILY = (
     (copy.ROUTINE_ITEM_NIACINAMIDE, "serum", "AM/PM"),
-    (copy.ROUTINE_ITEM_GEL, "moisturizer", "AM/PM"),
+    (_GEL, "moisturizer", "AM/PM"),
 )
 _SUN = (
-    (copy.ROUTINE_ITEM_SPF, "sunscreen", "AM"),
+    (_SPF, "sunscreen", "AM"),
     (copy.ROUTINE_ITEM_VITAMIN_C, "serum", "AM"),
 )
-_RETINOL = (
-    (copy.ROUTINE_ITEM_RETINOL, "retinoid", "PM"),
-    (copy.ROUTINE_ITEM_SPF, "sunscreen", "AM"),
+_RETINOL_RULE = (
+    (_RETINOL, "retinoid", "PM"),
+    (_SPF, "sunscreen", "AM"),
 )
 _EYE = ((copy.ROUTINE_ITEM_CAFFEINE, "eye cream", "AM"),)
 
 _RULES: dict[str, tuple[Rule, ...]] = {
     "oiliness": _OILY,
     "pore": _OILY,
-    "moisture": ((copy.ROUTINE_ITEM_CERAMIDE, "moisturizer", "AM/PM"),),
+    "moisture": ((_CERAMIDE, "moisturizer", "AM/PM"),),
     "age_spot": _SUN,
     "radiance": _SUN,
     "redness": (
-        (copy.ROUTINE_ITEM_FRAGRANCE_FREE, "cleanser", "AM/PM"),
-        (copy.ROUTINE_ITEM_SOOTHING, "moisturizer", "AM/PM"),
-        (copy.ROUTINE_ITEM_AVOID_TONERS, "", "AM/PM"),
+        (_FRAGRANCE_FREE, "cleanser", "AM/PM"),
+        (_SOOTHING, "moisturizer", "AM/PM"),
     ),
-    "acne": ((copy.ROUTINE_ITEM_BHA, "cleanser", "PM"),),
-    "texture": ((copy.ROUTINE_ITEM_AHA, "exfoliant", "PM"),),
-    "wrinkle": _RETINOL,
-    "firmness": _RETINOL,
+    "acne": ((_BHA, "cleanser", "PM"),),
+    "texture": ((_AHA, "exfoliant", "PM"),),
+    "wrinkle": _RETINOL_RULE,
+    "firmness": _RETINOL_RULE,
     "dark_circle_v2": _EYE,
     "eye_bag": _EYE,
     "tear_trough": _EYE,
@@ -53,16 +66,35 @@ _RULES: dict[str, tuple[Rule, ...]] = {
 }
 
 _ALWAYS_AM = (
-    (copy.ROUTINE_ITEM_CLEANSER, "cleanser", "AM"),
-    (copy.ROUTINE_ITEM_MOISTURIZER, "moisturizer", "AM"),
-    (copy.ROUTINE_ITEM_SPF, "sunscreen", "AM"),
+    (_GENTLE, "cleanser", "AM"),
+    (_MOISTURIZER, "moisturizer", "AM"),
+    (_SPF, "sunscreen", "AM"),
 )
 _ALWAYS_PM = (
-    (copy.ROUTINE_ITEM_CLEANSER, "cleanser", "PM"),
-    (copy.ROUTINE_ITEM_MOISTURIZER, "moisturizer", "PM"),
+    (_GENTLE, "cleanser", "PM"),
+    (_MOISTURIZER, "moisturizer", "PM"),
 )
-_RETINOL_NAME = copy.ROUTINE_ITEM_RETINOL
-_EXFOLIANT_NAMES = (copy.ROUTINE_ITEM_AHA, copy.ROUTINE_ITEM_BHA)
+_EXFOLIANT_NAMES = (_AHA, _BHA)
+_EYE_ASPECTS = (
+    "dark_circle_v2",
+    "eye_bag",
+    "tear_trough",
+    "droopy_upper_eyelid",
+    "droopy_lower_eyelid",
+)
+
+# Skincare step order: cleanser, treatment/serum, eye cream, moisturizer, SPF.
+_STEP = {
+    "cleanser": 1,
+    "serum": 2,
+    "retinoid": 2,
+    "exfoliant": 2,
+    "eye cream": 3,
+    "moisturizer": 4,
+    "sunscreen": 5,
+}
+_MOISTURIZER_PRIORITY = (_SOOTHING, _CERAMIDE, _GEL, _MOISTURIZER)
+_SUNSCREEN_PRIORITY = (_SPF,)
 
 
 @dataclass(slots=True)
@@ -78,8 +110,11 @@ class RoutineItem:
     name: str
     category: str
     when: str
+    display: str
     aspect: str | None = None
     aspect_label: str | None = None
+    alternatives: list[str] = field(default_factory=list)
+    nights: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -98,6 +133,8 @@ class Routine:
     lowest: list[LowAspect]
     am: list[RoutineItem]
     pm: list[RoutineItem]
+    am_notes: list[str]
+    pm_notes: list[str]
     week: list[DayPlan]
     notes: list[str]
     acne_lowest: bool
@@ -112,9 +149,7 @@ def build_routine(
     band_map = bands if isinstance(bands, Mapping) else {}
     has_bands = bool(band_map)
     unstable = [
-        aspect
-        for aspect in NUMERIC_ASPECTS
-        if _is_unstable(band_map, aspect)
+        aspect for aspect in NUMERIC_ASPECTS if _is_unstable(band_map, aspect)
     ]
 
     if capture is None:
@@ -126,6 +161,8 @@ def build_routine(
             lowest=[],
             am=[],
             pm=[],
+            am_notes=[],
+            pm_notes=[],
             week=[],
             notes=[copy.ROUTINE_NO_CAPTURE],
             acne_lowest=False,
@@ -172,19 +209,38 @@ def build_routine(
                     name=name,
                     category=category,
                     when=when,
+                    display=name,
                     aspect=aspect,
                     aspect_label=ASPECT_LABELS[aspect],
                 )
             )
 
-    always_am = [RoutineItem(name, category, when) for name, category, when in _ALWAYS_AM]
-    always_pm = [RoutineItem(name, category, when) for name, category, when in _ALWAYS_PM]
-    am = _dedupe(
-        [item for item in specific if item.when in ("AM", "AM/PM")] + always_am
+    retinol = any(item.name == _RETINOL for item in specific)
+    aha = any(item.name == _AHA for item in specific)
+    bha = any(item.name == _BHA for item in specific)
+    redness = "redness" in lowest_aspects
+    retinol_nights = _night_names([0, 2, 4, 6]) if retinol else []
+    exfoliant_nights = (
+        _night_names([1, 3, 5][: 2 if redness else 3]) if (aha or bha) else []
     )
-    pm = _dedupe(
-        [item for item in specific if item.when in ("PM", "AM/PM")] + always_pm
+
+    always_am = [
+        RoutineItem(name, category, when, name) for name, category, when in _ALWAYS_AM
+    ]
+    always_pm = [
+        RoutineItem(name, category, when, name) for name, category, when in _ALWAYS_PM
+    ]
+    am = _merge_slot(
+        [item for item in specific if item.when in ("AM", "AM/PM")] + always_am,
+        retinol_nights,
+        exfoliant_nights,
     )
+    pm = _merge_slot(
+        [item for item in specific if item.when in ("PM", "AM/PM")] + always_pm,
+        retinol_nights,
+        exfoliant_nights,
+    )
+    am_notes, pm_notes = _advice_notes(lowest_aspects)
 
     return Routine(
         capture_id=int(capture["id"]) if capture.get("id") is not None else None,
@@ -194,7 +250,9 @@ def build_routine(
         lowest=lowest,
         am=am,
         pm=pm,
-        week=_build_week(am, pm, lowest_aspects),
+        am_notes=am_notes,
+        pm_notes=pm_notes,
+        week=_build_week(am, pm, retinol_nights, exfoliant_nights),
         notes=notes,
         acne_lowest=bool(lowest_aspects) and lowest_aspects[0] == "acne",
         unstable_excluded=bool(unstable),
@@ -229,40 +287,171 @@ def _band(bands: Mapping[str, Mapping[str, object]], aspect: str) -> float | Non
     return float(entry["band"])
 
 
-def _dedupe(items: list[RoutineItem]) -> list[RoutineItem]:
+def _night_names(indices: list[int]) -> list[str]:
+    return [copy.ROUTINE_DAYS[index] for index in indices]
+
+
+def _advice_notes(lowest_aspects: list[str]) -> tuple[list[str], list[str]]:
+    """Advice is a note under the slot, never an item and never shopped for."""
+    am_notes: list[str] = []
+    pm_notes: list[str] = []
+    if "redness" in lowest_aspects:
+        am_notes.append(copy.ROUTINE_ITEM_AVOID_TONERS)
+        pm_notes.append(copy.ROUTINE_ITEM_AVOID_TONERS)
+    if any(aspect in _EYE_ASPECTS for aspect in lowest_aspects):
+        am_notes.append(copy.ROUTINE_EYE_NOTE)
+    return am_notes, pm_notes
+
+
+def _merge_slot(
+    candidates: list[RoutineItem],
+    retinol_nights: list[str],
+    exfoliant_nights: list[str],
+) -> list[RoutineItem]:
+    """One merged item per category, then ordered by skincare step."""
+    groups: dict[str, list[RoutineItem]] = {}
+    order: list[str] = []
+    for item in candidates:
+        if item.category not in groups:
+            groups[item.category] = []
+            order.append(item.category)
+        groups[item.category].append(item)
+
+    merged = [
+        _merge_group(category, groups[category], retinol_nights, exfoliant_nights)
+        for category in order
+    ]
+    merged.sort(key=lambda item: (_STEP.get(item.category, 9), order.index(item.category)))
+    return merged
+
+
+def _merge_group(
+    category: str,
+    items: list[RoutineItem],
+    retinol_nights: list[str],
+    exfoliant_nights: list[str],
+) -> RoutineItem:
+    specific = [item for item in items if item.aspect is not None]
+    generic = [item for item in items if item.aspect is None]
+    alternatives: list[RoutineItem] = []
+
+    if category == "moisturizer":
+        pool = specific or generic
+        primary = _pick(pool, _MOISTURIZER_PRIORITY)
+        alternatives = _others(pool, primary)
+    elif category == "cleanser":
+        daily = [item for item in specific if item.name != _BHA]
+        if daily:
+            primary = daily[0]
+        elif generic:
+            primary = generic[0]
+        else:
+            primary = specific[0]
+        alternatives = [item for item in specific if item.name != primary.name]
+    elif category == "sunscreen":
+        pool = specific or generic
+        primary = _pick(pool, _SUNSCREEN_PRIORITY)
+        alternatives = _others(pool, primary)
+    else:
+        pool = specific or generic
+        primary = pool[0]
+        alternatives = _others(pool, primary)
+
+    alt_names = _unique(item.name for item in alternatives)
+    variant_nights: dict[str, list[str]] = {}
+    for name in alt_names:
+        if name == _BHA:
+            variant_nights[name] = exfoliant_nights
+
+    nights: list[str] = []
+    if primary.name == _RETINOL:
+        nights = retinol_nights
+    elif primary.name in _EXFOLIANT_NAMES:
+        nights = exfoliant_nights
+
+    pieces = [primary.name]
+    for name in alt_names:
+        if name in variant_nights:
+            pieces.append(f"{name} — {', '.join(variant_nights[name])}")
+        else:
+            pieces.append(name)
+    if nights:
+        display = f"{primary.name} — {', '.join(nights)}"
+    else:
+        display = " or ".join(pieces)
+
+    return RoutineItem(
+        name=primary.name,
+        category=category,
+        when=primary.when,
+        display=display,
+        aspect=primary.aspect,
+        aspect_label=primary.aspect_label,
+        alternatives=alt_names,
+        nights=nights,
+    )
+
+
+def _pick(items: list[RoutineItem], priority: tuple[str, ...]) -> RoutineItem:
+    for name in priority:
+        for item in items:
+            if item.name == name:
+                return item
+    return items[0]
+
+
+def _others(items: list[RoutineItem], primary: RoutineItem) -> list[RoutineItem]:
+    return [item for item in items if item.name != primary.name]
+
+
+def _unique(values) -> list[str]:
     seen: set[str] = set()
-    result: list[RoutineItem] = []
-    for item in items:
-        if item.name in seen:
+    result: list[str] = []
+    for value in values:
+        if value in seen:
             continue
-        seen.add(item.name)
-        result.append(item)
+        seen.add(value)
+        result.append(value)
     return result
 
 
 def _build_week(
-    am: list[RoutineItem], pm: list[RoutineItem], lowest_aspects: list[str]
+    am: list[RoutineItem],
+    pm: list[RoutineItem],
+    retinol_nights: list[str],
+    exfoliant_nights: list[str],
 ) -> list[DayPlan]:
-    """Alternate retinol and AHA/BHA nights; redness caps exfoliating at 2 nights."""
-    pm_names = [item.name for item in pm]
-    retinol = _RETINOL_NAME in pm_names
-    exfoliants = [name for name in _EXFOLIANT_NAMES if name in pm_names]
-    redness = "redness" in lowest_aspects
-    active = {_RETINOL_NAME, *exfoliants}
-    pm_base = [name for name in pm_names if name not in active]
+    """Keep retinol and AHA/BHA on separate nights; BHA replaces the cleanser."""
+    cleanser = next((item for item in pm if item.category == "cleanser"), None)
+    bha = _BHA if cleanser is not None and _BHA in cleanser.alternatives else None
+    aha = _AHA if any(item.name == _AHA for item in pm) else None
+    retinol = _RETINOL if any(item.name == _RETINOL for item in pm) else None
+    pm_daily = [item.name for item in pm if not item.nights]
 
-    retinol_nights = {0, 2, 4, 6} if retinol else set()
-    exfoliant_nights: set[int] = set()
-    if exfoliants:
-        count = 2 if redness else 3
-        exfoliant_nights = set([1, 3, 5][:count]) - retinol_nights
+    category_by_name: dict[str, str] = {}
+    for item in pm:
+        category_by_name[item.name] = item.category
+    if bha:
+        category_by_name[bha] = "cleanser"
+    if aha:
+        category_by_name[aha] = "exfoliant"
+    if retinol:
+        category_by_name[retinol] = "retinoid"
 
     week: list[DayPlan] = []
-    for index, day in enumerate(copy.ROUTINE_DAYS):
-        nightly = list(pm_base)
-        if index in retinol_nights:
-            nightly.append(_RETINOL_NAME)
-        if index in exfoliant_nights:
-            nightly.extend(exfoliants)
-        week.append(DayPlan(day=day, am=[item.name for item in am], pm=nightly))
+    for day in copy.ROUTINE_DAYS:
+        nightly = list(pm_daily)
+        if day in retinol_nights and retinol:
+            nightly.append(retinol)
+        if day in exfoliant_nights:
+            if bha and cleanser is not None:
+                nightly = [
+                    bha if name == cleanser.name else name for name in nightly
+                ]
+            if aha:
+                nightly.append(aha)
+        nightly.sort(key=lambda name: _STEP.get(category_by_name.get(name, ""), 9))
+        week.append(
+            DayPlan(day=day, am=[item.name for item in am], pm=nightly)
+        )
     return week

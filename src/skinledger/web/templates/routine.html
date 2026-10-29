@@ -58,21 +58,31 @@
       <h2>{{ routine_am_title }}</h2>
       <ul>
         {% for item in routine.am %}
-        <li>{{ item.name }}
-          {% if item.aspect_label %}<small>{{ item.aspect_label }}</small>{% else %}<small>{{ routine_always }}</small>{% endif %}
+        <li>{{ item.display }}
+          {% if not item.alternatives and not item.nights %}
+            {% if item.aspect_label %}<small>{{ item.aspect_label }}</small>{% else %}<small>{{ routine_always }}</small>{% endif %}
+          {% endif %}
         </li>
         {% endfor %}
       </ul>
+      {% for note in routine.am_notes %}
+      <p class="routine-note">{{ note }}</p>
+      {% endfor %}
     </article>
     <article class="routine-card">
       <h2>{{ routine_pm_title }}</h2>
       <ul>
         {% for item in routine.pm %}
-        <li>{{ item.name }}
-          {% if item.aspect_label %}<small>{{ item.aspect_label }}</small>{% else %}<small>{{ routine_always }}</small>{% endif %}
+        <li>{{ item.display }}
+          {% if not item.alternatives and not item.nights %}
+            {% if item.aspect_label %}<small>{{ item.aspect_label }}</small>{% else %}<small>{{ routine_always }}</small>{% endif %}
+          {% endif %}
         </li>
         {% endfor %}
       </ul>
+      {% for note in routine.pm_notes %}
+      <p class="routine-note">{{ note }}</p>
+      {% endfor %}
     </article>
   </section>
 
