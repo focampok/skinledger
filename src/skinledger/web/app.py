@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
+from skinledger import copy
 from skinledger.db import init_db
 from skinledger.logs import configure_logging
 from skinledger.pipeline import resume_pending
@@ -55,6 +56,16 @@ async def healthz() -> dict[str, bool]:
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "index.html", home_context(request))
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy(request: Request) -> HTMLResponse:
+    """Privacy page; the capture page links here."""
+    return templates.TemplateResponse(
+        request,
+        "privacy.html",
+        {"privacy_title": copy.PRIVACY_TITLE, "privacy_text": copy.PRIVACY_TEXT},
+    )
 
 
 @app.get("/offline", response_class=HTMLResponse)

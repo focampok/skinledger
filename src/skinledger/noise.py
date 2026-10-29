@@ -15,7 +15,7 @@ from skinledger.aspects import NUMERIC_ASPECTS
 from skinledger.db import connect, db_path, init_db
 from skinledger.youcam import SKIN_TYPE_REGIONS
 
-# Product heuristic, not a YouCam figure: below this every change is treated as noise.
+# Product heuristic, not a YouCam figure: below this every change is counted as noise.
 NOISE_FLOOR = 3.0
 # Product heuristic, not a YouCam figure: above this an aspect cannot be judged at all.
 UNSTABLE_BAND = 10.0

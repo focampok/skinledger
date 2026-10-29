@@ -42,13 +42,13 @@ DELETE_CONFIRM_MISMATCH = "Type the profile name exactly to confirm."
 DEMO_READ_ONLY = "This sample profile is read-only."
 
 DELETED_MESSAGE = (
-    "Deleted from SkinLedger. Your photo was never stored here. To ask YouCam to "
-    "delete the uploaded photo sooner, contact Perfect Corp (YouCam API support)."
+    "Deleted from SkinLedger. Your photo was never stored here. To ask Perfect Corp to "
+    "delete the uploaded photo sooner, contact their API support."
 )
 
 PRIVACY_NOTE = (
-    "Your photo is sent to the YouCam API (Perfect Corp) for analysis and is never stored "
-    "by SkinLedger. YouCam may keep it for up to 30 days. See Privacy."
+    "Your photo is sent to our skin-analysis provider for analysis and is never stored "
+    "by SkinLedger. It may be kept for up to 30 days. See Privacy."
 )
 
 UPLOAD_TIP = (
@@ -62,7 +62,7 @@ BASELINE_DONE = (
 )
 
 BASELINE_INTRO = (
-    "Estimated from 2 captures on day 1. Changes smaller than the band are treated as noise. "
+    "Estimated from 2 captures on day 1. Changes smaller than the band are counted as noise. "
     "Unstable aspects are shown but not used for product verdicts."
 )
 
@@ -290,3 +290,19 @@ ROUTINE_ITEM_CAFFEINE = "Caffeine eye cream"
 ROUTINE_ITEM_CLEANSER = "Gentle cleanser"
 
 ROUTINE_ITEM_MOISTURIZER = "Moisturizer"
+
+# -- Privacy page (P13 audit prerequisite; full P15 page can extend it) ------
+
+PRIVACY_TITLE = "Privacy"
+
+PRIVACY_TEXT = (
+    "SkinLedger is a hackathon demo for adults 18+. We never store your photo. "
+    "When you run an analysis, your photo is held in memory only long enough to send it "
+    "to the YouCam API (Perfect Corp) for skin analysis, then discarded. We keep your "
+    "display name, consent, the 15 skin scores plus skin type and the analysis masks, "
+    "linked to a cookie in your browser; nobody else can see them. YouCam may keep the "
+    "uploaded photo for up to 30 days under its own terms. Your photo is never sent to "
+    "any other AI or service and is never used for training. Only analyze your own face. "
+    "Delete your profile at any time from the People page; that removes everything "
+    "SkinLedger stores about you."
+)

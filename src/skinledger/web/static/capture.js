@@ -71,10 +71,10 @@
         body: JSON.stringify({ level: level, event: event, detail: detail || "" }),
         keepalive: true,
       }).catch(function () {
-        /* Diagnostics must never break the capture flow. */
+        /* Event logging must never break the capture flow. */
       });
     } catch (error) {
-      /* Diagnostics must never break the capture flow. */
+      /* Event logging must never break the capture flow. */
     }
   }
 
