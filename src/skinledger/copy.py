@@ -60,3 +60,15 @@ BASELINE_DONE = (
     "That's how much your score moves on its own — SkinLedger only counts changes bigger "
     "than this."
 )
+
+BASELINE_INTRO = (
+    "Estimated from 2 captures on day 1. Changes smaller than the band are treated as noise. "
+    "Unstable aspects are shown but not used for product verdicts."
+)
+
+BASELINE_UNSTABLE_HINT = (
+    "Some scores move a lot between back-to-back photos. Same place, same light and same "
+    "distance keep the band tight."
+)
+
+NO_BAND_YET = "Take 2 baseline captures first."

@@ -8,7 +8,7 @@ from pathlib import PurePosixPath
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
-from skinledger import copy, guards, imaging, logs, pipeline, usage
+from skinledger import copy, guards, imaging, logs, noise, pipeline, usage
 from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
 from skinledger.config import Settings, get_settings
 from skinledger.db import connect, db_path
@@ -443,6 +443,12 @@ def _render_status(
         }
         for row in mask_rows
     ]
+    # The second baseline capture is when the day-1 band first exists.
+    baseline_ready = (
+        capture["status"] == "success"
+        and bool(capture["is_baseline_pair"])
+        and noise.has_band(capture["person_id"], conn=conn)
+    )
     return templates.TemplateResponse(
         request,
         "capture_status.html",
@@ -452,6 +458,7 @@ def _render_status(
             "scores": _score_rows(conn, capture_id),
             "analyses_left": analyses_left,
             "masks": masks,
+            "baseline_ready": baseline_ready,
         },
         status_code=status_code,
     )

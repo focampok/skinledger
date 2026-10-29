@@ -8,7 +8,8 @@ import shutil
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from skinledger import copy, guards, logs, pipeline, usage
+from skinledger import copy, guards, logs, noise, pipeline, usage
+from skinledger.aspects import ASPECT_LABELS, NUMERIC_ASPECTS
 from skinledger.config import get_settings
 from skinledger.db import connect, db_path
 from skinledger.web.forms import read_urlencoded_form
@@ -191,6 +192,68 @@ async def accept_consent(request: Request, person_id: int):
     finally:
         conn.close()
     return RedirectResponse("/people", status_code=303)
+
+
+@router.get("/people/{person_id}/baseline", response_class=HTMLResponse)
+async def baseline_page(request: Request, person_id: int) -> HTMLResponse:
+    """Show the day-1 noise band: both captures, the band per aspect and how stable it is."""
+    conn = connect(db_path())
+    try:
+        person = guards.authorize_person(conn, request, person_id)
+        if person is None:
+            raise HTTPException(status_code=404, detail="Person not found.")
+        admin = guards.is_admin_request(request)
+        if person["is_demo_public"] and not admin:
+            raise HTTPException(status_code=403, detail=copy.DEMO_READ_ONLY)
+        report = noise.read_band_report(person_id, conn=conn)
+    finally:
+        conn.close()
+
+    rows = _band_rows(report)
+    return templates.TemplateResponse(
+        request,
+        "baseline.html",
+        {
+            "person": dict(person),
+            "report": report,
+            "rows": rows,
+            "has_unstable": any(row["unstable"] for row in rows),
+            "baseline_intro": copy.BASELINE_INTRO,
+            "unstable_hint": copy.BASELINE_UNSTABLE_HINT,
+            "no_band_yet": copy.NO_BAND_YET,
+        },
+    )
+
+
+def _band_rows(report: noise.BandReport | None) -> list[dict[str, object]]:
+    """One table row per numeric aspect; skin_type is categorical and has no band."""
+    if report is None:
+        return []
+    rows: list[dict[str, object]] = []
+    for aspect in NUMERIC_ASPECTS:
+        band = report.bands.get(aspect)
+        first, second = report.scores.get(aspect, (None, None))
+        if band is None:
+            status = "—"
+        elif band["unstable"]:
+            status = "Unstable for your setup"
+        else:
+            status = "Stable"
+        rows.append(
+            {
+                "label": ASPECT_LABELS[aspect],
+                "first": _format_score(first),
+                "second": _format_score(second),
+                "band": "—" if band is None else f"{float(band['band']):.1f}",
+                "status": status,
+                "unstable": bool(band is not None and band["unstable"]),
+            }
+        )
+    return rows
+
+
+def _format_score(value: float | None) -> str:
+    return "—" if value is None else f"{float(value):.1f}"
 
 
 @router.get("/people/{person_id}/delete", response_class=HTMLResponse)

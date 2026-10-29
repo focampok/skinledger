@@ -14,7 +14,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from skinledger import copy, logs, usage
+from skinledger import copy, logs, noise, usage
 from skinledger.aspects import NUMERIC_ASPECTS
 from skinledger.config import Settings, get_settings
 from skinledger.db import connect, db_path
@@ -284,6 +284,32 @@ async def _store_success(
         except sqlite3.Error:
             conn.rollback()
             raise
+
+        # The band is derived data: failing to compute it must never fail the analysis.
+        _record_noise_band(conn, capture)
+
+
+def _record_noise_band(conn: sqlite3.Connection, capture: sqlite3.Row) -> None:
+    """Recompute the day-1 band once the second baseline capture succeeds."""
+    if not capture["is_baseline_pair"]:
+        return
+    try:
+        report = noise.compute_band(capture["person_id"], conn=conn)
+    except Exception:  # never let derived data turn a successful analysis into an error
+        conn.rollback()
+        logs.log_event(
+            "noise.error", level="warning", person_id=capture["person_id"], reason="db"
+        )
+        return
+    if report is None:
+        return
+    logs.log_event(
+        "noise.band",
+        person_id=capture["person_id"],
+        capture_id=capture["id"],
+        aspects=len(report.bands),
+        unstable=sum(1 for value in report.bands.values() if value["unstable"]),
+    )
 
 
 def _capture_exists(conn: sqlite3.Connection, capture_id: int) -> bool:

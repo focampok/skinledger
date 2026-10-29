@@ -32,6 +32,10 @@
   </table>
   {% endif %}
 
+  {% if baseline_ready %}
+  <p><a href="/people/{{ capture.person_id }}/baseline">See your day-1 baseline</a></p>
+  {% endif %}
+
   {% if analyses_left is not none %}
   <p><small>You have {{ analyses_left }} analysis{{ '' if analyses_left == 1 else 'es' }} left</small></p>
   {% endif %}
