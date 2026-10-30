@@ -56,6 +56,34 @@ UPLOAD_TIP = (
     "tracking, use the guided capture — same light, same distance."
 )
 
+# P16a: guided-capture guidance. One instruction is shown at a time, chosen in
+# GUIDANCE_ORDER; the browser only applies these strings, so the wording and the
+# priority live here and in the tests.
+CAPTURE_TIPS = (
+    "Light in front of you, not behind you.",
+    "Phone at eye level, an arm's length away.",
+    "Glasses off and hair off your forehead.",
+)
+
+GUIDANCE_TOOSMALL = "Move closer: fill the oval with your face"
+GUIDANCE_OUTOFBOUNDARY = "Center your face in the oval"
+GUIDANCE_LIGHTING = "Face a window or lamp; avoid light from behind"
+GUIDANCE_FRONTAL = "Look straight at the camera, chin level"
+GUIDANCE_ALL_GOOD = "Hold still..."
+
+# Priority: position before lighting before frontal.
+GUIDANCE_ORDER = ("position", "lighting", "frontal")
+
+GUIDANCE_CHIPS = (
+    ("position", "Position"),
+    ("lighting", "Light"),
+    ("frontal", "Angle"),
+)
+
+# After this long without all three good, offer the upload fallback.
+CAPTURE_FALLBACK_SECONDS = 45
+CAPTURE_FALLBACK_TEXT = "Having trouble? Upload a selfie instead"
+
 BASELINE_DONE = (
     "That's how much your score moves on its own — SkinLedger only counts changes bigger "
     "than this."

@@ -692,3 +692,53 @@ def test_cookie_setters_are_httponly_secure_and_lax():
         assert "HttpOnly" in header
         assert "Secure" in header
         assert "samesite=lax" in header.lower()
+
+
+# -- P16a: the upload source enforces the same guards as the guided camera ----
+
+
+def test_upload_source_requires_consent(env, web, stub):
+    person_id = seed_person(consent=False)
+    login(web)
+
+    response = post_capture(web, person_id, source="upload")
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == copy.CONSENT_REQUIRED
+    assert stub.calls == []
+
+
+def test_upload_source_requires_the_invite_code(env, web, stub):
+    person_id = seed_person()
+    login(web, invite=None)
+
+    response = post_capture(web, person_id, source="upload")
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == copy.INVITE_REQUIRED
+    assert stub.calls == []
+
+
+def test_upload_source_counts_against_the_daily_unit_cap(env, web, stub):
+    env.daily_unit_cap = 32
+    env.max_real_analyses_per_person = 10
+    person_id = seed_person()
+    login(web)
+    for _ in range(2):
+        accepted = post_capture(web, person_id, source="upload")
+        assert accepted.status_code == 202
+        wait_final(web, latest_capture()["id"])
+
+    response = post_capture(web, person_id, source="upload")
+
+    assert response.status_code == 429
+
+
+def test_upload_source_requires_attestation(env, web, stub):
+    person_id = seed_person()
+    login(web)
+
+    response = post_capture(web, person_id, source="upload", attested=0)
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == copy.ATTESTATION_REQUIRED

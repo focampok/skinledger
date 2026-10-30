@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import io
 from pathlib import Path
 
@@ -419,3 +420,122 @@ def test_capture_template_defines_the_sdk_hooks_before_the_script():
     assert "<script>" not in template
     assert " onload=" not in template
     assert " onerror=" not in template
+
+
+# -- P16a: live guidance, chips, tips and the upload fallback ----------------
+
+
+def test_guidance_messages_and_priority_come_from_copy(env, web):
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert response.status_code == 200
+    assert copy.GUIDANCE_ORDER == ("position", "lighting", "frontal")
+    assert 'data-guidance-order="position,lighting,frontal"' in response.text
+    assert f'data-msg-toosmall="{copy.GUIDANCE_TOOSMALL}"' in response.text
+    assert f'data-msg-outofboundary="{copy.GUIDANCE_OUTOFBOUNDARY}"' in response.text
+    assert f'data-msg-lighting="{copy.GUIDANCE_LIGHTING}"' in response.text
+    assert f'data-msg-frontal="{copy.GUIDANCE_FRONTAL}"' in response.text
+    assert f'data-msg-all-good="{copy.GUIDANCE_ALL_GOOD}"' in response.text
+    assert copy.GUIDANCE_TOOSMALL == "Move closer: fill the oval with your face"
+    assert copy.GUIDANCE_OUTOFBOUNDARY == "Center your face in the oval"
+    assert copy.GUIDANCE_LIGHTING == "Face a window or lamp; avoid light from behind"
+    assert copy.GUIDANCE_FRONTAL == "Look straight at the camera, chin level"
+    assert copy.GUIDANCE_ALL_GOOD == "Hold still..."
+
+
+def test_three_status_chips_render_in_order(env, web):
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert 'id="guidance-chips"' in response.text
+    positions = [
+        response.text.index(f'data-chip="{key}"') for key, _ in copy.GUIDANCE_CHIPS
+    ]
+    assert positions == sorted(positions)
+    assert copy.GUIDANCE_CHIPS == (
+        ("position", "Position"),
+        ("lighting", "Light"),
+        ("frontal", "Angle"),
+    )
+    for _, label in copy.GUIDANCE_CHIPS:
+        assert f">{label}<" in response.text
+
+
+def test_capture_js_shows_one_message_in_the_rendered_order(env, web):
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+
+    # The browser must follow the order attribute instead of hard-coding a priority.
+    assert 'getAttribute("data-guidance-order")' in source
+    assert "for (var i = 0; i < guidanceOrder.length; i += 1)" in source
+    # One message at a time: guidanceText is assigned once per quality event.
+    assert "guidanceText.textContent = guidance.text" in source
+    assert 'classList.toggle("all-good"' in source
+
+
+def test_fallback_flag_is_45_seconds_and_scoped_to_upload(env, web):
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert copy.CAPTURE_FALLBACK_SECONDS == 45
+    assert 'data-fallback-ms="45000"' in response.text
+    assert copy.CAPTURE_FALLBACK_TEXT in response.text
+    assert 'id="capture-fallback"' in response.text
+
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+    assert 'getAttribute("data-fallback-ms")' in source
+    assert "startFallbackTimer" in source
+    assert "clearFallbackTimer" in source
+    assert "selectTab(\"upload\")" in source
+
+
+def test_fallback_is_hidden_when_upload_is_disabled(env, web):
+    env.allow_upload = False
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert 'id="capture-fallback"' not in response.text
+
+
+def test_three_tips_appear_on_both_tabs(env, web):
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert len(copy.CAPTURE_TIPS) == 3
+    rendered = html.unescape(response.text)
+    for tip in copy.CAPTURE_TIPS:
+        assert rendered.count(tip) == 2, tip
+    assert 'id="capture-tips"' in response.text
+
+
+def test_upload_input_opens_the_phone_camera(env, web):
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert 'accept="image/*"' in response.text
+    assert 'capture="user"' in response.text
+
+
+def test_upload_never_reuses_the_camera_kit_blob(env, web):
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+
+    # The upload click handler must send the picked File, not an earlier Kit blob.
+    assert "var file = fileInput.files && fileInput.files[0];" in source
+    assert 'sendImage(file, "upload");' in source
+    assert "sendImage(objectUrl" not in source
+
+
+def test_camera_kit_auto_capture_needs_no_shutter_call(env, web):
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+
+    # The SDK captures on its own in skincare mode; the page only opens and closes it.
+    assert "YMK.init(" in source
+    assert "YMK.openCameraKit(" in source
+    for shutter in ("takePhoto", "YMK.capture", "snapshot"):
+        assert shutter not in source

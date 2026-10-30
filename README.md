@@ -17,6 +17,26 @@ People wonder about their skin right before a purchase, and right when they are 
 5. **Verdict at day 14 and day 28.** Keep, No measurable change → reconsider before rebuying, or Worse → pause & consult. [PLANNED]
 6. **AM/PM routine** from fixed aspect → ingredient-category rules, plus a generic shopping list (no brands). [PLANNED]
 
+## Guided capture
+The capture page (`/people/{id}/capture`) shows a three-bullet tips card before the
+camera opens — light in front of you, phone at eye level at an arm's length, glasses
+off and hair off your forehead. While the Kit runs, one plain-English instruction is
+shown at a time, chosen in a fixed priority: **position** (`Move closer` /
+`Center your face`) before **lighting** (`Face a window or lamp`) before **angle**
+(`Look straight at the camera`). Three chips — Position, Light, Angle — turn green
+independently, and when all three are good the panel says `Hold still...` in green.
+
+The SDK captures the photo itself in `skincare` mode; the page never calls a shutter
+API, so capture stays automatic. If all three chips are not green within 45 seconds,
+the page offers "Having trouble? Upload a selfie instead", which switches to the
+upload tab for the same person, with the same consent, attestation, invite check and
+unit caps. The upload input uses `accept="image/*" capture="user"` so a phone opens
+its camera directly, and it sends the file the user picked — never an earlier Kit blob.
+
+The wording and the priority order live in `copy.py` (`GUIDANCE_*`, `GUIDANCE_ORDER`,
+`CAPTURE_TIPS`, `CAPTURE_FALLBACK_SECONDS`) and are rendered as data attributes, so
+the page and the tests share one source of truth.
+
 ## Why it isn't a wrapper
 - **It measures its own noise.** On day 1, two guided captures of the same face, three minutes apart under the same light, are compared. In one real day-1 pair (the author's own), pore moved by +17.3, acne +15.0, radiance -7.9, oiliness +7.5, firmness +6.7, droopy upper eyelid -6.2, tear trough -5.5 and droopy lower eyelid +5.2; the other aspects moved 3.5 points or less, and skin type was identical. This is one person's measurement, not a general accuracy claim. It is why SkinLedger tells you which metrics are reliable for you before it gives a verdict.
 - **`raw_score`, not the display score.** The API documents the display score as adjusted to look more favourable. SkinLedger tracks only `raw_score`.
@@ -42,7 +62,7 @@ People wonder about their skin right before a purchase, and right when they are 
 
 ## YouCam APIs used
 - **YouCam AI Skin Analysis API, V2, SD** (15 numeric aspects with `raw_score`, plus skin type). The asynchronous 4-step flow: `POST /s2s/v2.0/file`, `PUT` the bytes to the signed URL, `POST /s2s/v2.0/task/skin-analysis`, then `GET /s2s/v2.0/task/skin-analysis/{task_id}` until `success` or `error`. The endpoint version is a variable.
-- **YouCam JS Camera Kit v2.5**, loaded from the vendor CDN, in `skincare` mode with strict quality checks.
+- **YouCam JS Camera Kit v2.5**, loaded from the vendor CDN, in `skincare` mode with strict quality checks. The SDK captures the photo by itself once its quality phases pass, and emits `faceQualityChanged` events that drive the on-page guidance panel.
 
 Powered by YouCam API.
 

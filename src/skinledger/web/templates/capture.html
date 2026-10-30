@@ -25,6 +25,48 @@
   [data-tab-panel][hidden] {
     display: none;
   }
+  .tips-card {
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+  .tips-card ul {
+    margin: 0.35rem 0 0;
+  }
+  #guidance-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.5rem;
+  }
+  #guidance-text.all-good {
+    color: #1b7f3b;
+  }
+  .chips {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+  .chip {
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 999px;
+    padding: 0.15rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--pico-muted-color);
+  }
+  .chip.good {
+    border-color: #1b7f3b;
+    color: #1b7f3b;
+    font-weight: 600;
+  }
+  .capture-primary {
+    font-size: 1.15rem;
+    padding: 0.8rem 1.5rem;
+    width: 100%;
+    max-width: 420px;
+  }
 </style>
 <script src="/static/capture_boot.js"></script>
 <script src="/static/capture.js" defer></script>
@@ -68,7 +110,17 @@
   </div>
 
   <section data-tab-panel="guided">
+    <div class="tips-card" id="capture-tips">
+      <strong>Before you start</strong>
+      <ul>
+        {% for tip in capture_tips %}
+        <li>{{ tip }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
     <div id="YMK-module"></div>
+
     <p id="baseline-step" {% if baseline_step is none %}hidden{% endif %}>
       {% if baseline_step == 1 %}
       Baseline: analysis 1 of 2
@@ -76,8 +128,36 @@
       Analysis 2 of 2 (same place, same light)
       {% endif %}
     </p>
-    <button type="button" id="start-capture" disabled>Start capture</button>
+
+    <div
+      id="capture-guidance"
+      data-guidance-order="{{ guidance_order }}"
+      data-fallback-ms="{{ capture_fallback_ms }}"
+      data-msg-toosmall="{{ guidance_toosmall }}"
+      data-msg-outofboundary="{{ guidance_outofboundary }}"
+      data-msg-lighting="{{ guidance_lighting }}"
+      data-msg-frontal="{{ guidance_frontal }}"
+      data-msg-all-good="{{ guidance_all_good }}"
+    >
+      <p id="guidance-text" role="status" aria-live="polite"></p>
+      <ul class="chips" id="guidance-chips">
+        {% for key, label in guidance_chips %}
+        <li class="chip" data-chip="{{ key }}">{{ label }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <button type="button" id="start-capture" class="capture-primary" disabled>
+      Start capture
+    </button>
     <p id="camera-help" role="status"></p>
+
+    {% if allow_upload %}
+    <p id="capture-fallback" hidden>
+      <a href="#upload" id="capture-fallback-link">{{ capture_fallback_text }}</a>
+    </p>
+    {% endif %}
+
     <label>
       Camera language
       <select id="camera-language">
@@ -89,7 +169,15 @@
 
   {% if allow_upload %}
   <section data-tab-panel="upload" hidden>
-    <input type="file" id="photo" accept="image/jpeg,image/png">
+    <div class="tips-card">
+      <strong>Before you start</strong>
+      <ul>
+        {% for tip in capture_tips %}
+        <li>{{ tip }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <input type="file" id="photo" accept="image/*" capture="user">
     <button type="button" id="send-upload" disabled>Analyze this photo</button>
     <p><small>{{ upload_tip }}</small></p>
   </section>

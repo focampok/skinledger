@@ -28,6 +28,33 @@
   var previewImage = document.getElementById("preview-image");
   var overlay = document.getElementById("preview-overlay");
   var maskSelect = document.getElementById("mask-select");
+  var guidanceEl = document.getElementById("capture-guidance");
+  var guidanceText = document.getElementById("guidance-text");
+  var fallbackEl = document.getElementById("capture-fallback");
+  var fallbackLink = document.getElementById("capture-fallback-link");
+
+  var chipEls = {};
+  document.querySelectorAll("[data-chip]").forEach(function (el) {
+    chipEls[el.getAttribute("data-chip")] = el;
+  });
+
+  // The wording and the priority order are rendered from copy.py, so the tests can
+  // check them without a browser; this file only applies them in that order.
+  var guidanceMessages = guidanceEl
+    ? {
+        toosmall: guidanceEl.getAttribute("data-msg-toosmall"),
+        outofboundary: guidanceEl.getAttribute("data-msg-outofboundary"),
+        lighting: guidanceEl.getAttribute("data-msg-lighting"),
+        frontal: guidanceEl.getAttribute("data-msg-frontal"),
+        allGood: guidanceEl.getAttribute("data-msg-all-good"),
+      }
+    : null;
+  var guidanceOrder = guidanceEl && guidanceEl.getAttribute("data-guidance-order")
+    ? guidanceEl.getAttribute("data-guidance-order").split(",")
+    : ["position", "lighting", "frontal"];
+  var fallbackMs = guidanceEl
+    ? Number(guidanceEl.getAttribute("data-fallback-ms")) || 45000
+    : 45000;
 
   var MAX_BYTES = 10 * 1024 * 1024;
   var SIZE_MESSAGE =
@@ -46,6 +73,9 @@
   var pollTimer = null;
   var handledCaptureId = null;
   var lastQualityLog = 0;
+  var allGood = false;
+  var fallbackTimer = null;
+  var fallbackShown = false;
 
   function errorText(error) {
     if (error && typeof error.message === "string") {
@@ -366,6 +396,8 @@
     if (help) {
       help.textContent = "Camera open. Hold still and look at the camera.";
     }
+    // The 45 s clock runs from the moment the camera is usable.
+    startFallbackTimer();
   }
 
   function onLoading(state) {
@@ -423,6 +455,82 @@
     logLifecycle("camera_closed", "event=cameraClosed");
   }
 
+  function qualityStatus(state) {
+    var hasFace = Boolean(state) && state.hasFace !== false;
+    var position =
+      hasFace &&
+      state.position !== "toosmall" &&
+      state.position !== "outofboundary" &&
+      state.position !== "notgood";
+    var lighting = hasFace && state.lighting !== "notgood";
+    var frontal = hasFace && state.frontal !== "notgood";
+    return {
+      hasFace: hasFace,
+      position: position,
+      lighting: lighting,
+      frontal: frontal,
+      allGood: position && lighting && frontal,
+    };
+  }
+
+  // One instruction at a time, first failing check in guidanceOrder wins.
+  function guidanceFor(state, status) {
+    if (!guidanceMessages) {
+      return null;
+    }
+    if (!status.hasFace) {
+      return { key: "outofboundary", text: guidanceMessages.outofboundary };
+    }
+    for (var i = 0; i < guidanceOrder.length; i += 1) {
+      var step = guidanceOrder[i];
+      if (step === "position") {
+        if (state.position === "toosmall") {
+          return { key: "toosmall", text: guidanceMessages.toosmall };
+        }
+        if (state.position === "outofboundary" || state.position === "notgood") {
+          return { key: "outofboundary", text: guidanceMessages.outofboundary };
+        }
+      } else if (step === "lighting" && state.lighting === "notgood") {
+        return { key: "lighting", text: guidanceMessages.lighting };
+      } else if (step === "frontal" && state.frontal === "notgood") {
+        return { key: "frontal", text: guidanceMessages.frontal };
+      }
+    }
+    return { key: "allGood", text: guidanceMessages.allGood };
+  }
+
+  function updateChips(status) {
+    Object.keys(chipEls).forEach(function (key) {
+      var good = Boolean(status[key]);
+      var el = chipEls[key];
+      el.classList.toggle("good", good);
+      el.setAttribute("aria-label", el.textContent + (good ? ": good" : ": adjust"));
+    });
+  }
+
+  function clearFallbackTimer() {
+    if (fallbackTimer !== null) {
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    }
+  }
+
+  // After fallbackMs without all three good, offer the upload path for this person.
+  function startFallbackTimer() {
+    if (!fallbackEl || fallbackShown || fallbackTimer !== null) {
+      return;
+    }
+    fallbackTimer = window.setTimeout(function () {
+      fallbackTimer = null;
+      if (allGood) {
+        return;
+      }
+      fallbackShown = true;
+      fallbackEl.hidden = false;
+      clientLog("info", "upload_fallback_shown", "after_ms=" + fallbackMs);
+    }, fallbackMs);
+  }
+
   function onQuality(state) {
     var now = Date.now();
     if (now - lastQualityLog >= 2000) {
@@ -437,27 +545,21 @@
           " position=" + (state && state.position)
       );
     }
-    var messages = [];
-    if (state) {
-      if (state.position === "toosmall") {
-        messages.push("Move closer");
-      } else if (state.position === "outofboundary" || state.position === "notgood") {
-        messages.push("Center your face");
-      }
-      if (state.frontal === "notgood") {
-        messages.push("Look straight");
-      }
-      if (state.lighting === "notgood") {
-        messages.push("Face the light");
-      }
-      if (state.hasFace === false && !messages.length) {
-        messages.push("Center your face");
-      }
+
+    var status = qualityStatus(state);
+    var guidance = guidanceFor(state, status);
+    updateChips(status);
+
+    if (guidance && guidanceText) {
+      guidanceText.textContent = guidance.text;
+      guidanceText.classList.toggle("all-good", guidance.key === "allGood");
     }
-    if (help) {
-      help.textContent = messages.length
-        ? messages.join(" · ")
-        : "Hold still and look at the camera.";
+
+    allGood = status.allGood;
+    if (allGood) {
+      clearFallbackTimer();
+    } else {
+      startFallbackTimer();
     }
   }
 
@@ -728,6 +830,17 @@
     });
   }
 
+  if (fallbackLink) {
+    fallbackLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      if (!allowUpload) {
+        return;
+      }
+      clientLog("info", "upload_fallback_clicked", "");
+      selectTab("upload");
+    });
+  }
+
   if (maskSelect) {
     maskSelect.addEventListener("change", function () {
       if (maskSelect.value) {
@@ -749,13 +862,16 @@
         showError("Choose a photo first.");
         return;
       }
-      var allowedType = file.type === "image/jpeg" || file.type === "image/png";
-      // UNVERIFIED: iPhone Safari may not convert HEIC for this input; the server then
-      // answers unsupported_format with the friendly message.
-      if (!allowedType || file.size > MAX_BYTES) {
+      // The input accepts image/* and capture="user", so a phone camera may hand back
+      // HEIC. The server validates the real format and answers unsupported_format with
+      // a friendly message; here we only reject non-images and oversize files.
+      var looksLikeImage = !file.type || file.type.indexOf("image/") === 0;
+      if (!looksLikeImage || file.size > MAX_BYTES) {
         showError(SIZE_MESSAGE);
         return;
       }
+      // Send the file the user picked. The Camera Kit blob is never reused here, so an
+      // earlier guided capture can't be uploaded by accident.
       setPreview(file);
       sendImage(file, "upload");
     });
