@@ -1,7 +1,144 @@
 /* SkinLedger shell styles on top of Pico.css. */
 
+/*
+ * P16b-1: the palette is one token set, mapped onto Pico's variables. Pico's
+ * own dark scheme is replaced below so every surface, wash and status colour
+ * stays readable when the phone is in dark mode.
+ */
 :root {
+  color-scheme: light dark;
+}
+
+/* Same specificity as Pico's light block (:root:not([data-theme=dark])). */
+:root:not([data-theme="dark"]) {
+  --sl-page: #ffffff;
+  --sl-ink: #2d3138;
+  --sl-body: #373c44;
+  --sl-muted: #646b79;
+  --sl-rule: #e7eaf0;
+  --sl-surface: #fbfcfc;
+  --sl-field-border: #cfd5e2;
+  --sl-neutral: #f1f3f4;
+  --sl-neutral-ink: #3c4043;
+  --sl-neutral-line: #e8eaed;
+  --sl-preview: #d9d9d9;
+
   --sl-accent: #1f6f5c;
+  --sl-accent-ink: #1f6f5c;
+  --sl-accent-deep: #145247;
+  --sl-accent-wash: #eef7f2;
+  --sl-accent-chip: rgba(31, 111, 92, 0.12);
+
+  --sl-warn: #b26a00;
+  --sl-warn-ink: #7a4b00;
+  --sl-warn-wash: #fff6e5;
+  --sl-status-ink: #8a4b08;
+
+  --sl-danger: #b3261e;
+  --sl-danger-ink: #8a1c1c;
+  --sl-danger-wash: #fdeeee;
+
+  --sl-grey: #5f6368;
+  --sl-focus: #1f6f5c;
+
+  --pico-background-color: var(--sl-page);
+  --pico-color: var(--sl-body);
+  --pico-h1-color: var(--sl-ink);
+  --pico-h2-color: var(--sl-ink);
+  --pico-h3-color: var(--sl-ink);
+  --pico-h4-color: var(--sl-ink);
+  --pico-h5-color: var(--sl-ink);
+  --pico-h6-color: var(--sl-ink);
+  --pico-muted-color: var(--sl-muted);
+  --pico-muted-border-color: var(--sl-rule);
+  --pico-card-background-color: var(--sl-page);
+  --pico-card-sectioning-background-color: var(--sl-surface);
+  --pico-form-element-background-color: var(--sl-surface);
+  --pico-form-element-border-color: var(--sl-field-border);
+  --pico-form-element-active-border-color: var(--sl-accent);
+  --pico-form-element-focus-color: var(--sl-accent);
+  --pico-form-element-color: var(--sl-body);
+  --pico-table-border-color: var(--sl-rule);
+  --pico-code-background-color: var(--sl-neutral);
+  --pico-del-color: var(--sl-danger-ink);
+  --pico-ins-color: var(--sl-accent-ink);
+
+  --pico-primary: var(--sl-accent);
+  --pico-primary-background: var(--sl-accent);
+  --pico-primary-border: var(--sl-accent);
+  --pico-primary-underline: var(--sl-accent);
+  --pico-primary-hover: var(--sl-accent-deep);
+  --pico-primary-hover-background: var(--sl-accent-deep);
+  --pico-primary-hover-border: var(--sl-accent-deep);
+  --pico-primary-hover-underline: var(--sl-accent-deep);
+  --pico-primary-focus: rgba(31, 111, 92, 0.35);
+  --pico-primary-inverse: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Same specificity as Pico's dark block; app.css loads later and wins. */
+  :root:not([data-theme]) {
+    --sl-page: #12161b;
+    --sl-ink: #eef1f4;
+    --sl-body: #d5dae1;
+    --sl-muted: #a4adb9;
+    --sl-rule: #2a313a;
+    --sl-surface: #181e25;
+    --sl-field-border: #3a434e;
+    --sl-neutral: #232a33;
+    --sl-neutral-ink: #cdd3db;
+    --sl-neutral-line: #2e3641;
+    --sl-preview: #232a33;
+
+    --sl-accent: #1f6f5c;
+    --sl-accent-ink: #7fd0b6;
+    --sl-accent-deep: #17584a;
+    --sl-accent-wash: #16302a;
+    --sl-accent-chip: rgba(127, 208, 182, 0.14);
+
+    --sl-warn: #c9832a;
+    --sl-warn-ink: #f0b45e;
+    --sl-warn-wash: #33260f;
+    --sl-status-ink: #e0a24a;
+
+    --sl-danger: #d24a42;
+    --sl-danger-ink: #ff9d97;
+    --sl-danger-wash: #3a1514;
+
+    --sl-grey: #b6bdc7;
+    --sl-focus: #7fd0b6;
+
+    --pico-primary: var(--sl-accent-ink);
+    --pico-primary-background: var(--sl-accent);
+    --pico-primary-border: var(--sl-accent);
+    --pico-primary-underline: rgba(127, 208, 182, 0.5);
+    --pico-primary-hover: #9be0c8;
+    --pico-primary-hover-background: var(--sl-accent-deep);
+    --pico-primary-hover-border: var(--sl-accent-deep);
+    --pico-primary-hover-underline: #9be0c8;
+    --pico-primary-focus: rgba(127, 208, 182, 0.4);
+    --pico-primary-inverse: #ffffff;
+
+    --pico-background-color: var(--sl-page);
+    --pico-color: var(--sl-body);
+    --pico-h1-color: var(--sl-ink);
+    --pico-h2-color: var(--sl-ink);
+    --pico-h3-color: var(--sl-ink);
+    --pico-h4-color: var(--sl-ink);
+    --pico-h5-color: var(--sl-ink);
+    --pico-h6-color: var(--sl-ink);
+    --pico-muted-color: var(--sl-muted);
+    --pico-muted-border-color: var(--sl-rule);
+    --pico-card-background-color: var(--sl-page);
+    --pico-card-sectioning-background-color: var(--sl-surface);
+    --pico-form-element-background-color: var(--sl-surface);
+    --pico-form-element-border-color: var(--sl-field-border);
+    --pico-form-element-active-border-color: var(--sl-accent-ink);
+    --pico-form-element-focus-color: var(--sl-accent-ink);
+    --pico-form-element-color: var(--sl-body);
+    --pico-table-border-color: var(--sl-rule);
+    --pico-code-background-color: var(--sl-neutral);
+  }
 }
 
 body > header nav ul li a {
@@ -11,13 +148,99 @@ body > header nav ul li a {
 body > footer {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
   padding-block: 1.5rem;
-  opacity: 0.8;
+  color: var(--sl-muted);
+}
+
+body > footer a {
+  color: var(--sl-accent-ink);
+}
+
+:where(a, button, input, select, textarea, [role="button"]):focus-visible {
+  outline: 2px solid var(--sl-focus);
+  outline-offset: 2px;
 }
 
 main.container {
   padding-block: 1.5rem;
+}
+
+/* -- P16 capture page (moved from capture.html so no inline style is used) -- */
+
+.preview-frame {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 3 / 4;
+  background: var(--sl-preview);
+  overflow: hidden;
+}
+
+.preview-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#preview-overlay {
+  pointer-events: none;
+}
+
+[data-tab-panel][hidden] {
+  display: none;
+}
+
+.tips-card {
+  border: 1px solid var(--sl-rule);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.tips-card ul {
+  margin: 0.35rem 0 0;
+}
+
+#guidance-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+}
+
+#guidance-text.all-good {
+  color: var(--sl-accent-ink);
+}
+
+.chips {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.chip {
+  border: 1px solid var(--sl-rule);
+  border-radius: 999px;
+  padding: 0.15rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--sl-muted);
+}
+
+.chip.good {
+  border-color: var(--sl-accent);
+  color: var(--sl-accent-ink);
+  font-weight: 600;
+}
+
+.capture-primary {
+  font-size: 1.15rem;
+  padding: 0.8rem 1.5rem;
+  width: 100%;
+  max-width: 420px;
 }
 
 /* -- P08 timeline ---------------------------------------------------------- */
@@ -72,7 +295,7 @@ main.container {
 
 .timeline-legend {
   font-size: 0.9rem;
-  opacity: 0.85;
+  color: var(--sl-muted);
 }
 
 .timeline-banner {
@@ -87,12 +310,12 @@ main.container {
 
 .timeline-note {
   font-size: 0.8rem;
-  opacity: 0.8;
+  color: var(--sl-muted);
   margin-block: 0.4rem;
 }
 
 .timeline-status {
-  color: #8a4b08;
+  color: var(--sl-status-ink);
 }
 
 .timeline-links {
@@ -105,18 +328,18 @@ main.container {
   gap: 0.35rem;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  background: rgba(31, 111, 92, 0.12);
-  color: #1f6f5c;
+  background: var(--sl-accent-chip);
+  color: var(--sl-accent-ink);
   font-size: 0.78rem;
 }
 
 .sl-chip-unstable {
-  background: #e8eaed;
-  color: #3c4043;
+  background: var(--sl-neutral-line);
+  color: var(--sl-neutral-ink);
 }
 
 .sl-chip small {
-  opacity: 0.75;
+  color: var(--sl-muted);
 }
 
 /* -- P09 product log ------------------------------------------------------- */
@@ -150,15 +373,15 @@ main.container {
 }
 
 .product-unstable {
-  color: #5f6368;
+  color: var(--sl-grey);
 }
 
 .product-notice {
-  color: #1f6f5c;
+  color: var(--sl-accent-ink);
 }
 
 .product-error {
-  color: #8a1c1c;
+  color: var(--sl-danger-ink);
 }
 
 /* -- P11 verdict screen and home cards ------------------------------------- */
@@ -167,7 +390,7 @@ main.container {
   max-width: 46rem;
   margin-inline: auto;
   padding: 1rem;
-  border-left: 6px solid #5f6368;
+  border-left: 6px solid var(--sl-grey);
 }
 
 .verdict-header h1 {
@@ -186,31 +409,31 @@ main.container {
 }
 
 .verdict-keep {
-  border-left-color: #1f6f5c;
-  background: #eef7f2;
+  border-left-color: var(--sl-accent);
+  background: var(--sl-accent-wash);
 }
 
 .verdict-no_change {
-  border-left-color: #b26a00;
-  background: #fff6e5;
+  border-left-color: var(--sl-warn);
+  background: var(--sl-warn-wash);
 }
 
 .verdict-worse {
-  border-left-color: #b3261e;
-  background: #fdeeee;
+  border-left-color: var(--sl-danger);
+  background: var(--sl-danger-wash);
 }
 
 .verdict-too_early,
 .verdict-no_band,
 .verdict-need_checkin {
-  border-left-color: #5f6368;
-  background: #f1f3f4;
+  border-left-color: var(--sl-grey);
+  background: var(--sl-neutral);
 }
 
 .verdict-banner,
 .demo-banner {
-  border-left: 4px solid #b26a00;
-  background: #fff6e5;
+  border-left: 4px solid var(--sl-warn);
+  background: var(--sl-warn-wash);
   padding: 0.75rem 1rem;
   margin-inline: auto;
   max-width: 46rem;
@@ -229,7 +452,7 @@ main.container {
 }
 
 .verdict-warning {
-  color: #7a4b00;
+  color: var(--sl-warn-ink);
 }
 
 .verdict-changes {
@@ -251,7 +474,7 @@ main.container {
 .verdict-masks figure {
   margin: 0;
   padding: 0.5rem;
-  background: #f1f3f4;
+  background: var(--sl-neutral);
   border-radius: 0.5rem;
   text-align: center;
 }
@@ -259,12 +482,12 @@ main.container {
 .verdict-masks img {
   max-width: 100%;
   height: auto;
-  background: #e8eaed;
+  background: var(--sl-neutral-line);
 }
 
 .verdict-masks figcaption {
   font-size: 0.8rem;
-  opacity: 0.8;
+  color: var(--sl-muted);
 }
 
 .verdict-checkin {
@@ -273,7 +496,7 @@ main.container {
 
 .verdict-disclaimer {
   margin-top: 0.75rem;
-  opacity: 0.85;
+  color: var(--sl-muted);
 }
 
 .home-product-grid {
@@ -291,19 +514,19 @@ main.container {
 .home-product-card {
   margin: 0;
   padding: 0.9rem;
-  border-left: 4px solid #5f6368;
+  border-left: 4px solid var(--sl-grey);
 }
 
 .home-product-card.home-verdict-keep {
-  border-left-color: #1f6f5c;
+  border-left-color: var(--sl-accent);
 }
 
 .home-product-card.home-verdict-no_change {
-  border-left-color: #b26a00;
+  border-left-color: var(--sl-warn);
 }
 
 .home-product-card.home-verdict-worse {
-  border-left-color: #b3261e;
+  border-left-color: var(--sl-danger);
 }
 
 .home-product-card h3 {
@@ -345,15 +568,15 @@ main.container {
 
 .routine-note {
   font-size: 0.9rem;
-  opacity: 0.85;
+  color: var(--sl-muted);
 }
 
 .routine-data {
-  opacity: 0.85;
+  color: var(--sl-muted);
 }
 
 .routine-keep {
-  color: #1f6f5c;
+  color: var(--sl-accent-ink);
 }
 
 .routine-shopping {
@@ -366,12 +589,12 @@ main.container {
 }
 
 .routine-acne-disclaimer {
-  border-left: 4px solid #b26a00;
-  background: #fff6e5;
+  border-left: 4px solid var(--sl-warn);
+  background: var(--sl-warn-wash);
   padding: 0.75rem 1rem;
 }
 
 .routine-footer {
   margin-top: 1rem;
-  opacity: 0.85;
+  color: var(--sl-muted);
 }

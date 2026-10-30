@@ -63,6 +63,7 @@ templates.env.globals.update(
     demo_invite_note=copy.DEMO_INVITE_NOTE,
     demo_privacy_note=copy.DEMO_PRIVACY_NOTE,
     footer_demo_link=copy.FOOTER_DEMO_LINK,
+    footer_privacy=copy.PRIVACY_TITLE,
     admin_usage_title=copy.ADMIN_USAGE_TITLE,
     admin_visitor_analyses_today=copy.ADMIN_VISITOR_ANALYSES_TODAY,
     admin_visitor_analyses_total=copy.ADMIN_VISITOR_ANALYSES_TOTAL,
