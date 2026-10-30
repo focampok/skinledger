@@ -19,6 +19,7 @@ templates.env.globals.update(
     capture_tips=copy.CAPTURE_TIPS,
     guidance_order=",".join(copy.GUIDANCE_ORDER),
     guidance_chips=copy.GUIDANCE_CHIPS,
+    guidance_initial=copy.GUIDANCE_INITIAL,
     guidance_toosmall=copy.GUIDANCE_TOOSMALL,
     guidance_outofboundary=copy.GUIDANCE_OUTOFBOUNDARY,
     guidance_lighting=copy.GUIDANCE_LIGHTING,

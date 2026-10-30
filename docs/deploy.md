@@ -103,6 +103,9 @@ renders the invite form — keeps the strict policy. If the Kit needs another
 origin, add it to the capture policy and its constants here rather than
 loosening the strict one.
 
+Both policies carry `object-src 'none'`, so no page can load a plugin, and both
+keep `frame-ancestors 'none'`, `base-uri 'self'` and `form-action 'self'`.
+
 The policy carries `report-uri /csp-report` and `report-to csp-endpoint`; the
 `Report-To` response header defines that group. `POST /csp-report` accepts
 `application/csp-report` and `application/reports+json`, caps the body at 8 KB,

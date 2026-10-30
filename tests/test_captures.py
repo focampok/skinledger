@@ -90,9 +90,11 @@ class StubClient:
         self.poll_result = sample_result()
         self.poll_error: Exception | None = None
         self.mask_bytes: bytes | None = None
+        self.uploaded_image: bytes | None = None
 
     async def upload_file(self, img, file_name="capture.jpg") -> str:
         self.calls.append(("upload_file", file_name))
+        self.uploaded_image = bytes(img.data)
         return "file-stub"
 
     async def create_task(self, file_id, actions=None, mask_overlay=False) -> str:
@@ -742,3 +744,82 @@ def test_upload_source_requires_attestation(env, web, stub):
 
     assert response.status_code == 400
     assert response.json()["detail"] == copy.ATTESTATION_REQUIRED
+
+
+# -- P16a1: HEIC uploads are converted before the API call -------------------
+
+
+def heic_bytes(size=(800, 1000)) -> bytes:
+    buffer = io.BytesIO()
+    Image.new("RGB", size, (180, 140, 120)).save(buffer, format="HEIF", quality=80)
+    return buffer.getvalue()
+
+
+def test_heic_upload_reaches_the_api_as_jpeg(env, web, stub):
+    person_id = seed_person()
+    login(web)
+
+    response = post_capture(
+        web,
+        person_id,
+        source="upload",
+        image=heic_bytes(),
+        headers={"Content-Type": "image/heic"},
+    )
+
+    assert response.status_code == 202
+    assert stub.uploaded_image is not None
+    assert stub.uploaded_image.startswith(b"\xff\xd8")
+    assert b"ftypheic" not in stub.uploaded_image
+
+
+def test_jpeg_upload_is_still_sent_as_jpeg(env, web, stub):
+    person_id = seed_person()
+    login(web)
+
+    response = post_capture(web, person_id, source="upload", image=jpeg_bytes())
+
+    assert response.status_code == 202
+    assert stub.uploaded_image is not None
+    assert stub.uploaded_image.startswith(b"\xff\xd8")
+
+
+def test_png_upload_is_still_reencoded_to_jpeg(env, web, stub):
+    person_id = seed_person()
+    login(web)
+    buffer = io.BytesIO()
+    Image.new("RGBA", (800, 800), (10, 20, 30, 255)).save(buffer, format="PNG")
+
+    response = post_capture(
+        web,
+        person_id,
+        source="upload",
+        image=buffer.getvalue(),
+        headers={"Content-Type": "image/png"},
+    )
+
+    assert response.status_code == 202
+    assert stub.uploaded_image is not None
+    assert stub.uploaded_image.startswith(b"\xff\xd8")
+
+
+def test_no_image_bytes_reach_the_event_log(env, web, stub):
+    person_id = seed_person()
+    login(web)
+    image = heic_bytes()
+
+    response = post_capture(
+        web,
+        person_id,
+        source="upload",
+        image=image,
+        headers={"Content-Type": "image/heic"},
+    )
+    assert response.status_code == 202
+
+    log_text = (env.log_dir / "skinledger.jsonl").read_text(encoding="utf-8")
+    assert log_text  # the run did log events
+    assert "ftypheic" not in log_text
+    # Neither the raw container bytes nor a base64 form may appear.
+    assert image[:32].hex() not in log_text
+    assert "data:image" not in log_text

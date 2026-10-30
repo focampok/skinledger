@@ -115,3 +115,53 @@ def test_prepare_creates_no_file(tmp_path, monkeypatch):
 
     assert list(cwd.iterdir()) == []
     assert list(temp_dir.iterdir()) == []
+
+
+# -- P16a1: HEIC/HEIF from an iPhone is decoded, re-encoded and never stored --
+
+
+def heic_bytes(size=(800, 1000), color=(180, 140, 120)) -> bytes:
+    buffer = io.BytesIO()
+    Image.new("RGB", size, color).save(buffer, format="HEIF", quality=80)
+    return buffer.getvalue()
+
+
+def test_heic_is_accepted_and_reencoded_to_jpeg():
+    source = heic_bytes()
+
+    prepared = prepare(source)
+
+    assert prepared.content_type == "image/jpeg"
+    assert prepared.data.startswith(b"\xff\xd8")
+    assert (prepared.width, prepared.height) == (800, 1000)
+    # The HEIC container marker must not survive the in-memory re-encode.
+    assert b"ftypheic" not in prepared.data
+    assert prepared.data != source
+
+
+def test_heic_without_exif_support_still_strips_metadata():
+    prepared = prepare(heic_bytes())
+
+    with Image.open(io.BytesIO(prepared.data)) as reopened:
+        assert not reopened.info.get("exif")
+
+
+def test_small_heic_is_rejected_before_any_request():
+    with pytest.raises(ImageRejected) as raised:
+        prepare(heic_bytes(size=(300, 300)))
+
+    assert raised.value.code == "error_below_min_image_size"
+
+
+def test_heic_writes_no_file_and_keeps_no_trace(tmp_path, monkeypatch):
+    cwd = tmp_path / "cwd"
+    temp_dir = tmp_path / "temp"
+    cwd.mkdir()
+    temp_dir.mkdir()
+    monkeypatch.chdir(cwd)
+    monkeypatch.setattr(tempfile, "tempdir", str(temp_dir))
+
+    prepare(heic_bytes())
+
+    assert list(cwd.iterdir()) == []
+    assert list(temp_dir.iterdir()) == []

@@ -226,6 +226,7 @@ def test_csp_header_has_reporting_directives_and_no_wasm_eval(env, web):
     assert "report-uri /csp-report" in csp
     assert "report-to csp-endpoint" in csp
     assert "'wasm-unsafe-eval'" not in csp
+    assert _directive(csp, "object-src") == "object-src 'none'"
     report_to = json.loads(response.headers["report-to"])
     assert report_to["group"] == "csp-endpoint"
     assert report_to["endpoints"][0]["url"].endswith("/csp-report")
@@ -348,7 +349,12 @@ def test_both_policies_share_reporting_and_framing(env):
     strict = content_security_policy()
     capture = capture_content_security_policy()
 
-    for directive in ("frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'"):
+    for directive in (
+        "frame-ancestors 'none'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+    ):
         assert directive in strict
         assert directive in capture
     assert "report-uri /csp-report" in strict

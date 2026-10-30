@@ -139,7 +139,7 @@
       data-msg-frontal="{{ guidance_frontal }}"
       data-msg-all-good="{{ guidance_all_good }}"
     >
-      <p id="guidance-text" role="status" aria-live="polite"></p>
+      <p id="guidance-text" role="status" aria-live="polite">{{ guidance_initial }}</p>
       <ul class="chips" id="guidance-chips">
         {% for key, label in guidance_chips %}
         <li class="chip" data-chip="{{ key }}">{{ label }}</li>

@@ -33,6 +33,11 @@ upload tab for the same person, with the same consent, attestation, invite check
 unit caps. The upload input uses `accept="image/*" capture="user"` so a phone opens
 its camera directly, and it sends the file the user picked — never an earlier Kit blob.
 
+iPhones set to High Efficiency send HEIC. `pillow-heif` decodes it in memory and the
+photo is re-encoded to a JPEG with no EXIF before it goes to the API, exactly like a
+PNG upload; the original container bytes are never written and are dropped with the
+request. The wheel bundles libheif and libde265, so no system package is added.
+
 The wording and the priority order live in `copy.py` (`GUIDANCE_*`, `GUIDANCE_ORDER`,
 `CAPTURE_TIPS`, `CAPTURE_FALLBACK_SECONDS`) and are rendered as data attributes, so
 the page and the tests share one source of truth.

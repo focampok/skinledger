@@ -5,7 +5,14 @@ from __future__ import annotations
 import io
 from dataclasses import dataclass
 
+import pillow_heif
 from PIL import Image, ImageOps
+
+# iPhone sends HEIC when Camera > Formats is set to High Efficiency. pillow-heif
+# ships libheif in its wheel, so no system package is needed. Decoding still
+# happens in memory; the original bytes are never written and are dropped once
+# the JPEG re-encode below is done.
+pillow_heif.register_heif_opener()
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 MIN_SHORT_SIDE = 480
@@ -16,7 +23,13 @@ MAX_IMAGE_PIXELS = 40_000_000
 # Pillow refuses to decode images above this pixel count (approx. 40 MP).
 Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
 
-ACCEPTED_FORMATS = {"JPEG": "image/jpeg", "PNG": "image/png"}
+# HEIF/HEIC is decoded by pillow-heif and re-encoded to JPEG like every other input.
+ACCEPTED_FORMATS = {
+    "JPEG": "image/jpeg",
+    "PNG": "image/png",
+    "HEIF": "image/heif",
+    "HEIC": "image/heic",
+}
 
 
 @dataclass(frozen=True, slots=True)

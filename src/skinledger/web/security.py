@@ -57,6 +57,7 @@ def content_security_policy() -> str:
         "worker-src 'self' blob:; "
         f"frame-src 'self' {kit}; "
         "frame-ancestors 'none'; "
+        "object-src 'none'; "
         "base-uri 'self'; "
         "form-action 'self'; "
         f"report-uri {REPORT_PATH}; "
@@ -70,7 +71,8 @@ def capture_content_security_policy() -> str:
     The Kit evaluates strings as JS (1000+ violations under report-only), compiles
     WebAssembly, and loads its stylesheets, webfonts and images from third-party
     origins. Scripts still forbid 'unsafe-inline': every script stays an external
-    file. Reporting directives, frame-ancestors and base-uri are unchanged.
+    file. Reporting directives, frame-ancestors, object-src and base-uri are the
+    same as on the strict policy.
     """
     kit = " ".join(CAMERA_KIT_ORIGINS)
     style = " ".join(CAPTURE_STYLE_ORIGINS)

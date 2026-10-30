@@ -539,3 +539,21 @@ def test_camera_kit_auto_capture_needs_no_shutter_call(env, web):
     assert "YMK.openCameraKit(" in source
     for shutter in ("takePhoto", "YMK.capture", "snapshot"):
         assert shutter not in source
+
+
+def test_guidance_panel_starts_with_the_initial_message(env, web):
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    assert response.status_code == 200
+    assert copy.GUIDANCE_INITIAL == "Point the camera at your face"
+    assert (
+        f'<p id="guidance-text" role="status" aria-live="polite">{copy.GUIDANCE_INITIAL}</p>'
+        in response.text
+    )
+
+    # The first faceQualityChanged event is what replaces it.
+    source = (STATIC / "capture.js").read_text(encoding="utf-8")
+    assert "function onQuality(state)" in source
+    assert "guidanceText.textContent = guidance.text" in source

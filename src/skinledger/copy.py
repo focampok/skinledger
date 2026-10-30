@@ -65,6 +65,7 @@ CAPTURE_TIPS = (
     "Glasses off and hair off your forehead.",
 )
 
+GUIDANCE_INITIAL = "Point the camera at your face"
 GUIDANCE_TOOSMALL = "Move closer: fill the oval with your face"
 GUIDANCE_OUTOFBOUNDARY = "Center your face in the oval"
 GUIDANCE_LIGHTING = "Face a window or lamp; avoid light from behind"
