@@ -15,6 +15,13 @@
   data-baseline-step="{{ baseline_step or '' }}"
   data-max-analyses="{{ max_analyses }}"
   data-camera-language="{{ camera_language }}"
+  data-msg-kit-timeout="{{ capture_kit_timeout }}"
+  data-msg-kit-timeout-no-upload="{{ capture_kit_timeout_no_upload }}"
+  data-msg-api-timeout="{{ capture_api_timeout }}"
+  data-msg-network="{{ capture_network_error }}"
+  data-msg-lost-track="{{ capture_lost_track }}"
+  data-msg-uploading="{{ capture_uploading }}"
+  data-msg-retry="{{ capture_retry }}"
 >
   <h1>Capture for {{ person.display_name }}</h1>
   {% if demo_banner %}
@@ -25,26 +32,36 @@
   <p id="analyses-left">{{ analyses_left }} of {{ max_analyses }} analyses left</p>
   {% endif %}
 
-  <label>
-    <input type="checkbox" id="attestation">
-    {{ attestation }}
+  <label class="capture-attestation">
+    <input type="checkbox" id="attestation" aria-describedby="attestation-hint">
+    <span>{{ attestation }}</span>
   </label>
-  <p id="attestation-hint"><small>Tick the checkbox above to enable the camera and upload buttons.</small></p>
+  <p id="attestation-hint">Tick the checkbox above to enable the camera and upload.</p>
 
-  <p><small>{{ privacy_note }} <a href="/privacy">Read the privacy page</a></small></p>
+  <div class="capture-privacy">
+    <p class="capture-privacy-lead"><strong>{{ privacy_lead }}</strong></p>
+    <p>{{ privacy_note }} <a href="/privacy">Read the privacy page</a></p>
+  </div>
 
-  <div role="tablist">
-    <button type="button" data-tab-button="guided" aria-selected="true">
-      Guided capture (recommended for tracking)
+  <div class="capture-tabs" role="tablist" aria-label="Capture method">
+    <button type="button" class="capture-tab" id="tab-guided" role="tab"
+            aria-selected="true" aria-controls="panel-guided"
+            data-tab-button="guided" tabindex="0">
+      Guided capture
     </button>
     {% if allow_upload %}
-    <button type="button" data-tab-button="upload" aria-selected="false">
-      Quick try: upload a photo
+    <button type="button" class="capture-tab" id="tab-upload" role="tab"
+            aria-selected="false" aria-controls="panel-upload"
+            data-tab-button="upload" tabindex="-1">
+      Upload a photo
     </button>
     {% endif %}
   </div>
 
-  <section data-tab-panel="guided">
+  <section id="panel-guided" role="tabpanel" aria-labelledby="tab-guided"
+           data-tab-panel="guided" tabindex="0">
+    <p class="capture-tab-note">{{ capture_tab_note }}</p>
+
     <div class="tips-card" id="capture-tips">
       <strong>Before you start</strong>
       <ul>
@@ -82,7 +99,8 @@
       </ul>
     </div>
 
-    <button type="button" id="start-capture" class="capture-primary" disabled>
+    <button type="button" id="start-capture" class="capture-primary"
+            aria-describedby="attestation-hint" disabled>
       Start capture
     </button>
     <p id="camera-help" role="status"></p>
@@ -93,17 +111,21 @@
     </p>
     {% endif %}
 
-    <label>
-      Camera language
-      <select id="camera-language">
-        <option value="enu">English</option>
-        <option value="esp">Español</option>
-      </select>
-    </label>
+    <details class="capture-language">
+      <summary>Camera language</summary>
+      <label>Language
+        <select id="camera-language">
+          <option value="enu">English</option>
+          <option value="esp">Español</option>
+        </select>
+      </label>
+    </details>
   </section>
 
   {% if allow_upload %}
-  <section data-tab-panel="upload" hidden>
+  <section id="panel-upload" role="tabpanel" aria-labelledby="tab-upload"
+           data-tab-panel="upload" hidden tabindex="0">
+    <p class="capture-tab-note">Quick try: upload a photo</p>
     <div class="tips-card">
       <strong>Before you start</strong>
       <ul>
@@ -112,11 +134,14 @@
         {% endfor %}
       </ul>
     </div>
+    <label for="photo">Photo of your face</label>
     <input type="file" id="photo" accept="image/*" capture="user">
     <button type="button" id="send-upload" disabled>Analyze this photo</button>
-    <p><small>{{ upload_tip }}</small></p>
+    <p class="capture-upload-tip">{{ upload_tip }}</p>
   </section>
   {% endif %}
+
+  <div id="capture-status-container" aria-live="polite"></div>
 
   <section id="preview" hidden>
     <div class="preview-frame">
@@ -128,8 +153,6 @@
       <select id="mask-select" hidden></select>
     </label>
   </section>
-
-  <div id="capture-status-container" aria-live="polite"></div>
 
   <p id="baseline-done" hidden>
     {{ baseline_done }}

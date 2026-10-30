@@ -46,10 +46,25 @@ DELETED_MESSAGE = (
     "photo to be deleted sooner, contact YouCam API support (Perfect Corp)."
 )
 
+PRIVACY_LEAD = "We never store your photo."
+
 PRIVACY_NOTE = (
-    "Your photo is sent to the YouCam API (Perfect Corp) for analysis and is never stored "
-    "by SkinLedger. YouCam may keep it for up to 30 days. See Privacy."
+    "Your photo is sent to the YouCam API (Perfect Corp) for analysis. "
+    "YouCam may keep it for up to 30 days. See Privacy."
 )
+
+# P16b-3: capture page status and recovery copy. The browser applies these
+# strings; the wording lives here so the tests can check it without a browser.
+CAPTURE_KIT_TIMEOUT = "The camera is taking too long. Upload a selfie instead."
+CAPTURE_KIT_TIMEOUT_NO_UPLOAD = "The camera is taking too long. Try again later."
+CAPTURE_API_TIMEOUT = "This is taking too long. Check your connection and try again."
+CAPTURE_NETWORK_ERROR = "We couldn't reach SkinLedger. Check your connection and try again."
+CAPTURE_LOST_TRACK = (
+    "We lost track of this analysis. Check your connection and try again."
+)
+CAPTURE_UPLOADING = "Uploading…"
+CAPTURE_RETRY = "Retry"
+CAPTURE_TAB_NOTE = "Guided capture (recommended for tracking)"
 
 UPLOAD_TIP = (
     "Use a recent, well-lit, front-facing photo of your own face, no filters. For weekly "

@@ -222,6 +222,10 @@ main.container {
   margin: 0 0 1rem;
 }
 
+.chips li {
+  list-style: none;
+}
+
 .chip {
   border: 1px solid var(--sl-rule);
   border-radius: 999px;
@@ -241,6 +245,101 @@ main.container {
   padding: 0.8rem 1.5rem;
   width: 100%;
   max-width: 420px;
+  margin-top: 0.5rem;
+}
+
+.capture-attestation {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+.capture-attestation input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+}
+
+#attestation-hint {
+  margin: -0.25rem 0 1rem;
+  font-size: 0.95rem;
+  color: var(--sl-muted);
+}
+
+.capture-privacy {
+  border-left: 4px solid var(--sl-accent);
+  background: var(--sl-accent-wash);
+  padding: 0.75rem 1rem;
+  margin-block: 1rem;
+}
+
+.capture-privacy p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.capture-privacy-lead {
+  margin-bottom: 0.25rem;
+}
+
+.capture-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--sl-rule);
+  border-radius: 0.5rem;
+  background: var(--sl-neutral);
+  margin-block: 1rem 0.5rem;
+}
+
+.capture-tab {
+  appearance: none;
+  min-height: 44px;
+  padding: 0.55rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--sl-body);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.capture-tab[aria-selected="true"] {
+  background: var(--sl-page);
+  border-color: var(--sl-rule);
+  color: var(--sl-accent-ink);
+}
+
+.capture-tab-note {
+  margin: 0.5rem 0 1rem;
+  font-size: 0.9rem;
+  color: var(--sl-muted);
+}
+
+.capture-language {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--sl-muted);
+}
+
+.capture-language summary {
+  cursor: pointer;
+  padding-block: 0.5rem;
+}
+
+.capture-upload-tip {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--sl-muted);
 }
 
 /* -- P08 timeline ---------------------------------------------------------- */

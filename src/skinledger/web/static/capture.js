@@ -76,6 +76,23 @@
   var allGood = false;
   var fallbackTimer = null;
   var fallbackShown = false;
+  var kitTimeoutTimer = null;
+  var kitTimedOut = false;
+
+  var API_TIMEOUT_MS = 30000;
+  var KIT_READY_MS = 20000;
+  var msgKitTimeout =
+    root.dataset.msgKitTimeout || "The camera is taking too long. Upload a selfie instead.";
+  var msgKitTimeoutNoUpload =
+    root.dataset.msgKitTimeoutNoUpload || "The camera is taking too long. Try again later.";
+  var msgApiTimeout =
+    root.dataset.msgApiTimeout || "This is taking too long. Check your connection and try again.";
+  var msgNetwork =
+    root.dataset.msgNetwork || "We couldn't reach SkinLedger. Check your connection and try again.";
+  var msgLostTrack =
+    root.dataset.msgLostTrack || "We lost track of this analysis. Check your connection and try again.";
+  var msgUploading = root.dataset.msgUploading || "Uploading…";
+  var msgRetry = root.dataset.msgRetry || "Retry";
 
   function errorText(error) {
     if (error && typeof error.message === "string") {
@@ -150,19 +167,39 @@
 
   function selectTab(name) {
     document.querySelectorAll("[data-tab-button]").forEach(function (button) {
-      button.setAttribute(
-        "aria-selected",
-        button.getAttribute("data-tab-button") === name ? "true" : "false"
-      );
+      var selected = button.getAttribute("data-tab-button") === name;
+      button.setAttribute("aria-selected", selected ? "true" : "false");
+      button.tabIndex = selected ? 0 : -1;
     });
     document.querySelectorAll("[data-tab-panel]").forEach(function (panel) {
       panel.hidden = panel.getAttribute("data-tab-panel") !== name;
     });
   }
 
-  document.querySelectorAll("[data-tab-button]").forEach(function (button) {
+  var tabButtons = Array.prototype.slice.call(
+    document.querySelectorAll("[data-tab-button]")
+  );
+  tabButtons.forEach(function (button, index) {
     button.addEventListener("click", function () {
       selectTab(button.getAttribute("data-tab-button"));
+    });
+    button.addEventListener("keydown", function (event) {
+      var next = null;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        next = tabButtons[(index + 1) % tabButtons.length];
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        next = tabButtons[(index - 1 + tabButtons.length) % tabButtons.length];
+      } else if (event.key === "Home") {
+        next = tabButtons[0];
+      } else if (event.key === "End") {
+        next = tabButtons[tabButtons.length - 1];
+      }
+      if (!next) {
+        return;
+      }
+      event.preventDefault();
+      selectTab(next.getAttribute("data-tab-button"));
+      next.focus();
     });
   });
 
@@ -191,12 +228,41 @@
     }
   }
 
-  function showError(message) {
+  function showError(message, retry) {
     statusBox.innerHTML = "";
     var paragraph = document.createElement("p");
     paragraph.setAttribute("role", "alert");
     paragraph.textContent = message;
     statusBox.append(paragraph);
+    if (typeof retry === "function") {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "secondary";
+      button.textContent = msgRetry;
+      button.addEventListener("click", retry);
+      statusBox.append(button);
+    }
+  }
+
+  // Every API call gets a hard 30 s ceiling so a stalled request shows a
+  // friendly error and a Retry button instead of leaving the page waiting.
+  function fetchWithTimeout(url, options) {
+    var controller = new AbortController();
+    var timer = window.setTimeout(function () {
+      controller.abort();
+    }, API_TIMEOUT_MS);
+    var opts = options || {};
+    opts.signal = controller.signal;
+    return fetch(url, opts).then(
+      function (response) {
+        window.clearTimeout(timer);
+        return response;
+      },
+      function (error) {
+        window.clearTimeout(timer);
+        throw error;
+      }
+    );
   }
 
   function showMasks(section) {
@@ -266,27 +332,25 @@
 
   function watchCapture(captureId) {
     stopPolling();
+    var failures = 0;
+    var inFlight = false;
     var tick = function () {
+      if (inFlight) {
+        return;
+      }
+      inFlight = true;
       clientLog("debug", "fetch_start", "endpoint=status capture_id=" + captureId);
-      fetch("/api/captures/" + encodeURIComponent(captureId) + "/status", {
+      fetchWithTimeout("/api/captures/" + encodeURIComponent(captureId) + "/status", {
         headers: { "HX-Request": "true" },
       })
         .then(function (response) {
           if (!response.ok) {
-            clientLog(
-              "warning",
-              "fetch_response",
-              "endpoint=status capture_id=" + captureId + " status=" + response.status
-            );
-            stopPolling();
-            return null;
+            throw new Error("status " + response.status);
           }
           return response.text();
         })
         .then(function (html) {
-          if (html === null) {
-            return;
-          }
+          failures = 0;
           var state = applyStatus(html);
           if (state === "success" || state === "error") {
             clientLog(
@@ -298,12 +362,21 @@
           }
         })
         .catch(function (error) {
+          failures += 1;
           clientLog(
             "warning",
             "fetch_error",
-            "endpoint=status message=" + errorText(error)
+            "endpoint=status attempt=" + failures + " message=" + errorText(error)
           );
-          /* Keep the interval running; a transient failure is fine. */
+          if (failures >= 2) {
+            stopPolling();
+            showError(msgLostTrack, function () {
+              watchCapture(captureId);
+            });
+          }
+        })
+        .finally(function () {
+          inFlight = false;
         });
     };
     pollTimer = window.setInterval(tick, 3000);
@@ -329,13 +402,16 @@
       is_baseline_pair: baselineStep ? "1" : "0",
       attested: "1",
     });
-    statusBox.innerHTML = "<p>Uploading…</p>";
+    statusBox.innerHTML = "";
+    var uploading = document.createElement("p");
+    uploading.textContent = msgUploading;
+    statusBox.append(uploading);
     clientLog(
       "info",
       "fetch_start",
       "endpoint=/api/captures source=" + source + " bytes=" + blob.size
     );
-    fetch("/api/captures?" + params.toString(), {
+    fetchWithTimeout("/api/captures?" + params.toString(), {
       method: "POST",
       body: blob,
       headers: { "Content-Type": blob.type || "image/jpeg" },
@@ -348,7 +424,17 @@
         );
         return response.text().then(function (text) {
           if (!response.ok) {
-            showError(extractDetail(text));
+            // 4xx answers are decisions (cap, invite, bad photo); only a
+            // server or rate-limit failure is worth offering a Retry.
+            var retryable = response.status >= 500 || response.status === 429;
+            showError(
+              extractDetail(text),
+              retryable
+                ? function () {
+                    sendImage(blob, source);
+                  }
+                : null
+            );
             return;
           }
           var state = applyStatus(text);
@@ -360,16 +446,20 @@
         });
       })
       .catch(function (error) {
+        var timedOut = Boolean(error) && error.name === "AbortError";
         clientLog(
           "error",
           "fetch_error",
-          "endpoint=/api/captures message=" + errorText(error)
+          "endpoint=/api/captures timeout=" + timedOut + " message=" + errorText(error)
         );
-        showError("We couldn't reach SkinLedger. Check your connection and try again.");
+        showError(timedOut ? msgApiTimeout : msgNetwork, function () {
+          sendImage(blob, source);
+        });
       });
   }
 
   function cameraUnavailable(message, reason, switchToUpload) {
+    clearKitTimeout();
     if (help) {
       help.textContent = message || "Guided camera unavailable on this device.";
     }
@@ -597,7 +687,7 @@
       return;
     }
     if (typeof image === "string") {
-      fetch(image)
+      fetchWithTimeout(image)
         .then(function (response) {
           if (!response.ok) {
             throw new Error("image fetch failed");
@@ -610,7 +700,9 @@
         })
         .catch(function (error) {
           clientLog("error", "capture_image", "fetch_failed " + errorText(error));
-          showError("The camera did not return a photo. Please try again.");
+          showError("The camera did not return a photo. Please try again.", function () {
+            handleCapturedImage(image);
+          });
         });
       return;
     }
@@ -707,6 +799,41 @@
     }
   }
 
+  function clearKitTimeout() {
+    if (kitTimeoutTimer !== null) {
+      window.clearTimeout(kitTimeoutTimer);
+      kitTimeoutTimer = null;
+    }
+  }
+
+  // 20 s is a hard ceiling for the Kit to become usable. After that the user
+  // gets the upload path instead of an open-ended "still loading" line.
+  function onKitReadyTimeout() {
+    kitTimeoutTimer = null;
+    if (kitReady || kitTimedOut) {
+      return;
+    }
+    kitTimedOut = true;
+    clientLog(
+      "warning",
+      "kit_ready_timeout",
+      "sdk=" + (window.__ymkScriptState || "pending")
+    );
+    if (help) {
+      help.textContent = allowUpload ? msgKitTimeout : msgKitTimeoutNoUpload;
+    }
+    if (fallbackEl && allowUpload) {
+      fallbackEl.hidden = false;
+    }
+  }
+
+  function startKitTimeout() {
+    if (kitReady || kitTimeoutTimer !== null) {
+      return;
+    }
+    kitTimeoutTimer = window.setTimeout(onKitReadyTimeout, KIT_READY_MS);
+  }
+
   function startAsyncInitWatch() {
     if (window.YMKAsyncInitFired || asyncInitTimer !== null) {
       return;
@@ -733,7 +860,7 @@
         registerCameraKit();
         return;
       }
-      cameraUnavailable("Guided camera unavailable on this device.", "async_init_missing");
+      // The page-level 20 s timer owns the user-facing fallback message.
     }, 10000);
   }
 
@@ -742,6 +869,13 @@
       return;
     }
     listenersRegistered = true;
+    clearKitTimeout();
+    if (kitTimedOut) {
+      kitTimedOut = false;
+      if (help) {
+        help.textContent = "Camera ready. Tick the checkbox, then start.";
+      }
+    }
     if (asyncInitTimer !== null) {
       window.clearTimeout(asyncInitTimer);
       asyncInitTimer = null;
@@ -905,6 +1039,7 @@
       " ua=" + shortUserAgent()
   );
 
+  startKitTimeout();
   selectTab("guided");
   updateButtons();
 })();

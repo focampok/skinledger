@@ -365,12 +365,18 @@ def test_async_init_watchdog_falls_back_to_an_existing_ymk_global():
     assert '" has_ymk=" + hasYmk' in source
     assert "async_init_fallback" in source
     assert "window.YMKAsyncInitFired || asyncInitFallback" in source
-    # With YMK present the watchdog registers the kit instead of showing "unavailable".
+    # P16b-3: the 10 s watchdog registers an existing global; the page-level
+    # 20 s timer owns the user-facing fallback instead of this watchdog.
     fallback = source.index("asyncInitFallback = true;")
-    unavailable = source.index(
-        'cameraUnavailable("Guided camera unavailable on this device.", "async_init_missing")'
+    register = source.index("registerCameraKit();", fallback)
+    assert fallback < register
+    assert "KIT_READY_MS = 20000" in source
+    assert "kit_ready_timeout" in source
+    unavailable_call = (
+        'cameraUnavailable("Guided camera unavailable on this device.", '
+        '"async_init_missing")'
     )
-    assert fallback < unavailable
+    assert unavailable_call not in source
     assert "isLoaded" not in source
 
 
