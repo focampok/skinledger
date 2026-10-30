@@ -21,7 +21,6 @@
   --sl-neutral: #f1f3f4;
   --sl-neutral-ink: #3c4043;
   --sl-neutral-line: #e8eaed;
-  --sl-preview: #d9d9d9;
 
   --sl-accent: #1f6f5c;
   --sl-accent-ink: #1f6f5c;
@@ -88,7 +87,6 @@
     --sl-neutral: #232a33;
     --sl-neutral-ink: #cdd3db;
     --sl-neutral-line: #2e3641;
-    --sl-preview: #232a33;
 
     --sl-accent: #1f6f5c;
     --sl-accent-ink: #7fd0b6;
@@ -173,7 +171,6 @@ main.container {
   width: 100%;
   max-width: 420px;
   aspect-ratio: 3 / 4;
-  background: var(--sl-preview);
   overflow: hidden;
 }
 
@@ -332,14 +329,67 @@ main.container {
 }
 
 .capture-language summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   cursor: pointer;
-  padding-block: 0.5rem;
 }
 
-.capture-upload-tip {
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
-  color: var(--sl-muted);
+.capture-tips {
+  margin-top: 1rem;
+  border: 1px solid var(--sl-rule);
+  border-radius: 0.5rem;
+  padding: 0 1rem;
+}
+
+.capture-tips summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.capture-tips ul {
+  margin: 0 0 0.75rem;
+}
+
+.tips-card p {
+  margin: 0.35rem 0 0;
+}
+
+.capture-error {
+  border-left: 4px solid var(--sl-danger);
+  background: var(--sl-danger-wash);
+  padding: 0.75rem 1rem;
+  margin-block: 0.75rem;
+}
+
+.capture-error p {
+  margin: 0 0 0.6rem;
+}
+
+.capture-error button {
+  margin: 0;
+}
+
+/* Secondary outline treatment for the native file picker. */
+input[type="file"]::file-selector-button {
+  min-height: 44px;
+  margin-right: 0.75rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--sl-accent);
+  border-radius: var(--pico-border-radius);
+  background: transparent;
+  color: var(--sl-accent-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: var(--sl-accent-wash);
 }
 
 /* -- P08 timeline ---------------------------------------------------------- */

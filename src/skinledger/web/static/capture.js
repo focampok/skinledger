@@ -208,15 +208,20 @@
       URL.revokeObjectURL(objectUrl);
       objectUrl = null;
     }
+    previewImage.removeAttribute("src");
+    preview.hidden = true;
   }
 
   function setPreview(blob) {
     revokePreview();
     objectUrl = URL.createObjectURL(blob);
+    // Show the frame only once the image has decoded; no grey slab before that.
+    previewImage.onload = function () {
+      preview.hidden = false;
+    };
     previewImage.src = objectUrl;
     overlay.removeAttribute("src");
     overlay.hidden = true;
-    preview.hidden = false;
   }
 
   window.addEventListener("pagehide", revokePreview);
@@ -230,18 +235,21 @@
 
   function showError(message, retry) {
     statusBox.innerHTML = "";
+    var box = document.createElement("div");
+    box.className = "capture-error";
+    box.setAttribute("role", "alert");
     var paragraph = document.createElement("p");
-    paragraph.setAttribute("role", "alert");
     paragraph.textContent = message;
-    statusBox.append(paragraph);
+    box.append(paragraph);
     if (typeof retry === "function") {
       var button = document.createElement("button");
       button.type = "button";
       button.className = "secondary";
       button.textContent = msgRetry;
       button.addEventListener("click", retry);
-      statusBox.append(button);
+      box.append(button);
     }
+    statusBox.append(box);
   }
 
   // Every API call gets a hard 30 s ceiling so a stalled request shows a
@@ -870,12 +878,6 @@
     }
     listenersRegistered = true;
     clearKitTimeout();
-    if (kitTimedOut) {
-      kitTimedOut = false;
-      if (help) {
-        help.textContent = "Camera ready. Tick the checkbox, then start.";
-      }
-    }
     if (asyncInitTimer !== null) {
       window.clearTimeout(asyncInitTimer);
       asyncInitTimer = null;
@@ -903,9 +905,13 @@
 
     kitReady = kitIsReady();
     updateButtons();
-    if (help && !help.textContent) {
-      help.textContent = "Camera ready. Tick the checkbox, then start.";
+    if (
+      help &&
+      (!help.textContent || help.textContent === "Guided camera is still loading…" || kitTimedOut)
+    ) {
+      help.textContent = "Camera ready.";
     }
+    kitTimedOut = false;
     clientLog(
       "info",
       "kit_ready",

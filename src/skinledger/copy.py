@@ -50,7 +50,7 @@ PRIVACY_LEAD = "We never store your photo."
 
 PRIVACY_NOTE = (
     "Your photo is sent to the YouCam API (Perfect Corp) for analysis. "
-    "YouCam may keep it for up to 30 days. See Privacy."
+    "YouCam may keep it for up to 30 days."
 )
 
 # P16b-3: capture page status and recovery copy. The browser applies these
@@ -64,11 +64,17 @@ CAPTURE_LOST_TRACK = (
 )
 CAPTURE_UPLOADING = "Uploading…"
 CAPTURE_RETRY = "Retry"
-CAPTURE_TAB_NOTE = "Guided capture (recommended for tracking)"
+CAPTURE_TAB_NOTE = (
+    "Guided capture (recommended for tracking) keeps light and distance the same for each check-in."
+)
+CAPTURE_UPLOAD_NOTE = (
+    "Quick try: upload a photo from your device. Lighting varies, so use it for a first look."
+)
+CAPTURE_TIPS_TITLE = "Tips for a good capture"
+UPLOAD_TIPS_TITLE = "Before you upload"
 
 UPLOAD_TIP = (
-    "Use a recent, well-lit, front-facing photo of your own face, no filters. For weekly "
-    "tracking, use the guided capture — same light, same distance."
+    "Use a recent, well-lit, front-facing photo of your own face, no filters."
 )
 
 # P16a: guided-capture guidance. One instruction is shown at a time, chosen in

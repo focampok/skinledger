@@ -62,17 +62,6 @@
            data-tab-panel="guided" tabindex="0">
     <p class="capture-tab-note">{{ capture_tab_note }}</p>
 
-    <div class="tips-card" id="capture-tips">
-      <strong>Before you start</strong>
-      <ul>
-        {% for tip in capture_tips %}
-        <li>{{ tip }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <div id="YMK-module"></div>
-
     <p id="baseline-step" {% if baseline_step is none %}hidden{% endif %}>
       {% if baseline_step == 1 %}
       Baseline: analysis 1 of 2
@@ -80,6 +69,8 @@
       Analysis 2 of 2 (same place, same light)
       {% endif %}
     </p>
+
+    <div id="YMK-module"></div>
 
     <div
       id="capture-guidance"
@@ -111,6 +102,15 @@
     </p>
     {% endif %}
 
+    <details class="capture-tips" id="capture-tips">
+      <summary>{{ capture_tips_title }}</summary>
+      <ul>
+        {% for tip in capture_tips %}
+        <li>{{ tip }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+
     <details class="capture-language">
       <summary>Camera language</summary>
       <label>Language
@@ -125,19 +125,14 @@
   {% if allow_upload %}
   <section id="panel-upload" role="tabpanel" aria-labelledby="tab-upload"
            data-tab-panel="upload" hidden tabindex="0">
-    <p class="capture-tab-note">Quick try: upload a photo</p>
-    <div class="tips-card">
-      <strong>Before you start</strong>
-      <ul>
-        {% for tip in capture_tips %}
-        <li>{{ tip }}</li>
-        {% endfor %}
-      </ul>
-    </div>
+    <p class="capture-tab-note">{{ capture_upload_note }}</p>
     <label for="photo">Photo of your face</label>
     <input type="file" id="photo" accept="image/*" capture="user">
     <button type="button" id="send-upload" disabled>Analyze this photo</button>
-    <p class="capture-upload-tip">{{ upload_tip }}</p>
+    <div class="tips-card">
+      <strong>{{ upload_tips_title }}</strong>
+      <p>{{ upload_tip }}</p>
+    </div>
   </section>
   {% endif %}
 

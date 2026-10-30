@@ -151,6 +151,8 @@ def test_capture_page_has_exact_copy_and_baseline_step(env, web):
     assert copy.ATTESTATION in response.text
     assert copy.DISCLAIMER in response.text
     assert copy.PRIVACY_NOTE in response.text
+    assert "See Privacy." not in response.text
+    assert "Read the privacy page" in response.text
     assert copy.UPLOAD_TIP in response.text
     assert "Guided capture (recommended for tracking)" in response.text
     assert "Quick try: upload a photo" in response.text
@@ -507,7 +509,7 @@ def test_fallback_is_hidden_when_upload_is_disabled(env, web):
     assert 'id="capture-fallback"' not in response.text
 
 
-def test_three_tips_appear_on_both_tabs(env, web):
+def test_camera_tips_are_guided_only_and_upload_tip_is_upload_only(env, web):
     person_id = create_profile(web)
 
     response = web.get(f"/people/{person_id}/capture")
@@ -515,8 +517,24 @@ def test_three_tips_appear_on_both_tabs(env, web):
     assert len(copy.CAPTURE_TIPS) == 3
     rendered = html.unescape(response.text)
     for tip in copy.CAPTURE_TIPS:
-        assert rendered.count(tip) == 2, tip
+        assert rendered.count(tip) == 1, tip
+    assert copy.UPLOAD_TIP in response.text
     assert 'id="capture-tips"' in response.text
+    assert copy.CAPTURE_TIPS_TITLE in response.text
+    assert copy.UPLOAD_TIPS_TITLE in response.text
+
+
+def test_capture_primary_action_comes_before_tips(env, web):
+    person_id = create_profile(web)
+
+    response = web.get(f"/people/{person_id}/capture")
+
+    start = response.text.index('id="start-capture"')
+    guided_tips = response.text.index('id="capture-tips"')
+    assert start < guided_tips
+    upload = response.text.index('id="send-upload"')
+    upload_tips = response.text.index(copy.UPLOAD_TIPS_TITLE)
+    assert upload < upload_tips
 
 
 def test_upload_input_opens_the_phone_camera(env, web):
