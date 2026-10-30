@@ -31,12 +31,12 @@
       <table>
         <thead>
           <tr>
-            <th>{{ verdict_col_aspect }}</th>
-            <th>{{ verdict_col_baseline }}</th>
-            <th>{{ verdict_col_checkin }}</th>
-            <th>{{ verdict_col_change }}</th>
-            <th>{{ verdict_col_band }}</th>
-            <th>{{ verdict_col_outside }}</th>
+            <th scope="col">{{ verdict_col_aspect }}</th>
+            <th scope="col">{{ verdict_col_baseline }}</th>
+            <th scope="col">{{ verdict_col_checkin }}</th>
+            <th scope="col">{{ verdict_col_change }}</th>
+            <th scope="col">{{ verdict_col_band }}</th>
+            <th scope="col">{{ verdict_col_outside }}</th>
           </tr>
         </thead>
         <tbody>
@@ -53,6 +53,20 @@
         </tbody>
       </table>
     </div>
+
+    <ul class="verdict-targets" aria-label="{{ verdict_targets_title }}">
+      {% for row in target_rows %}
+      <li class="verdict-target" data-target-aspect="{{ row.aspect }}"{% if row.unstable %} data-unstable="true"{% endif %}>
+        <span class="verdict-target-label">{{ row.label }}</span>
+        <span class="verdict-target-change">{{ row.change }}</span>
+        <span class="verdict-target-band">{{ verdict_col_band }} {{ row.band_display }}</span>
+        <span class="verdict-target-state">
+          <span class="sl-chip{% if row.outside_state != 'outside' %} sl-chip-neutral{% endif %}">{{ row.outside_plain }}</span>
+        </span>
+        <span class="verdict-target-meta">{{ verdict_col_baseline }} {{ row.baseline }} → {{ verdict_col_checkin }} {{ row.checkin }}</span>
+      </li>
+      {% endfor %}
+    </ul>
     {% endif %}
 
     {% if unstable_rows %}

@@ -333,7 +333,8 @@ main.container {
   font-size: 0.78rem;
 }
 
-.sl-chip-unstable {
+.sl-chip-unstable,
+.sl-chip-neutral {
   background: var(--sl-neutral-line);
   color: var(--sl-neutral-ink);
 }
@@ -393,6 +394,11 @@ main.container {
   border-left: 6px solid var(--sl-grey);
 }
 
+/* The card is one tinted surface; Pico's sectioning header would cut a seam. */
+.verdict-card > header {
+  background: transparent;
+}
+
 .verdict-header h1 {
   margin-bottom: 0.25rem;
 }
@@ -439,8 +445,71 @@ main.container {
   max-width: 46rem;
 }
 
+/* Mobile: stacked target rows keep the band and the answer on screen. */
 .verdict-table-wrap {
-  overflow-x: auto;
+  display: none;
+}
+
+.verdict-targets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.verdict-target {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.3rem 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--sl-rule);
+}
+
+.verdict-target:last-child {
+  border-bottom: 0;
+}
+
+.verdict-target-label {
+  grid-column: 1;
+  grid-row: 1;
+  font-weight: 600;
+}
+
+.verdict-target-change {
+  grid-column: 2;
+  grid-row: 1;
+  text-align: right;
+  font-weight: 700;
+}
+
+.verdict-target-band {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 0.9rem;
+  color: var(--sl-muted);
+}
+
+.verdict-target-state {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+}
+
+.verdict-target-meta {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  font-size: 0.85rem;
+  color: var(--sl-muted);
+}
+
+@media (min-width: 640px) {
+  .verdict-table-wrap {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .verdict-targets {
+    display: none;
+  }
 }
 
 .verdict-table-wrap table {

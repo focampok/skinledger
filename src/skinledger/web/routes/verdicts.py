@@ -64,6 +64,25 @@ def _outside(target: TargetResult) -> str:
     return copy.VERDICT_NO_SCORE
 
 
+def _outside_state(target: TargetResult) -> str:
+    """Mobile chip state: a measured change, within noise, or not comparable."""
+    if target.status in ("improved", "worse"):
+        return "outside"
+    if target.status == "within_noise":
+        return "within"
+    return "other"
+
+
+def _outside_plain(target: TargetResult) -> str:
+    """Words for the mobile chip; the table keeps the compact symbol."""
+    state = _outside_state(target)
+    if state == "outside":
+        return copy.VERDICT_OUTSIDE_NOISE
+    if state == "within":
+        return copy.VERDICT_WITHIN_NOISE
+    return _outside(target)
+
+
 def _target_rows(computed: Verdict) -> list[dict[str, object]]:
     return [
         {
@@ -73,7 +92,10 @@ def _target_rows(computed: Verdict) -> list[dict[str, object]]:
             "checkin": _score(target.checkin),
             "change": _change(target.delta),
             "band": "—" if target.band is None else f"{float(target.band):.1f}",
+            "band_display": "—" if target.band is None else f"±{float(target.band):.1f}",
             "outside": _outside(target),
+            "outside_plain": _outside_plain(target),
+            "outside_state": _outside_state(target),
             "unstable": target.status == "unstable",
         }
         for target in computed.targets
