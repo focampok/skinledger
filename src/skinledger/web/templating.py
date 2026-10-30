@@ -1,5 +1,6 @@
 """Shared Jinja2 environment for full pages and HTMX fragments."""
 
+from datetime import datetime
 from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
@@ -40,6 +41,14 @@ templates.env.globals.update(
     capture_fallback_text=copy.CAPTURE_FALLBACK_TEXT,
     capture_fallback_ms=copy.CAPTURE_FALLBACK_SECONDS * 1000,
     baseline_done=copy.BASELINE_DONE,
+    timeline_product_key=copy.TIMELINE_PRODUCT_KEY,
+    timeline_numbers=copy.TIMELINE_NUMBERS,
+    timeline_show_fewer=copy.TIMELINE_SHOW_FEWER,
+    timeline_shown_note=copy.TIMELINE_SHOWN_NOTE,
+    timeline_band_prefix=copy.TIMELINE_BAND_PREFIX,
+    timeline_summary_latest=copy.TIMELINE_SUMMARY_LATEST,
+    timeline_noscript=copy.TIMELINE_NOSCRIPT,
+    timeline_no_points=copy.TIMELINE_NO_POINTS,
     features=FEATURES,
     verdict_title_prefix=copy.VERDICT_TITLE_PREFIX,
     verdict_simulated_banner=copy.VERDICT_SIMULATED_BANNER,
@@ -115,3 +124,18 @@ templates.env.globals.update(
     routine_day_pm=copy.ROUTINE_DAY_PM,
     routine_always=copy.ROUTINE_ALWAYS,
 )
+
+_MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def short_date(value: object) -> str:
+    """A compact date for tables and keys: 'Oct 4'. Falls back to the raw text."""
+    text = str(value or "")
+    try:
+        moment = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return text[:10]
+    return f"{_MONTHS[moment.month - 1]} {moment.day}"
+
+
+templates.env.filters["short_date"] = short_date

@@ -16,12 +16,23 @@
     mock: "sample"
   };
 
+  function cssVar(name, fallback) {
+    var value = getComputedStyle(document.documentElement).getPropertyValue(name);
+    return value && value.trim() ? value.trim() : fallback;
+  }
+
+  // P16b-4: chart colours come from the same tokens as the page, so a phone in
+  // dark mode gets light text, a light band and readable provenance marks.
   var COLORS = {
-    real: "#1f6f5c",
-    simulated: "#8a6d3b",
-    sample: "#6b5b95",
-    band: "rgba(31, 111, 92, 0.16)",
-    bandUnstable: "rgba(120, 126, 132, 0.22)"
+    text: cssVar("--sl-body", "#373c44"),
+    grid: cssVar("--sl-chart-grid", "rgba(0, 0, 0, 0.08)"),
+    real: cssVar("--sl-chart-real", "#1f6f5c"),
+    simulated: cssVar("--sl-chart-simulated", "#8a6d3b"),
+    sample: cssVar("--sl-chart-sample", "#6b5b95"),
+    band: cssVar("--sl-chart-band", "rgba(31, 111, 92, 0.16)"),
+    bandUnstable: cssVar("--sl-chart-band-unstable", "rgba(120, 126, 132, 0.22)"),
+    rule: cssVar("--sl-chart-rule", "rgba(31, 111, 92, 0.55)"),
+    hollow: cssVar("--sl-chart-hollow", "#ffffff")
   };
 
   var LABEL_STYLES = {
@@ -30,7 +41,17 @@
     SAMPLE: { color: COLORS.sample, dash: [2, 3], hollow: true }
   };
 
-  function formatDate(iso) {
+  // The axis shows the day only; the tooltip keeps the time of capture.
+  function formatTick(iso) {
+    var date = new Date(iso);
+    if (isNaN(date.getTime())) return String(iso).slice(0, 10);
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric"
+    });
+  }
+
+  function formatFull(iso) {
     var date = new Date(iso);
     if (isNaN(date.getTime())) return String(iso);
     return date.toLocaleString(undefined, {
@@ -50,6 +71,8 @@
     return String(point.t || "").slice(0, 10);
   }
 
+  // One vertical mark per product start. The full names live in the shared
+  // product key, so nothing is truncated inside a 300px chart.
   function productMarksFor(points, products) {
     var marks = [];
     (products || []).forEach(function (product) {
@@ -57,10 +80,7 @@
       var started = String(product.started_on).slice(0, 10);
       for (var index = 0; index < points.length; index += 1) {
         if (dayOf(points[index]) >= started) {
-          marks.push({
-            index: index,
-            label: String(product.name || "Product").slice(0, 16)
-          });
+          marks.push({ index: index });
           return;
         }
       }
@@ -68,7 +88,6 @@
     return marks;
   }
 
-  // Vertical marks at each product start; no annotation plugin is needed.
   var productMarks = {
     id: "slProductMarks",
     afterDatasetsDraw: function (chart, args, options) {
@@ -79,10 +98,8 @@
       var ctx = chart.ctx;
       var labels = chart.data.labels || [];
       ctx.save();
-      ctx.strokeStyle = "rgba(31, 111, 92, 0.55)";
-      ctx.fillStyle = "rgba(31, 111, 92, 0.85)";
+      ctx.strokeStyle = COLORS.rule;
       ctx.lineWidth = 1;
-      ctx.font = "10px system-ui, sans-serif";
       ctx.setLineDash([3, 3]);
       marks.forEach(function (mark) {
         if (mark.index < 0 || mark.index >= labels.length) return;
@@ -91,7 +108,6 @@
         ctx.moveTo(px, area.top);
         ctx.lineTo(px, area.bottom);
         ctx.stroke();
-        ctx.fillText(mark.label, px + 3, area.top + 10);
       });
       ctx.restore();
     }
@@ -99,8 +115,8 @@
 
   Chart.register(productMarks);
   Chart.defaults.font.family = "system-ui, sans-serif";
-  Chart.defaults.font.size = 11;
-  Chart.defaults.color = "#3c4043";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = COLORS.text;
 
   function buildDatasets(aspect, labels) {
     var datasets = [];
@@ -151,8 +167,8 @@
         label: dataLabel,
         data: values,
         borderColor: style.color,
-        backgroundColor: style.hollow ? "#ffffff" : style.color,
-        pointBackgroundColor: style.hollow ? "#ffffff" : style.color,
+        backgroundColor: style.hollow ? COLORS.hollow : style.color,
+        pointBackgroundColor: style.hollow ? COLORS.hollow : style.color,
         pointBorderColor: style.color,
         pointBorderWidth: 2,
         pointRadius: 4,
@@ -172,7 +188,7 @@
     if (!canvas) return;
     var points = aspect.points || [];
     var labels = points.map(function (point) {
-      return formatDate(point.t);
+      return formatTick(point.t);
     });
     new Chart(canvas, {
       type: "line",
@@ -192,7 +208,7 @@
           },
           y: {
             beginAtZero: false,
-            grid: { color: "rgba(0, 0, 0, 0.06)" }
+            grid: { color: COLORS.grid }
           }
         },
         plugins: {
@@ -204,7 +220,7 @@
             callbacks: {
               title: function (items) {
                 var point = points[items[0].dataIndex];
-                return point ? formatDate(point.t) : "";
+                return point ? formatFull(point.t) : "";
               },
               label: function (item) {
                 var point = points[item.dataIndex];
@@ -232,6 +248,42 @@
     if (status) status.hidden = false;
   }
 
+  // Collapse to the first three cards. Charts are created only for visible
+  // cards, and the rest are built when the reader expands the grid.
+  var grid = document.getElementById("timeline-grid");
+  var controls = document.getElementById("timeline-collapse-controls");
+  var toggle = document.getElementById("timeline-toggle");
+  var extraCards = document.querySelectorAll(".timeline-card-extra");
+  var latestSeries = null;
+  var built = {};
+
+  function buildVisible() {
+    if (!latestSeries) return;
+    (latestSeries.aspects || []).forEach(function (aspect) {
+      if (built[aspect.aspect]) return;
+      var card = document.querySelector(
+        '[data-timeline-aspect="' + aspect.aspect + '"]'
+      );
+      if (!card || card.offsetParent === null) return;
+      buildChart(aspect, latestSeries.products || []);
+      built[aspect.aspect] = true;
+    });
+  }
+
+  if (extraCards.length && grid && controls && toggle) {
+    controls.hidden = false;
+    grid.classList.add("is-collapsed");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.addEventListener("click", function () {
+      var collapsed = grid.classList.toggle("is-collapsed");
+      toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      toggle.textContent = collapsed
+        ? toggle.getAttribute("data-show-all")
+        : toggle.getAttribute("data-show-fewer");
+      if (!collapsed) buildVisible();
+    });
+  }
+
   fetch("/api/people/" + encodeURIComponent(personId) + "/series", {
     headers: { Accept: "application/json" },
     credentials: "same-origin"
@@ -241,9 +293,8 @@
       return response.json();
     })
     .then(function (series) {
-      (series.aspects || []).forEach(function (aspect) {
-        buildChart(aspect, series.products || []);
-      });
+      latestSeries = series;
+      buildVisible();
     })
     .catch(showChartError);
 })();

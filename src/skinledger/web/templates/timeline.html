@@ -15,6 +15,15 @@
   <p class="demo-banner" role="status">{{ demo_banner }}</p>
   {% endif %}
 
+  <p class="timeline-summary">
+    <span><strong>{{ cards|length }}</strong> {{ 'aspect' if cards|length == 1 else 'aspects' }}</span>
+    <span><strong>{{ products|length }}</strong> {{ 'product' if products|length == 1 else 'products' }}</span>
+    <span><strong>{{ unstable_count }}</strong> unstable</span>
+    {% if summary_latest %}
+    <span>{{ timeline_summary_latest }} <strong>{{ summary_latest|short_date }}</strong></span>
+    {% endif %}
+  </p>
+
   {% if has_band %}
   <p class="timeline-legend">{{ band_legend }}</p>
   {% else %}
@@ -23,22 +32,51 @@
   </article>
   {% endif %}
 
+  {% if products %}
+  <div class="timeline-product-key">
+    <p class="timeline-product-key-title">{{ timeline_product_key }}</p>
+    <ul>
+      {% for product in products %}
+      <li>
+        <strong>{{ product.name }}</strong> · {{ product.started_on|short_date }}{% if product.ended_on %} – {{ product.ended_on|short_date }}{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if skin_type and skin_type.value %}
   <p class="timeline-skin-type">
-    <span class="sl-chip" data-skin-type="{{ skin_type.value if skin_type else '' }}">
+    <span class="sl-chip" data-skin-type="{{ skin_type.value }}">
       Skin type:
-      <strong>{{ skin_type.value if skin_type else '—' }}</strong>
-      {% if skin_type %}<small>{{ skin_type.data_label }}</small>{% endif %}
+      <strong>{{ skin_type.value }}</strong>
+      <small>{{ skin_type.data_label }}</small>
     </span>
   </p>
+  {% endif %}
+
+  <noscript>
+    <p class="timeline-noscript">{{ timeline_noscript }}</p>
+  </noscript>
 
   <p id="timeline-chart-status" class="timeline-status" hidden>
     Charts could not load. Refresh to try again.
   </p>
 
-  <div class="timeline-grid">
+  <div class="timeline-collapse" id="timeline-collapse-controls" hidden>
+    <button type="button" id="timeline-toggle" class="secondary outline"
+            aria-controls="timeline-grid" aria-expanded="false"
+            data-show-all="{{ timeline_show_all }}"
+            data-show-fewer="{{ timeline_show_fewer }}">
+      {{ timeline_show_all }}
+    </button>
+    <span class="timeline-shown-note">{{ timeline_shown_note }}</span>
+  </div>
+
+  <div class="timeline-grid" id="timeline-grid">
     {% for card in cards %}
     <article
-      class="timeline-card{% if card.unstable %} timeline-card-unstable{% endif %}"
+      class="timeline-card{% if card.unstable %} timeline-card-unstable{% endif %}{% if loop.index > 3 %} timeline-card-extra{% endif %}"
       data-timeline-aspect="{{ card.aspect }}"
       data-order-group="{{ card.group }}"
       data-unstable="{{ 'true' if card.unstable else 'false' }}"
@@ -49,6 +87,9 @@
         <span class="sl-chip sl-chip-unstable">{{ unstable_chip }}</span>
         {% endif %}
       </header>
+      {% if card.band is not none %}
+      <p class="timeline-band-label">{{ timeline_band_prefix }} ±{{ '%.1f'|format(card.band) }}</p>
+      {% endif %}
       {% if card.unstable %}
       <p class="timeline-note">{{ unstable_note }}</p>
       {% endif %}
@@ -56,6 +97,29 @@
         <canvas id="chart-{{ card.aspect }}" role="img"
                 aria-label="{{ card.label }} scores over time"></canvas>
       </div>
+      <details class="timeline-numbers">
+        <summary>{{ timeline_numbers }}</summary>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Score</th>
+              <th scope="col">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for point in card.points %}
+            <tr>
+              <td>{{ point.t|short_date }}</td>
+              <td>{{ '%.1f'|format(point.raw_score) }}</td>
+              <td>{{ point.data_label }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">{{ timeline_no_points }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
     </article>
     {% endfor %}
   </div>

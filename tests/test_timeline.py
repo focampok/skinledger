@@ -194,6 +194,54 @@ def test_timeline_page_renders_15_cards_and_the_skin_type_chip(env, web):
     assert f'href="/people/{person_id}/capture"' in response.text
 
 
+def test_timeline_shows_summary_product_key_and_numeric_fallback(env, web):
+    person_id = seed_person()
+    seed_baseline_pair(person_id)
+    add_product(
+        person_id,
+        name="Niacinamide serum",
+        targets=["oiliness"],
+        started_on="2026-10-28",
+    )
+    login(web)
+
+    page = web.get(f"/people/{person_id}/timeline").text
+
+    assert 'class="timeline-summary"' in page
+    assert copy.TIMELINE_SUMMARY_LATEST in page
+    assert copy.TIMELINE_PRODUCT_KEY in page
+    assert "Niacinamide serum" in page
+    assert 'class="timeline-numbers"' in page
+    assert copy.TIMELINE_NUMBERS in page
+    assert "50.0" in page
+    assert "SAMPLE" in page
+
+
+def test_timeline_hides_the_skin_type_chip_when_it_has_no_value(env, web):
+    person_id = seed_person()
+    capture = add_capture(person_id, at=T1)
+    add_scores(capture, {aspect: 40.0 for aspect in NUMERIC_ASPECTS})
+    login(web)
+
+    page = web.get(f"/people/{person_id}/timeline").text
+
+    assert "Skin type:" not in page
+    assert "data-skin-type=" not in page
+
+
+def test_timeline_charts_use_date_ticks_and_no_truncated_product_labels(env, web):
+    charts_js = (STATIC / "charts.js").read_text(encoding="utf-8")
+    timeline = (TEMPLATES / "timeline.html").read_text(encoding="utf-8")
+
+    assert 'month: "short"' in charts_js
+    assert 'day: "numeric"' in charts_js
+    assert "slice(0, 16)" not in charts_js
+    assert "fillText" not in charts_js
+    assert "offsetParent" in charts_js
+    assert "timeline-card-extra" in timeline
+    assert "timeline-numbers" in timeline
+
+
 def test_series_json_has_no_ui_score_and_uses_raw_points(env, web):
     person_id = seed_person()
     seed_baseline_pair(person_id)

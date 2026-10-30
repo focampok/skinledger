@@ -125,6 +125,16 @@ NO_BAND_YET = "Take 2 baseline captures first."
 
 TIMELINE_TITLE = "Your skin, measured against your own noise"
 
+TIMELINE_PRODUCT_KEY = "Product starts"
+TIMELINE_NUMBERS = "Numbers"
+TIMELINE_SHOW_ALL = "Show all {count} aspects"
+TIMELINE_SHOW_FEWER = "Show fewer"
+TIMELINE_SHOWN_NOTE = "Product targets first."
+TIMELINE_BAND_PREFIX = "Noise band"
+TIMELINE_SUMMARY_LATEST = "Latest check-in"
+TIMELINE_NOSCRIPT = "Charts need JavaScript. Open Numbers in each card for the values."
+TIMELINE_NO_POINTS = "No captures yet."
+
 TIMELINE_BAND_LEGEND = (
     "Shaded band = your day-1 measurement noise. Only changes outside it count."
 )

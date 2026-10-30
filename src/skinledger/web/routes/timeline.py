@@ -221,17 +221,24 @@ async def timeline_page(request: Request, person_id: int) -> HTMLResponse:
     finally:
         conn.close()
 
-    logs.log_event(
-        "timeline.viewed", person_id=person_id, aspect_count=len(series["aspects"])
+    cards = series["aspects"]
+    latest = max(
+        (point["t"] for card in cards for point in card["points"]),
+        default=None,
     )
+    logs.log_event("timeline.viewed", person_id=person_id, aspect_count=len(cards))
     return templates.TemplateResponse(
         request,
         "timeline.html",
         {
             "person": person_data,
-            "cards": series["aspects"],
+            "cards": cards,
+            "products": series["products"],
             "has_band": series["has_band"],
             "skin_type": series["skin_type"],
+            "unstable_count": sum(1 for card in cards if card["unstable"]),
+            "summary_latest": latest,
+            "timeline_show_all": copy.TIMELINE_SHOW_ALL.format(count=len(cards)),
             "timeline_title": copy.TIMELINE_TITLE,
             "band_legend": copy.TIMELINE_BAND_LEGEND,
             "unstable_chip": copy.TIMELINE_UNSTABLE_CHIP,
