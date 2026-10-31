@@ -45,8 +45,10 @@
           <line x1="0" y1="5" x2="28" y2="5" stroke="currentColor" stroke-width="2"
                 {% if dash %}stroke-dasharray="{{ dash }}"{% endif %}></line>
         </svg>
+        {% set parts = product.name|split_data_label %}
         <span class="timeline-product-name">
-          <strong>{{ product.name }}</strong> · {{ product.started_on|short_date }}{% if product.ended_on %} – {{ product.ended_on|short_date }}{% endif %}
+          <strong>{{ parts.name }}</strong>{% if parts.label %} <span class="sl-chip sl-chip-neutral">{{ parts.label }}</span>{% endif %}
+          <span class="timeline-product-date">{{ product.started_on|short_date }}{% if product.ended_on %} – {{ product.ended_on|short_date }}{% endif %}</span>
         </span>
       </li>
       {% endfor %}

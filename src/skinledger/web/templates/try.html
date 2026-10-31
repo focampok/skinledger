@@ -5,8 +5,9 @@
 {% block content %}
 <h1>Try SkinLedger</h1>
 <p>
-  SkinLedger measures 15 skin aspects plus skin type from one selfie and tells you whether a
-  product is really working, against your own measurement noise. {{ powered_by }}.
+  SkinLedger measures 15 skin aspects plus skin type (one measurement per aspect) from one
+  selfie and tells you whether a product is really working, against your own measurement noise.
+  {{ powered_by }}.
 </p>
 {% if demo_person_id %}
 <p><a href="/people/{{ demo_person_id }}/timeline" role="button"

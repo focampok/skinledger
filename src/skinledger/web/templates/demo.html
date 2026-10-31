@@ -13,8 +13,10 @@
     <small>15 aspects, each against the sample's own day-1 band.</small>
   </li>
   {% for product in sample_products %}
+  {% set parts = product.name|split_data_label %}
   <li>
-    <a href="/products/{{ product.id }}/verdict">See the verdict for {{ product.name }}</a>
+    <a href="/products/{{ product.id }}/verdict">See the verdict for {{ parts.name }}</a>
+    {% if parts.label %}<span class="sl-chip sl-chip-neutral">{{ parts.label }}</span>{% endif %}
   </li>
   {% endfor %}
 </ol>

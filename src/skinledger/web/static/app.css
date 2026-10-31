@@ -539,6 +539,12 @@ input[type="file"]::file-selector-button:hover {
   min-width: 0;
 }
 
+.timeline-product-date {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--sl-muted);
+}
+
 .timeline-product-index {
   min-width: 1ch;
   font-size: 0.85rem;

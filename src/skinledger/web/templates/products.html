@@ -64,6 +64,7 @@
       <p id="target-count" class="product-count" role="status" aria-live="polite">
         {{ form.targets|length }} of {{ max_targets }} selected
       </p>
+      <p class="product-aspects-note">{{ product_aspects_note }}</p>
       {% set unstable_aspects = aspects|selectattr("unstable")|list %}
       {% if unstable_aspects %}
       <p class="product-unstable-note">{{ unstable_hint }}</p>
