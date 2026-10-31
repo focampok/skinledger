@@ -836,23 +836,28 @@ input[type="file"]::file-selector-button:hover {
 
 .sl-chip {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  background: var(--sl-accent-chip);
-  color: var(--sl-accent-ink);
-  font-size: 0.78rem;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--sl-rule);
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-stone);
+  color: var(--sl-ink);
+  font-family: var(--sl-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .sl-chip-unstable,
 .sl-chip-neutral {
-  background: var(--sl-neutral-line);
+  background: var(--sl-stone-deep);
   color: var(--sl-neutral-ink);
 }
 
 .sl-chip small {
   color: var(--sl-muted);
+  font-weight: 400;
 }
 
 /* -- P09 product log ------------------------------------------------------- */
@@ -1250,22 +1255,120 @@ input[type="file"]::file-selector-button:hover {
   color: var(--sl-muted);
 }
 
-.home-actions {
+.eyebrow {
+  margin: 0 0 var(--sl-space-xs);
+  font-family: var(--sl-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-muted);
+}
+
+.home-hero {
+  display: grid;
+  gap: var(--sl-space-lg);
+  align-items: start;
+}
+
+.home-hero-title {
+  margin: 0 0 var(--sl-space-md);
+}
+
+.home-hero-sub {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--sl-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.home-band {
+  margin: 0;
+  padding: 20px;
+  background: var(--sl-page);
+  border: 1px solid var(--sl-rule);
+  border-radius: var(--sl-radius-card);
+  box-shadow: var(--sl-shadow-lift);
+}
+
+.home-band svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.home-band figcaption {
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-xs);
+  margin-top: var(--sl-space-sm);
+  color: var(--sl-muted);
+  font-size: 0.875rem;
+}
+
+.band-axis {
+  font-family: var(--sl-font-sans);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  fill: var(--sl-muted);
+}
+
+.home-hero-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
-  margin-block: 1rem;
+  gap: var(--sl-space-sm);
 }
 
-.home-actions a[role="button"] {
+.home-hero-actions a[role="button"] {
   margin: 0;
+}
+
+@media (min-width: 768px) {
+  .home-hero {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    grid-template-areas:
+      "copy visual"
+      "actions visual";
+    column-gap: var(--sl-space-2xl);
+    row-gap: var(--sl-space-md);
+    align-items: center;
+  }
+
+  .home-hero-copy {
+    grid-area: copy;
+  }
+
+  .home-hero-actions {
+    grid-area: actions;
+  }
+
+  .home-band {
+    grid-area: visual;
+    width: 100%;
+    max-width: 460px;
+    justify-self: end;
+  }
+}
+
+.home-products {
+  margin-top: var(--sl-space-2xl);
+}
+
+.home-products > h2 {
+  margin-bottom: var(--sl-space-md);
+}
+
+.home-products .demo-banner {
+  max-width: none;
+  margin: 0 0 var(--sl-space-md);
 }
 
 .home-product-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
+  gap: var(--sl-space-md);
 }
 
 @media (min-width: 640px) {
@@ -1276,8 +1379,12 @@ input[type="file"]::file-selector-button:hover {
 
 .home-product-card {
   margin: 0;
-  padding: 0.9rem;
-  border-left: 4px solid var(--sl-grey);
+  padding: var(--sl-space-lg);
+  background: var(--sl-page);
+  border: 1px solid var(--sl-rule);
+  border-left: 3px solid var(--sl-grey);
+  border-radius: var(--sl-radius-card);
+  box-shadow: none;
 }
 
 .home-product-card.home-verdict-keep {
@@ -1293,12 +1400,42 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .home-product-card h3 {
-  margin-bottom: 0.35rem;
+  margin: 0 0 var(--sl-space-xs);
+  font-size: 1.25rem;
+}
+
+.home-product-card h3 a {
+  color: var(--sl-ink);
+  text-decoration: none;
+}
+
+.home-product-card h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .home-product-outcome {
+  margin: 0 0 4px;
+  font-family: var(--sl-font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--sl-ink);
+}
+
+.home-product-detail {
+  margin: 0 0 var(--sl-space-sm);
+  color: var(--sl-body);
+  font-size: 0.9375rem;
+}
+
+.home-product-meta {
   margin: 0;
-  font-weight: 700;
+  color: var(--sl-muted);
+  font-size: 0.875rem;
+}
+
+.home-product-meta + .home-product-meta {
+  margin-top: 4px;
 }
 
 /* -- P16b-6 people and demo tour ------------------------------------------- */

@@ -278,6 +278,12 @@ TRY_DEMO_LINK = "About the demo"
 
 HOME_SAMPLE_LINK = "Open the sample profile (SIMULATED)"
 HOME_SAMPLE_TITLE = "Sample profile products"
+HOME_EYEBROW = "Your own baseline"
+HOME_SUB = (
+    "One product, one honest verdict, measured against your own day-1 noise — "
+    "not a stranger's average."
+)
+HOME_BAND_CAPTION = "Your day-1 noise band"
 
 HOME_OUTCOME_DETAILS = {
     "keep": "The change is bigger than your noise band.",

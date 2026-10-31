@@ -3,18 +3,42 @@
 {% block title %}SkinLedger — Is it working or not?{% endblock %}
 
 {% block content %}
-<h1>Is it working or not? Know before you rebuy.</h1>
-<p>
-  Capture a guided selfie, log the product you are using, and after 14 or 28 days SkinLedger
-  tells you whether the change is larger than your own measurement noise.
-</p>
-<p class="home-actions">
-  <a href="/try" role="button">Try it</a>
-  {% if demo_person_id %}
-  <a href="/people/{{ demo_person_id }}/timeline" role="button"
-     class="secondary outline">{{ home_sample_link }}</a>
-  {% endif %}
-</p>
+<section class="home-hero" aria-labelledby="home-title">
+  <div class="home-hero-copy">
+    <p class="eyebrow">{{ home_eyebrow }}</p>
+    <h1 id="home-title" class="home-hero-title">Is it working or not? Know before you rebuy.</h1>
+    <p class="home-hero-sub">{{ home_sub }}</p>
+  </div>
+
+  <figure class="home-band">
+    <svg viewBox="0 0 360 160" role="img"
+         aria-label="Sample noise band: a score line staying inside a soft band">
+      <rect x="0" y="44" width="360" height="68" rx="34" fill="var(--sl-sand-wash)"></rect>
+      <line x1="0" y1="112" x2="360" y2="112" stroke="var(--sl-rule)" stroke-width="1"></line>
+      <path d="M0 84 C40 78 70 82 108 78 S180 70 220 76 S300 68 360 64"
+            fill="none" stroke="var(--sl-accent)" stroke-width="2"></path>
+      <circle cx="40" cy="78" r="3" fill="var(--sl-accent)"></circle>
+      <circle cx="108" cy="78" r="3" fill="var(--sl-accent)"></circle>
+      <circle cx="180" cy="72" r="3" fill="var(--sl-accent)"></circle>
+      <circle cx="260" cy="72" r="3" fill="var(--sl-accent)"></circle>
+      <circle cx="332" cy="66" r="3" fill="var(--sl-accent)"></circle>
+      <text x="0" y="140" class="band-axis">Sep 20</text>
+      <text x="318" y="140" class="band-axis">Oct 28</text>
+    </svg>
+    <figcaption>
+      <span class="sl-chip">SAMPLE</span>
+      {{ home_band_caption }}
+    </figcaption>
+  </figure>
+
+  <div class="home-hero-actions">
+    <a href="/try" role="button">Try it</a>
+    {% if demo_person_id %}
+    <a href="/people/{{ demo_person_id }}/timeline" role="button"
+       class="secondary outline">{{ home_sample_link }}</a>
+    {% endif %}
+  </div>
+</section>
 
 {% if show_home_products %}
 <section class="home-products">
@@ -30,14 +54,14 @@
       {% set name_parts = card.name|split_data_label %}
       <h3><a href="/products/{{ card.product_id }}/verdict">{{ name_parts.name }}</a>{% if name_parts.label %} <span class="sl-chip sl-chip-neutral">{{ name_parts.label }}</span>{% endif %}</h3>
       <p class="home-product-outcome">{{ card.outcome_label }}</p>
-      {% if card.detail %}<p><small>{{ card.detail }}</small></p>{% endif %}
+      {% if card.detail %}<p class="home-product-detail">{{ card.detail }}</p>{% endif %}
       {% if card.next_checkin_date %}
-      <p><small>{{ home_next_checkin }}: {{ card.next_checkin_label }} · {{ card.next_checkin_date }}</small></p>
+      <p class="home-product-meta">{{ home_next_checkin }}: {{ card.next_checkin_label }} · {{ card.next_checkin_date }}</p>
       {% else %}
-      <p><small>{{ home_both_passed }}</small></p>
+      <p class="home-product-meta">{{ home_both_passed }}</p>
       {% endif %}
       {% set person_parts = card.person_name|split_data_label %}
-      <p><small>{{ person_parts.name }} · {{ card.label }}</small></p>
+      <p class="home-product-meta">{{ person_parts.name }} · {{ card.label }}</p>
     </article>
     {% endfor %}
   </div>
