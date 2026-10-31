@@ -53,7 +53,7 @@ Stage 2 criteria have equal weight; a tie is broken by technical implementation.
 | D3 | Only Francisco's face, or no face, in the repo, video and screenshots; never family | Manual review of every frame and image | F | todo |
 | D4 | No photo files on the volume | `/admin/usage` "files outside masks/" = 0 | F | todo |
 | D5 | Exact disclaimer on every page and on the verdict screen; "Powered by YouCam API" is the only brand tagline and API names appear only as technical references; no medical language | `test_copy.py` (P13) green; run the banned-word check on README and docs | CA, SL | todo |
-| D6 | Orphan test profile (person 6) removed before recording | Manual check on People page | F | todo |
+| D6 | Orphan test profile removed before recording | Manual check on People page | F | done |
 | D7 | `--proxy-headers` confirmed so the `/try` rate limit sees the real client IP | P15 note | F, CA | todo |
 | D8 | Visitor upload test in a private window (16 units) | P16 | F | todo |
 | D9 | Submit on Devpost with repo, video and demo links correct; then `git tag submission` | Devpost confirmation page | F | todo |
@@ -82,12 +82,12 @@ Remove each item when verified. Before submitting, no draft-feature marker may r
 
 ### Placeholders
 - [ ] `<INVITE_CODE>`: typed only into Devpost testing instructions, never committed.
-- [ ] `VIDEO_URL_TBD`: replaced in `README.md` and `docs/devpost.md` after the upload.
+- [x] `VIDEO_URL_TBD`: replaced in `README.md` and `docs/devpost.md` after the upload.
 
 ### Video
 - [ ] Full flow shown; "simulated" said aloud and SIMULATED on screen for every sample or simulated day-14/28 element.
 - [ ] "Unstable for your setup", the confounded warning on the sample and TOO_EARLY on Francisco's profile are visible.
-- [ ] Orphan test profile (person 6) deleted before recording; People page shows only Francisco and the sample profile.
+- [x] Orphan test profile deleted before recording.
 - [ ] No family member, brand or logo visible; no invite code, admin token or query strings in the URL bar.
 - [ ] Length 2:30–3:00 (aim 2:45–2:55).
 

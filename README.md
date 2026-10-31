@@ -4,7 +4,7 @@
 
 SkinLedger is a responsive web app (installable PWA) that tells you, from your own measurements, whether a skincare product is really working, and only counts a change when it beats the noise of the measurement itself.
 
-Demo: https://skinledger.focampo.com · Video: `VIDEO_URL_TBD` · Licence: MIT · Powered by YouCam API
+Demo: https://skinledger.focampo.com · Video: https://youtu.be/Syo0nqcsYgc · Licence: MIT · Powered by YouCam API
 
 ## The problem
 People wonder about their skin right before a purchase, and right when they are standing in front of a mirror deciding whether a product is working. The light changes, the mirror lies, and many beauty apps show deliberately encouraging scores. A tracker that confuses noise with progress misleads you.

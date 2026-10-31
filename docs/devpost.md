@@ -1,6 +1,6 @@
 # SkinLedger: Devpost description
 
-Paste the sections below into the Devpost form. `<INVITE_CODE>` is a placeholder: the real code goes only into Devpost, never into the repo. `VIDEO_URL_TBD` is the video placeholder, kept in both `README.md` and this file so it is easy to find and replace after upload.
+Paste the sections below into the Devpost form. `<INVITE_CODE>` is a placeholder: the real code goes only into Devpost, never into the repo. The demo video is at https://youtu.be/Syo0nqcsYgc.
 
 ---
 
@@ -84,7 +84,7 @@ python, fastapi, htmx, sqlite, chart.js, youcam-api, pwa, railway
 ## Try it out (links)
 - Live demo: https://skinledger.focampo.com
 - Repo: https://github.com/focampok/skinledger (MIT licence)
-- Video: `VIDEO_URL_TBD` (replace after upload)
+- Video: https://youtu.be/Syo0nqcsYgc
 
 ## Testing instructions (for judges)
 1. Open https://skinledger.focampo.com/demo. Browse the public read-only "Sample user (SIMULATED)" profile with no code.

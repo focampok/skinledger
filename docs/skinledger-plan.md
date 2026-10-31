@@ -6,8 +6,8 @@
 - **Shipped:** P00–P16c-4, ending with the "The Quiet Lab" UI; **316 tests green** and `ruff` clean on 31 Oct 2026.
 - **Docs aligned:** P17–P19 updated `README.md`, `docs/devpost.md`, `docs/video-script.md`, `docs/screenshots.md`, `docs/requirements-matrix.md` and this Status section against the shipped app. Docs only; no code changes.
 - **Next:** P20 submission checks (live flow, unit balance, repo history, video upload). No code work is planned.
-- **Real data:** the real day-1 baseline pair is person 7, captures 2 and 3 (guided Camera Kit, same light, 3 minutes apart). Measured noise: pore +17.3 and acne +15.0 (both unstable, band > 10), radiance -7.9, oiliness +7.5, firmness +6.7, droopy upper eyelid -6.2, tear trough -5.5, droopy lower eyelid +5.2; every other aspect moved 3.5 or less; skin type identical.
-- **Cleanup before recording:** the orphan test profile, person 6, must be deleted.
+- **Real data:** the real day-1 baseline pair is captures 2 and 3 (guided Camera Kit, same light, 3 minutes apart). Measured noise: pore +17.3 and acne +15.0 (both unstable, band > 10), radiance -7.9, oiliness +7.5, firmness +6.7, droopy upper eyelid -6.2, tear trough -5.5, droopy lower eyelid +5.2; every other aspect moved 3.5 or less; skin type identical.
+- **Cleanup before recording:** orphan test profile deleted (done).
 - **Units (29 Oct snapshot):** 64 of 1,040 used.
 - **Schedule (decided 29 Oct):** everything submitted by **Sat 31 Oct 21:00 GT** (hard deadline Mon 2 Nov 10:45 GT); submission checklist Sat 31 Oct 14:00 GT; kill switch Sat 31 Oct 20:00 GT. Sunday is buffer only, Monday is margin only.
 - **Paths:** all `web/...` paths in these docs live under `src/skinledger/` (for example `src/skinledger/web/static/`).
