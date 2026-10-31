@@ -125,6 +125,10 @@ NO_BAND_YET = "Take 2 baseline captures first."
 
 TIMELINE_TITLE = "Your skin, measured against your own noise"
 
+SCORE_DIRECTION_NOTE = (
+    "Higher score = healthier-looking skin, for every aspect."
+)
+
 TIMELINE_PRODUCT_KEY = "Product starts"
 TIMELINE_NUMBERS = "Numbers"
 TIMELINE_SHOW_ALL = "Show all {count} aspects"

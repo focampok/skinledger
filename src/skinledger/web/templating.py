@@ -47,6 +47,7 @@ templates.env.globals.update(
     capture_fallback_text=copy.CAPTURE_FALLBACK_TEXT,
     capture_fallback_ms=copy.CAPTURE_FALLBACK_SECONDS * 1000,
     baseline_done=copy.BASELINE_DONE,
+    score_direction_note=copy.SCORE_DIRECTION_NOTE,
     timeline_product_key=copy.TIMELINE_PRODUCT_KEY,
     timeline_numbers=copy.TIMELINE_NUMBERS,
     timeline_show_fewer=copy.TIMELINE_SHOW_FEWER,

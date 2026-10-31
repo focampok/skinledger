@@ -231,6 +231,17 @@ def test_the_owner_sees_the_verdict_card(env, web):
     assert copy.DISCLAIMER in card
 
 
+def test_score_direction_label_is_on_verdict_and_timeline(env, web):
+    person_id, product_id, _, _ = seed_product(env)
+    login(web)
+
+    verdict = web.get(f"/products/{product_id}/verdict")
+    timeline = web.get(f"/people/{person_id}/timeline")
+
+    assert copy.SCORE_DIRECTION_NOTE in verdict.text
+    assert copy.SCORE_DIRECTION_NOTE in timeline.text
+
+
 def test_another_browser_gets_404(env, web):
     _, product_id, _, _ = seed_product(env)
     login(web, OTHER_TOKEN)

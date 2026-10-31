@@ -987,6 +987,12 @@ input[type="file"]::file-selector-button:hover {
   color: var(--sl-muted);
 }
 
+.score-note {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--sl-muted);
+}
+
 .verdict-changes {
   padding-left: 0;
   list-style: none;

@@ -74,7 +74,11 @@ def _outside_state(target: TargetResult) -> str:
 
 
 def _direction_label(target: TargetResult) -> str:
-    """The verdict engine treats higher raw_score as better; mirror it in words."""
+    """The verdict engine treats higher raw_score as better; mirror it in words.
+
+    Source: YouCam AI Skin Analysis docs, Inputs & Outputs: raw_score is 1-100 and
+    "a higher score indicates healthier and more aesthetically pleasing skin condition".
+    """
     if target.status == "improved":
         return copy.VERDICT_DIRECTION_IMPROVED
     if target.status == "worse":
