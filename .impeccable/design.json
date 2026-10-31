@@ -8,63 +8,234 @@
         "role": "neutral",
         "displayName": "Warm Ivory",
         "canonical": "#FAF7F2",
-        "tonalRamp": ["#2B2A28", "#3B3833", "#66615A", "#A39A8C", "#D8CEC0", "#E2D9CD", "#F1ECE4", "#FAF7F2"]
+        "tonalRamp": [
+          "#2B2A28",
+          "#3B3833",
+          "#66615A",
+          "#A39A8C",
+          "#D8CEC0",
+          "#E2D9CD",
+          "#F1ECE4",
+          "#FAF7F2"
+        ]
       },
       "stone": {
         "role": "neutral",
         "displayName": "Stone",
         "canonical": "#F1ECE4",
-        "tonalRamp": ["#2B2A28", "#3B3833", "#66615A", "#9E9485", "#C9BDAC", "#DDD3C6", "#E8E1D6", "#F1ECE4"]
+        "tonalRamp": [
+          "#2B2A28",
+          "#3B3833",
+          "#66615A",
+          "#9E9485",
+          "#C9BDAC",
+          "#DDD3C6",
+          "#E8E1D6",
+          "#F1ECE4"
+        ]
       },
       "primary": {
         "role": "primary",
         "displayName": "Deep Sage",
         "canonical": "#1F6F5C",
-        "tonalRamp": ["#0D2F27", "#144A3F", "#1F6F5C", "#2C8A73", "#57A78F", "#8FC7B4", "#C8E5DC", "#E7EFEA"]
+        "tonalRamp": [
+          "#0D2F27",
+          "#144A3F",
+          "#1F6F5C",
+          "#2C8A73",
+          "#57A78F",
+          "#8FC7B4",
+          "#C8E5DC",
+          "#E7EFEA"
+        ]
       },
       "sand": {
         "role": "secondary",
         "displayName": "Sand (highlight only)",
         "canonical": "#D8C6A6",
-        "tonalRamp": ["#3D3426", "#5C4E39", "#7E6B4D", "#A08A66", "#D8C6A6", "#E4D7BE", "#EFE6D4", "#F4EDE1"]
+        "tonalRamp": [
+          "#3D3426",
+          "#5C4E39",
+          "#7E6B4D",
+          "#A08A66",
+          "#D8C6A6",
+          "#E4D7BE",
+          "#EFE6D4",
+          "#F4EDE1"
+        ]
       },
       "rose": {
         "role": "secondary",
         "displayName": "Dusty Rose (highlight only)",
         "canonical": "#C4A09A",
-        "tonalRamp": ["#3B2A28", "#5C403C", "#7E5752", "#A37670", "#C4A09A", "#D6BAB5", "#E7D3CF", "#F6E9E6"]
+        "tonalRamp": [
+          "#3B2A28",
+          "#5C403C",
+          "#7E5752",
+          "#A37670",
+          "#C4A09A",
+          "#D6BAB5",
+          "#E7D3CF",
+          "#F6E9E6"
+        ]
       },
       "warn": {
         "role": "tertiary",
         "displayName": "Warm Amber",
         "canonical": "#8A5514",
-        "tonalRamp": ["#3D2400", "#6B3F00", "#8A5514", "#B06F1E", "#D08B34", "#E5B269", "#F4D9B0", "#F4E8D4"]
+        "tonalRamp": [
+          "#3D2400",
+          "#6B3F00",
+          "#8A5514",
+          "#B06F1E",
+          "#D08B34",
+          "#E5B269",
+          "#F4D9B0",
+          "#F4E8D4"
+        ]
       },
       "danger": {
         "role": "tertiary",
         "displayName": "Warm Red",
         "canonical": "#A33A32",
-        "tonalRamp": ["#3B0B08", "#6D1712", "#A33A32", "#C15047", "#D97C74", "#E8A49E", "#F3C9C4", "#F7E5E1"]
+        "tonalRamp": [
+          "#3B0B08",
+          "#6D1712",
+          "#A33A32",
+          "#C15047",
+          "#D97C74",
+          "#E8A49E",
+          "#F3C9C4",
+          "#F7E5E1"
+        ]
       },
       "dark-page": {
         "role": "neutral",
         "displayName": "Warm Charcoal",
         "canonical": "#1C1A17",
-        "tonalRamp": ["#12110F", "#1C1A17", "#25221E", "#2E2A25", "#3A352F", "#5C554C", "#B3AA9E", "#F2EDE5"]
+        "tonalRamp": [
+          "#12110F",
+          "#1C1A17",
+          "#25221E",
+          "#2E2A25",
+          "#3A352F",
+          "#5C554C",
+          "#B3AA9E",
+          "#F2EDE5"
+        ]
       },
       "dark-accent": {
         "role": "primary",
         "displayName": "Sage Ink (dark)",
         "canonical": "#8FC7B4",
-        "tonalRamp": ["#0D2F27", "#16302A", "#1F6F5C", "#2C8A73", "#57A78F", "#8FC7B4", "#C3E4D8", "#EDF7F2"]
+        "tonalRamp": [
+          "#0D2F27",
+          "#16302A",
+          "#1F6F5C",
+          "#2C8A73",
+          "#57A78F",
+          "#8FC7B4",
+          "#C3E4D8",
+          "#EDF7F2"
+        ]
+      },
+      "dark-accent-deep": {
+        "role": "primary",
+        "displayName": "Sage Ink Hover (dark)",
+        "canonical": "#A8D8C8",
+        "tonalRamp": [
+          "#0D2F27",
+          "#16302A",
+          "#1F6F5C",
+          "#2C8A73",
+          "#57A78F",
+          "#8FC7B4",
+          "#A8D8C8",
+          "#EDF7F2"
+        ]
+      },
+      "dark-neutral-wash": {
+        "role": "neutral",
+        "displayName": "Dark Neutral Wash",
+        "canonical": "#2A2622",
+        "tonalRamp": [
+          "#12110F",
+          "#1C1A17",
+          "#25221E",
+          "#2A2622",
+          "#3A352F",
+          "#5C554C",
+          "#B3AA9E",
+          "#F2EDE5"
+        ]
+      },
+      "dark-neutral-ink": {
+        "role": "neutral",
+        "displayName": "Dark Neutral Ink",
+        "canonical": "#CFC7BB",
+        "tonalRamp": [
+          "#3A352F",
+          "#5C554C",
+          "#7E756A",
+          "#A39A8C",
+          "#B3AA9E",
+          "#CFC7BB",
+          "#E3DDD3",
+          "#F2EDE5"
+        ]
+      },
+      "dark-sand-wash": {
+        "role": "secondary",
+        "displayName": "Dark Sand Wash",
+        "canonical": "#332C21",
+        "tonalRamp": [
+          "#1C1A17",
+          "#262218",
+          "#332C21",
+          "#4A3F2E",
+          "#6B5A40",
+          "#A08A66",
+          "#D8C6A6",
+          "#F4EDE1"
+        ]
+      },
+      "dark-rose-wash": {
+        "role": "secondary",
+        "displayName": "Dark Rose Wash",
+        "canonical": "#352624",
+        "tonalRamp": [
+          "#1C1A17",
+          "#251D1B",
+          "#352624",
+          "#4A332F",
+          "#7E5752",
+          "#A37670",
+          "#C4A09A",
+          "#F6E9E6"
+        ]
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Home hero and the verdict outcome; Fraunces 500 with optical size 144." },
-      "headline": { "displayName": "Headline", "purpose": "Page headings and section titles; Fraunces 500." },
-      "title": { "displayName": "Title", "purpose": "Card, product and target names; Fraunces 500." },
-      "body": { "displayName": "Body", "purpose": "Explanatory copy; Inter 400 at 1rem/1.6, max 70ch." },
-      "label": { "displayName": "Label", "purpose": "Chips, metadata and form labels; Inter 500 0.8125rem." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home hero and the verdict outcome; Fraunces 500 with optical size 144."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page headings and section titles; Fraunces 500."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card, product and target names; Fraunces 500."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanatory copy; Inter 400 at 1rem/1.6, max 70ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Chips, metadata and form labels; Inter 500 0.8125rem."
+      }
     },
     "shadows": [
       {
@@ -74,13 +245,29 @@
       }
     ],
     "motion": [
-      { "name": "fade", "value": "160ms ease", "purpose": "Subtle colour/opacity fades only; no movement, no loops." }
+      {
+        "name": "fade",
+        "value": "160ms ease",
+        "purpose": "Subtle colour/opacity fades only; no movement, no loops."
+      }
     ],
     "breakpoints": [
-      { "name": "sm", "value": "640px" },
-      { "name": "md", "value": "768px" },
-      { "name": "lg", "value": "1024px" },
-      { "name": "xl", "value": "1440px" }
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1440px"
+      }
     ]
   },
   "components": [
@@ -126,7 +313,7 @@
       "name": "Verdict Summary",
       "kind": "card",
       "description": "The result moment: outcome in Fraunces, one sentence, soft lift only here.",
-      "html": "<section class=\"ds-verdict\"><p class=\"ds-eyebrow\">RESULT</p><h1>Keep</h1><p>The change is bigger than your noise band.</p><p class=\"ds-window\">Day 28 · 18 Oct 2026</p></section>",
+      "html": "<section class=\"ds-verdict\"><p class=\"ds-eyebrow\">RESULT</p><h1>Keep</h1><p>The change is bigger than your noise band.</p><p class=\"ds-window\">Day 28 \u00b7 18 Oct 2026</p></section>",
       "css": ".ds-verdict { background: #f1ece4; border: 1px solid #e2d9cd; border-left: 3px solid #1f6f5c; border-radius: 16px; padding: 32px; box-shadow: 0 1px 2px rgba(43,42,40,0.04), 0 12px 32px rgba(43,42,40,0.05); color: #3b3833; font-family: Inter, system-ui, sans-serif; } .ds-verdict h1 { margin: 8px 0 12px; font-family: Fraunces, Georgia, serif; font-size: clamp(2.25rem, 6vw, 3.5rem); font-weight: 500; line-height: 1.08; color: #2b2a28; } .ds-eyebrow { margin: 0; font-size: 0.8125rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #66615a; } .ds-window { font-variant-numeric: tabular-nums; color: #66615a; }"
     },
     {
@@ -159,17 +346,41 @@
       "Warm ivory page, stone surfaces, ink text, one deep sage accent.",
       "Fraunces display serif for headings; Inter for UI and body; tabular figures for every number.",
       "Sand band, sage line, hairline grid: the noise band is the signature graphic.",
-      "12–16px card radii, full-pill chips and segmented control, 1px warm hairlines, no decorative shadow.",
+      "12\u201316px card radii, full-pill chips and segmented control, 1px warm hairlines, no decorative shadow.",
       "Generous 8/12/16/24/32/48 spacing; 1120px maximum line length with real margins.",
       "Dark mode is warm charcoal (#1C1A17), never black."
     ],
     "rules": [
-      { "name": "The One Judgement Rule", "body": "Sage, amber, red and warm stone mean a verdict state. Sand and rose never do.", "section": "colors" },
-      { "name": "The Paper Rule", "body": "The page is warm ivory. Stone panels group content; tinted surfaces appear only when a state changes.", "section": "colors" },
-      { "name": "The No Decorative Gradient Rule", "body": "Gradients are not used as decoration. A single subtle tonal wash may sit inside the noise-band visual, where it represents the band.", "section": "colors" },
-      { "name": "The Two Voices Rule", "body": "Serif is for reading and for the answer; sans is for operating and for numbers. Never use the serif for form fields, buttons or data cells.", "section": "typography" },
-      { "name": "The Tabular Numbers Rule", "body": "Every score, band, date and count uses tabular figures.", "section": "typography" },
-      { "name": "The Flat-At-Rest Rule", "body": "No shadow on buttons, chips, inputs, table rows or ordinary cards. The hero visual and the verdict summary are the only lifted surfaces.", "section": "elevation" }
+      {
+        "name": "The One Judgement Rule",
+        "body": "Sage, amber, red and warm stone mean a verdict state. Sand and rose never do.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paper Rule",
+        "body": "The page is warm ivory. Stone panels group content; tinted surfaces appear only when a state changes.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Decorative Gradient Rule",
+        "body": "Gradients are not used as decoration. A single subtle tonal wash may sit inside the noise-band visual, where it represents the band.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Voices Rule",
+        "body": "Serif is for reading and for the answer; sans is for operating and for numbers. Never use the serif for form fields, buttons or data cells.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Every score, band, date and count uses tabular figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-At-Rest Rule",
+        "body": "No shadow on buttons, chips, inputs, table rows or ordinary cards. The hero visual and the verdict summary are the only lifted surfaces.",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do keep the footer disclaimer verbatim on every page and the exact disclaimer inside the verdict card.",

@@ -30,6 +30,11 @@ colors:
   dark-muted: "#B3AA9E"
   dark-hairline: "#3A352F"
   dark-accent: "#8FC7B4"
+  dark-accent-deep: "#A8D8C8"
+  dark-neutral-wash: "#2A2622"
+  dark-neutral-ink: "#CFC7BB"
+  dark-sand-wash: "#332C21"
+  dark-rose-wash: "#352624"
   dark-warn: "#E0B36A"
   dark-danger: "#E89A90"
 typography:
@@ -103,7 +108,7 @@ components:
     backgroundColor: "{colors.page}"
     textColor: "{colors.body}"
     rounded: "{rounded.control}"
-    padding: "12px 16px"
+    padding: "14px 20px"
 ---
 
 # Design System: SkinLedger
@@ -174,9 +179,11 @@ Sand and rose are atmosphere. They must not be used to say Keep, Worse or No cha
 ### Dark scheme
 - **Page** (#1C1A17), **Stone** (#25221E), **Stone Deep** (#2E2A25), **Ink** (#F2EDE5),
   **Body** (#DCD5CA), **Muted** (#B3AA9E), **Hairline** (#3A352F).
-- **Accent Ink** (#8FC7B4) for links, focus and the primary fill in dark; the dark primary
-  button uses ink-on-sage (#1C1A17 on #8FC7B4) rather than white.
+- **Accent Ink** (#8FC7B4) for links, focus and the primary fill in dark; **Accent Deep**
+  (#A8D8C8) for its hover; the dark primary button uses ink-on-sage (#1C1A17 on #8FC7B4), not white.
 - **Sage Wash** (#27332D), **Amber Wash** (#33281A), **Red Wash** (#35211F).
+- **Neutral Wash** (#2A2622) with **Neutral Ink** (#CFC7BB); **Sand Wash** (#332C21);
+  **Rose Wash** (#352624).
 - Charts read `--sl-chart-*`; the sage line, sand band, hairline grid and warm product marks all
   have dark counterparts.
 
@@ -280,7 +287,7 @@ colour. No cut corners, no overlaps, no clipping.
 - **Shadow:** none at rest; the hero visual and verdict summary may use the one soft ambient shadow.
 
 ### Inputs / Fields
-- **Style:** 1px Hairline border, Ivory background, 12px radius, 12px × 16px padding, Inter.
+- **Style:** 1px Hairline border, Ivory background, 12px radius, 14px × 20px padding, Inter.
 - **Focus:** 2px sage outline with 2px offset; the border stays hairline.
 - **Error:** warm red text and a red wash block with `role="alert"`; never colour alone.
 
@@ -316,7 +323,8 @@ colour. No cut corners, no overlaps, no clipping.
   tabular tick labels.
 
 ### Product form
-- The product list comes first; "Add a product" is a stone disclosure panel below it.
+- The product list comes first; "Add a product" is an ivory disclosure panel with a hairline
+  below it, while its target groups sit on stone.
 - Four grouped fieldsets on stone, 16px radius, 1px hairline; the counter and score-direction
   note sit above the groups. At four targets, unchecked rows mute and disable.
 

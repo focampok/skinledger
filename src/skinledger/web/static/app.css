@@ -2089,7 +2089,7 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .people-grid {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: var(--sl-space-lg);
   max-width: 860px;
 }
@@ -2275,4 +2275,8 @@ input[type="radio"] {
 
 .chips {
   margin-bottom: 8px;
+}
+
+label.capture-attestation {
+  width: 100%;
 }
