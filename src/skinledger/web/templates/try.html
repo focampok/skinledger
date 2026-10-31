@@ -9,9 +9,11 @@
   product is really working, against your own measurement noise. {{ powered_by }}.
 </p>
 {% if demo_person_id %}
-<p><a href="/people/{{ demo_person_id }}/timeline">{{ try_sample_link }}</a> — no invite code needed.</p>
+<p><a href="/people/{{ demo_person_id }}/timeline" role="button"
+      class="secondary outline">{{ try_sample_link }}</a></p>
+<p><small>No invite code needed for the sample.</small></p>
 {% else %}
-<p><a href="/people">Browse the sample profile</a> — no invite code needed.</p>
+<p><a href="/people" role="button" class="secondary outline">Browse the sample profile</a></p>
 {% endif %}
 <p><a href="/demo">{{ try_demo_link }}</a></p>
 
@@ -21,7 +23,10 @@
 
 <form method="post" action="/try">
   <label for="invite_code">Invite code</label>
-  <input type="text" id="invite_code" name="invite_code" autocomplete="off" required>
+  <input type="text" id="invite_code" name="invite_code" autocomplete="off"
+         autocapitalize="off" autocorrect="off" spellcheck="false"
+         aria-describedby="invite-hint" required>
+  <small id="invite-hint">{{ try_invite_hint }}</small>
   <button type="submit">Continue</button>
 </form>
 

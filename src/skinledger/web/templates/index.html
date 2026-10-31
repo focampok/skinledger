@@ -8,14 +8,21 @@
   Capture a guided selfie, log the product you are using, and after 14 or 28 days SkinLedger
   tells you whether the change is larger than your own measurement noise.
 </p>
-<p>
+<p class="home-actions">
   <a href="/try" role="button">Try it</a>
-  <a href="/people">My people</a>
+  {% if demo_person_id %}
+  <a href="/people/{{ demo_person_id }}/timeline" role="button"
+     class="secondary outline">{{ home_sample_link }}</a>
+  {% endif %}
 </p>
+<p class="home-people"><a href="/people">My people</a></p>
 
 {% if show_home_products %}
 <section class="home-products">
-  <h2>{{ home_active_title }}</h2>
+  <h2>{{ home_title }}</h2>
+  {% if sample_only %}
+  <p class="demo-banner" role="status">{{ sample_profile_banner }}</p>
+  {% endif %}
   {% if product_cards %}
   <div class="home-product-grid">
     {% for card in product_cards %}
@@ -23,7 +30,7 @@
              data-product-id="{{ card.product_id }}" data-outcome="{{ card.outcome }}">
       <h3><a href="/products/{{ card.product_id }}/verdict">{{ card.name }}</a></h3>
       <p class="home-product-outcome">{{ card.outcome_label }}</p>
-      <p><small>{{ card.message }}</small></p>
+      {% if card.detail %}<p><small>{{ card.detail }}</small></p>{% endif %}
       {% if card.next_checkin_date %}
       <p><small>{{ home_next_checkin }}: {{ card.next_checkin_label }} · {{ card.next_checkin_date }}</small></p>
       {% else %}

@@ -8,10 +8,11 @@ from fastapi import Request
 
 from skinledger import copy, guards, usage, verdict_store
 from skinledger.db import connect, db_path
+from skinledger.web.demo import sample_person_id
 
 ACTIVE_PRODUCTS = (
     "SELECT pr.id, pr.name, pr.started_on, pr.data_label, "
-    "p.id AS person_id, p.display_name "
+    "p.id AS person_id, p.display_name, p.is_demo_public "
     "FROM products pr JOIN persons p ON p.id = pr.person_id "
     "WHERE pr.ended_on IS NULL"
 )
@@ -61,12 +62,20 @@ def home_context(request: Request) -> dict[str, object]:
                         "person_name": row["display_name"],
                         "outcome": computed.outcome,
                         "outcome_label": copy.verdict_outcome_label(computed.outcome),
-                        "message": computed.message,
+                        "detail": copy.home_outcome_detail(computed.outcome),
                         "label": computed.label,
+                        "is_demo_public": bool(row["is_demo_public"]),
                         "next_checkin_label": checkin_label,
                         "next_checkin_date": checkin_date,
                     }
                 )
         finally:
             conn.close()
-    return {"product_cards": cards, "show_home_products": show}
+    sample_only = bool(cards) and all(card["is_demo_public"] for card in cards)
+    return {
+        "product_cards": cards,
+        "show_home_products": show,
+        "sample_only": sample_only,
+        "home_title": copy.HOME_SAMPLE_TITLE if sample_only else copy.HOME_ACTIVE_TITLE,
+        "demo_person_id": sample_person_id(),
+    }
