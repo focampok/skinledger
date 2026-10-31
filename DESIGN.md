@@ -2,337 +2,356 @@
 name: SkinLedger
 description: "Is it working or not? Know before you rebuy."
 colors:
-  primary: "#1f6f5c"
-  primary-deep: "#145247"
-  primary-tint: "#eef7f2"
-  accent-chip: "rgba(31, 111, 92, 0.12)"
-  warn: "#b26a00"
-  warn-tint: "#fff6e5"
-  danger: "#b3261e"
-  danger-tint: "#fdeeee"
-  neutral-ink: "#2d3138"
-  body-ink: "#373c44"
-  muted-ink: "#646b79"
-  neutral-surface: "#f1f3f4"
-  neutral-line: "#e8eaed"
-  neutral-border: "#e7eaf0"
-  page: "#ffffff"
-  card-sectioning: "#fbfcfc"
-  focus: "#1f6f5c"
-  chart-product: "#646b79"
-  dark-page: "#12161b"
-  dark-body: "#d5dae1"
-  dark-accent-ink: "#7fd0b6"
-  dark-muted: "#a4adb9"
-  dark-warn-tint: "#33260f"
-  dark-danger-tint: "#3a1514"
+  page: "#FAF7F2"
+  stone: "#F1ECE4"
+  stone-deep: "#E8E1D6"
+  ink: "#2B2A28"
+  body: "#3B3833"
+  muted: "#66615A"
+  hairline: "#E2D9CD"
+  primary: "#1F6F5C"
+  primary-deep: "#17594A"
+  primary-wash: "#E7EFEA"
+  sand: "#D8C6A6"
+  sand-wash: "#F4EDE1"
+  rose: "#C4A09A"
+  rose-wash: "#F6E9E6"
+  warn: "#8A5514"
+  warn-wash: "#F4E8D4"
+  danger: "#A33A32"
+  danger-wash: "#F7E5E1"
+  neutral-ink: "#4A4640"
+  neutral-wash: "#EFEAE1"
+  dark-page: "#1C1A17"
+  dark-stone: "#25221E"
+  dark-stone-deep: "#2E2A25"
+  dark-ink: "#F2EDE5"
+  dark-body: "#DCD5CA"
+  dark-muted: "#B3AA9E"
+  dark-hairline: "#3A352F"
+  dark-accent: "#8FC7B4"
+  dark-warn: "#E0B36A"
+  dark-danger: "#E89A90"
 typography:
   display:
-    fontFamily: "system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, sans-serif"
-    fontSize: "2rem"
-    fontWeight: 700
-    lineHeight: 1.125
+    fontFamily: "Fraunces, Georgia, 'Times New Roman', serif"
+    fontSize: "clamp(2.25rem, 6vw, 3.5rem)"
+    fontWeight: 500
+    lineHeight: 1.08
+    letterSpacing: "-0.01em"
   headline:
-    fontFamily: "system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, sans-serif"
-    fontSize: "1.75rem"
-    fontWeight: 700
+    fontFamily: "Fraunces, Georgia, 'Times New Roman', serif"
+    fontSize: "clamp(1.6rem, 3vw, 2rem)"
+    fontWeight: 500
     lineHeight: 1.15
+    letterSpacing: "-0.005em"
   title:
-    fontFamily: "system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
-    lineHeight: 1.175
+    fontFamily: "Fraunces, Georgia, 'Times New Roman', serif"
+    fontSize: "1.25rem"
+    fontWeight: 500
+    lineHeight: 1.25
   body:
-    fontFamily: "system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, sans-serif"
+    fontFamily: "Inter, system-ui, 'Segoe UI', Roboto, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1.6
   label:
-    fontFamily: "system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: 1.5
+    fontFamily: "Inter, system-ui, 'Segoe UI', Roboto, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 500
+    lineHeight: 1.4
+    letterSpacing: "0.01em"
 rounded:
-  control: "0.25rem"
-  panel: "0.5rem"
+  control: "12px"
+  card: "16px"
+  panel: "16px"
   pill: "999px"
 spacing:
-  unit: "1rem"
-  control-x: "1rem"
-  control-y: "0.75rem"
-  card: "1rem"
-  section: "1.5rem"
+  xs: "8px"
+  sm: "12px"
+  md: "16px"
+  lg: "24px"
+  xl: "32px"
+  2xl: "48px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "#ffffff"
     rounded: "{rounded.control}"
-    padding: "0.75rem 1rem"
+    padding: "14px 24px"
   button-primary-hover:
     backgroundColor: "{colors.primary-deep}"
     textColor: "#ffffff"
     rounded: "{rounded.control}"
-    padding: "0.75rem 1rem"
+    padding: "14px 24px"
   button-secondary:
-    backgroundColor: "{colors.page}"
-    textColor: "{colors.muted-ink}"
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
     rounded: "{rounded.control}"
-    padding: "0.75rem 1rem"
-  chip-accent:
-    backgroundColor: "{colors.accent-chip}"
-    textColor: "{colors.primary}"
+    padding: "14px 24px"
+  chip:
+    backgroundColor: "{colors.stone}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.pill}"
-    padding: "0.15rem 0.55rem"
-  chip-neutral:
-    backgroundColor: "{colors.neutral-line}"
-    textColor: "#3c4043"
-    rounded: "{rounded.pill}"
-    padding: "0.15rem 0.55rem"
+    padding: "4px 12px"
   card:
     backgroundColor: "{colors.page}"
-    textColor: "{colors.body-ink}"
-    rounded: "{rounded.control}"
-    padding: "{spacing.card}"
+    textColor: "{colors.body}"
+    rounded: "{rounded.card}"
+    padding: "24px"
   input:
-    backgroundColor: "{colors.card-sectioning}"
-    textColor: "{colors.body-ink}"
+    backgroundColor: "{colors.page}"
+    textColor: "{colors.body}"
     rounded: "{rounded.control}"
-    padding: "0.75rem 1rem"
+    padding: "12px 16px"
 ---
 
 # Design System: SkinLedger
 
 ## Overview
 
-**Creative North Star: "The Honest Ledger"**
+**Creative North Star: "The Quiet Lab"**
 
-SkinLedger looks like a calm measuring instrument you keep in the bathroom, not a beauty brand.
-The page is paper-white, the type is the system font at reading size, and the only saturated
-colour is a deep green used where a measurement has produced a judgement. Everything else is
-ink, rule lines and quiet grey surfaces. The interface has one job per screen and says the
-uncomfortable thing ("No measurable change", "Too early") in the same weight as the good news.
+SkinLedger should read like the printed report of a high-end Seoul skincare laboratory: warm
+ivory paper, stone panels, one deep sage accent, a refined serif for the things you read and a
+quiet sans for the things you operate. It is clinical without being cold, premium without
+selling anything. The interface never performs wellness; it presents a measurement, a band and
+an honest answer with the calm of a lab report.
 
-The visual language is inherited from Pico.css: 0.25rem controls, 1rem spacing and the
-seven-layer neutral card shadow. Pico's variables are remapped to one token set, so the deep
-green now drives primary actions, links and focus as well as judgement. The product's own
-additions are the green accent, left-border status cards, pill chips for metadata, tinted verdict
-surfaces and the noise-band chart language. The system is deliberately plain; its character
-comes from restraint, labelling and honest wording rather than decoration.
+The core visual idea is the noise band: a line inside a soft sand band, labelled. It is the one
+graphic the product owns, and it appears on the home screen, the timeline and the verdict. Sand
+and dusty rose are atmosphere only; they never carry a verdict. Sage means action and Keep,
+warm amber means "no measurable change", warm red means "worse", and warm stone means "not
+enough evidence yet". Every label is still honest: REAL, SIMULATED or SAMPLE.
+
+This is a refinement of the incumbent system, not a marketing site. The monochrome honesty and
+the status language stay; the paper turns warm, the headings gain a serif voice, the cards gain
+soft radius and hairline rules, and the layout opens up on tablet and laptop instead of remaining
+a narrow mobile column.
 
 **Key Characteristics:**
-- Paper-white page with near-black ink and one deep-green accent.
-- Dark mode uses the same tokens: page, text, washes, focus and chart colours flip together.
-- Status is carried by a 4-6px left border plus a tinted surface, never by gradients or icons alone.
-- System sans-serif at 1rem/1.5; headings 2rem/1.75rem/1.5rem bold.
-- Pico.css defaults are the substrate: 0.25rem radii, 1rem rhythm, neutral stacked shadow.
-- Every data point is labelled REAL, SIMULATED or SAMPLE; the disclaimer is always present.
+- Warm ivory page, stone surfaces, ink text, one deep sage accent.
+- Fraunces display serif for headings; Inter for UI and body; tabular figures for every number.
+- Sand band, sage line, hairline grid: the noise band is the signature graphic.
+- 12–16px card radii, full-pill chips and segmented control, 1px warm hairlines, no decorative shadow.
+- Generous 8/12/16/24/32/48 spacing; 1120px maximum line length with real margins.
+- Dark mode is warm charcoal (#1C1A17), never black.
 
 ## Colors
 
-A near-monochrome page interrupted by one green judgement accent and three status tints.
+A warm paper palette with one saturated sage accent and two quiet highlights.
 
 ### Primary
-- **Deep Ledger Green** (#1f6f5c): the product accent and the primary action fill. Used on
-  primary buttons, links, focus rings, verdict "Keep" borders and surfaces, selected chips, the
-  timeline band legend and the "all good" capture guidance. It is the only colour that reads as
-  "SkinLedger".
-- **Deep Ledger Hover** (#145247): the primary button hover and link hover.
-- **Green Wash** (#eef7f2): the Keep verdict surface.
-- **Accent Chip** (rgba(31, 111, 92, 0.12)): the pill background under green metadata.
+- **Deep Sage** (#1F6F5C): primary buttons, links, focus, the Keep verdict spine and the chart
+  line. It is the only saturated colour that carries meaning.
+- **Sage Deep** (#17594A): primary hover and pressed states.
+- **Sage Wash** (#E7EFEA): Keep surfaces and soft selected states.
 
 ### Secondary
-- **Muted Ink** (#646b79): secondary outline buttons and secondary actions. There is no second
-  accent; Pico's stock blue is fully retired and its secondary variables are mapped to ink and
-  neutral surfaces. The only saturated colours in the product are the judgement accents.
+- **Sand** (#D8C6A6) on **Sand Wash** (#F4EDE1): the noise-band fill, the small home chart and
+  editorial highlight surfaces. Never text, never a verdict.
+- **Dusty Rose** (#C4A09A) on **Rose Wash** (#F6E9E6): a rare editorial highlight (for example a
+  quiet rule or a non-status note). Never text, never a verdict.
+
+Sand and rose are atmosphere. They must not be used to say Keep, Worse or No change.
 
 ### Tertiary
-- **Caution Amber** (#b26a00) on **Amber Wash** (#fff6e5): "No measurable change" verdicts,
-  SIMULATED banners and general cautions.
-- **Signal Red** (#b3261e) on **Red Wash** (#fdeeee): "Worse" verdicts and product form errors.
-- **Quiet Grey** (#5f6368) on **Grey Wash** (#f1f3f4): "Too early", "No verdict yet",
-  "Check-in needed", unstable chips and mask placeholders.
+- **Warm Amber** (#8A5514) on **Amber Wash** (#F4E8D4): No measurable change, baseline prompts
+  and caution banners.
+- **Warm Red** (#A33A32) on **Red Wash** (#F7E5E1): Worse and form errors.
+- **Warm Stone Ink** (#4A4640) on **Stone Wash** (#EFEAE1): Too early, No verdict yet,
+  Check-in needed, unstable chips.
 
 ### Neutral
-- **Ink** (#2d3138 / #373c44): headings and body copy.
-- **Muted Ink** (#646b79): secondary text, hints, footer and `<small>`.
-- **Rule Line** (#e7eaf0): card borders, table rules, dividers.
-- **Neutral Line** (#e8eaed): neutral chip backgrounds and mask placeholders.
-- **Paper** (#ffffff): the page and card surface.
-- **Sectioning Paper** (#fbfcfc): form fields and card headers.
+- **Warm Ivory** (#FAF7F2): the page.
+- **Stone** (#F1ECE4): cards, side panels and soft surfaces.
+- **Stone Deep** (#E8E1D6): pressed surfaces, neutral chips, table headers.
+- **Ink** (#2B2A28): headings and primary text.
+- **Body** (#3B3833): body copy.
+- **Muted Warm Grey** (#66615A): hints, metadata, footer.
+- **Hairline** (#E2D9CD): 1px borders, table rules and dividers.
 
 ### Dark scheme
-- **Page** (#12161b), **Body** (#d5dae1), **Muted** (#a4adb9), **Accent Ink** (#7fd0b6),
-  **Accent Wash** (#16302a), **Amber Wash** (#33260f), **Red Wash** (#3a1514).
-- All are declared under `@media (prefers-color-scheme: dark)` in `app.css`, mapped onto the same
-  Pico variables. Chart colours read `--sl-chart-*` so the charts flip with the page.
+- **Page** (#1C1A17), **Stone** (#25221E), **Stone Deep** (#2E2A25), **Ink** (#F2EDE5),
+  **Body** (#DCD5CA), **Muted** (#B3AA9E), **Hairline** (#3A352F).
+- **Accent Ink** (#8FC7B4) for links, focus and the primary fill in dark; the dark primary
+  button uses ink-on-sage (#1C1A17 on #8FC7B4) rather than white.
+- **Sage Wash** (#27332D), **Amber Wash** (#33281A), **Red Wash** (#35211F).
+- Charts read `--sl-chart-*`; the sage line, sand band, hairline grid and warm product marks all
+  have dark counterparts.
 
 ### Named Rules
-**The One Judgement Rule.** Green, amber, red and grey mean a verdict state. They never decorate a
-heading, an icon or a non-verdict surface.
+**The One Judgement Rule.** Sage, amber, red and warm stone mean a verdict state. Sand and rose
+never do.
 
-**The Paper Rule.** The page is flat white. Tint appears only when a state changes: verdict cards,
-SIMULATED banners, form errors and unstable chips.
+**The Paper Rule.** The page is warm ivory. Stone panels group content; tinted surfaces appear
+only when a state changes.
+
+**The No Decorative Gradient Rule.** Gradients are not used as decoration. A single subtle tonal
+wash may sit inside the noise-band visual, where it represents the band.
 
 ## Typography
 
-**Display Font:** system-ui (with Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial)
-**Body Font:** the same system stack
+**Display Font:** Fraunces Variable (OFL), fallback Georgia, serif
+**Body/UI Font:** Inter Variable (OFL), fallback system-ui
 
-**Character:** Neutral, legible, unmarketed. The type is the browser's own voice, chosen so the
-app reads as a utility rather than a skincare brand and so no font request breaks the strict CSP.
+**Character:** Fraunces is a contemporary old-style serif with optical-size and soft/wonk axes.
+Pinned to `opsz 144`, `SOFT 0`, `WONK 0` and weights 400–600, it reads precise and warm — a lab
+report with a human hand, not a wedding invitation. Inter supplies a neutral, highly legible UI
+voice and true tabular figures; it disappears behind the numbers, which is the point.
+
+### Files and loading
+- `/static/fonts/fraunces-latin.woff2` — 67.3 KB, variable `opsz 9–144`, `wght 400–600`, Latin subset.
+- `/static/fonts/inter-latin.woff2` — 48.3 KB, variable `wght 400–600`, Latin subset.
+- Total: **115.6 KB** (limit 150 KB). `font-display: swap`. `font-src 'self'` for app pages; the
+  capture page keeps its existing Camera Kit font exception unchanged.
 
 ### Hierarchy
-- **Display** (700, 2rem, 1.125): page titles, including the verdict headline. Wraps to 2-3 lines
-  at 390px, which is expected.
-- **Headline** (700, 1.75rem, 1.15): section titles such as "Target aspects" and "Biggest changes".
-- **Title** (700, 1.5rem, 1.175): card titles, form section titles, the verdict outcome (1.6rem).
-- **Body** (400, 1rem, 1.5): all explanatory copy and table cells.
-- **Label** (400, 0.875-1rem): form labels, tab buttons, metadata. Metadata uses 0.8-0.9rem
-  `<small>` at muted ink.
+- **Display** (Fraunces 500, clamp 2.25–3.5rem, 1.08): home hero and the verdict outcome.
+- **Headline** (Fraunces 500, clamp 1.6–2rem, 1.15): section titles and page headings.
+- **Title** (Fraunces 500, 1.25rem, 1.25): card titles, product names, target names.
+- **Body** (Inter 400, 1rem, 1.6): all explanatory copy. Maximum 70ch.
+- **Label** (Inter 500, 0.8125rem, 1.4): metadata, chips, form labels, eyebrows.
+- **Numbers** (Inter 500–600 with `font-variant-numeric: tabular-nums`): scores, bands, dates,
+  check-in days, units.
 
 ### Named Rules
-**The No New Font Rule.** No webfont is introduced without resolving the CSP and the offline PWA
-constraint. The system stack is normative.
+**The Two Voices Rule.** Serif is for reading and for the answer; sans is for operating and for
+numbers. Never use the serif for form fields, buttons or data cells.
+
+**The Tabular Numbers Rule.** Every score, band, date and count uses tabular figures.
 
 ## Layout
 
-Pico's container is the layout: full width with 1rem gutters below 576px, then 510px, 700px,
-950px, 1200px and 1450px max-width tiers at 576/768/1024/1280/1536px. `main` gets 1.5rem of
-vertical padding. The primary composition is a single reading column; multi-column grids appear
-only above 640px (`repeat(2, 1fr)`) and 1024px (`repeat(3, 1fr)`) for timeline cards and home
-product cards, and the product form's date pair splits into two columns at 640px.
+The content column is **1120px maximum**, with 24px gutters at 390px, 32px at 768px and 48px at
+1440px. The design is verified at 390×844, 768×1024 and 1440×900.
 
-Mobile is the design target: 390x844, one column, 1rem rhythm. Dense data does not scroll
-sideways at 390px: verdict targets become stacked rows, the product log becomes cards, and the
-timeline shows three cards with a Show-all toggle. The six-column verdict table and seven-column
-product table return only when the container can hold them (640px and 768px).
+- **Mobile (390):** one column. Cards stack; the target rows stack; the timeline shows three
+  chart cards with a Show-all toggle; the product form groups stack; the segmented control is a
+  full-width pill track.
+- **Tablet (768):** two-column home hero; verdict summary above the target list; timeline two
+  columns; product form groups two columns; people two cards per row.
+- **Laptop (1440):** home hero is two columns (text + noise-band visual); verdict puts the summary
+  card beside the target list; timeline is a 2–3 column chart grid; the content is centred in the
+  1120px column with real margins, never a mobile column floating in an empty page.
+
+The product form, people grid, timeline grid and home product cards switch to two columns at
+640px and three at 1024px where the content allows. The verdict summary uses a sticky side card
+only at ≥1024px.
 
 ## Elevation & Depth
 
-Depth is Pico's single neutral stacked shadow (`--pico-box-shadow`: seven layered grey shadows,
-`rgba(129,145,181,...)`), applied to every `article` card. There is no glow, no coloured shadow
-and no hover lift. Verdict and banner cards replace elevation with a 4-6px coloured left border
-and a tinted background, so the state reads before the shadow does.
-
-### Shadow Vocabulary
-- **Card Rest** (`box-shadow: var(--pico-box-shadow)`): the default for every `<article>`; static,
-  never animated.
+The system is flat at rest. Cards are separated by a 1px warm hairline and a stone surface, not a
+shadow. One exception: the home noise-band visual and the verdict summary card may carry a single
+very soft ambient shadow (`0 1px 2px rgba(43,42,40,0.04), 0 12px 32px rgba(43,42,40,0.05)`) to
+lift the two moments that carry the product idea. No coloured shadow, no glow, no glass.
 
 ### Named Rules
-**The Flat-At-Rest Rule.** No shadows on buttons, links, inputs or chips. Only `article` cards
-carry the neutral card shadow.
+**The Flat-At-Rest Rule.** No shadow on buttons, chips, inputs, table rows or ordinary cards. The
+hero visual and the verdict summary are the only lifted surfaces.
 
 ## Shapes
 
-Controls, inputs and cards share a 0.25rem radius; the mask figures and capture tips card use
-0.5rem; chips are full pills (999px). The recurring silhouette is a white card with a vertical
-coloured spine: a 4px left border for banners and home cards, a 6px left border for verdict cards.
-Borders are hairline (0.0625rem) in Rule Line grey on a white surface. There are no rounded
-"friendly" shapes larger than 0.5rem and no cut corners, overlaps or clipping.
+Controls use 12px radii, cards and panels 16px, chips and the segmented control are full pills
+(999px). Borders are 1px warm hairline. The recurring silhouette is a warm ivory or stone panel
+with a generous 24px interior and a fine rule; status cards add a 3px left spine in their state
+colour. No cut corners, no overlaps, no clipping.
 
 ## Components
 
 ### Buttons
-- **Shape:** 0.25rem radius, 0.0625rem border, Pico's 0.75rem x 1rem padding.
-- **Primary:** Deep Ledger Green (#1f6f5c) background with white text; `role="button"` links
-  inherit it. Hover shifts to #145247 over 0.2s.
-- **Secondary:** an outline button on Paper with Muted Ink text and border; filled secondary
-  uses the neutral surface with ink text. Both are deliberately quieter than green.
-- **Focus:** a solid 2px outline in Deep Ledger Green light / Accent Ink dark, including
-  `summary` disclosure controls.
-- **Capture primary:** "Start capture" is 1.15rem text, full width up to 420px.
+- **Shape:** 12px radius, 14px × 24px padding, minimum height 44px.
+- **Primary:** Deep Sage (#1F6F5C) with white text; hover Sage Deep (#17594A); focus 2px sage
+  outline with 2px offset. In dark, sage ink fill (#8FC7B4) with warm charcoal text.
+- **Secondary:** transparent with Ink text and a 1px Hairline border; hover Stone fill. Never a
+  second accent colour.
+- **Disabled:** warm stone fill, muted text, `cursor: not-allowed`.
 
 ### Chips
-- **Style:** pill, 0.15rem x 0.55rem padding, 0.78rem text. Accent chips use rgba(31, 111, 92,
-  0.12) with Deep Ledger Green text; neutral chips use Neutral Line (#e8eaed) with #3c4043.
-- **State:** metadata only; chips are not interactive and carry skin type, unstable status or
-  the SAMPLE/SIMULATED data label.
+- **Style:** full pill, 4px × 12px padding, Inter 500 0.8125rem, Stone or Stone Deep background,
+  Ink text. Status chips use their state wash and state ink.
+- **State:** metadata only; never interactive. SAMPLE/SIMULATED chips sit beside titles.
 
-### Cards / Containers
-- **Corner Style:** 0.25rem.
-- **Background:** Paper; verdict cards use their state wash.
-- **Shadow Strategy:** the single neutral card shadow.
-- **Border:** hairline Rule Line; verdict/banner cards carry a 4-6px coloured left spine instead
-  of a full border.
-- **Internal Padding:** 0.9-1rem.
+### Cards / Panels
+- **Corner:** 16px.
+- **Background:** Warm Ivory or Stone.
+- **Border:** 1px Hairline.
+- **Padding:** 24px (16px on mobile).
+- **Shadow:** none at rest; the hero visual and verdict summary may use the one soft ambient shadow.
 
 ### Inputs / Fields
-- **Style:** 1px #cfd5e2 border, Sectioning Paper background, 0.25rem radius, 0.75rem x 1rem
-  padding, full width. Labels are block-level and sit above the control.
-- **Focus:** Pico's primary-coloured border and outline.
-- **Error / Disabled:** errors are separate `.product-error` / `role="alert"` paragraphs in Signal
-  Red; no inline field-level error styling exists.
+- **Style:** 1px Hairline border, Ivory background, 12px radius, 12px × 16px padding, Inter.
+- **Focus:** 2px sage outline with 2px offset; the border stays hairline.
+- **Error:** warm red text and a red wash block with `role="alert"`; never colour alone.
 
 ### Navigation
-- **Style:** a single row inside the container: bold "SkinLedger" wordmark on the left, text links
-  (Home, Try it, My people, and feature-gated Timeline, Products, Routine) on the right.
-- **States:** links are underlined by default. There is no active-page state and no logo link.
-- **Mobile treatment:** the same inline row; at 390px the three visible labels already fill the
-  width and long labels such as "My people" sit tight against the wordmark.
+- **Style:** wordmark in Fraunces 500, 1.25rem, Ink; links in Inter 500, 0.9375rem, Muted.
+- **States:** the current page uses Ink text and a 2px sage underline (`aria-current="page"`);
+  hover uses Ink. The wordmark links home.
+- **Mobile:** the same row with 44px link hit areas; no hamburger until six or more items.
 
-### Status Banners
-- **Style:** full-width card with a 4px amber left spine on Amber Wash, used for SIMULATED and
-  SAMPLE notices, demo notices and baseline prompts.
-- **Placement:** directly under the page title, inside the reading column.
+### Segmented control (capture)
+- **Track:** full-pill Stone background, 4px inner padding, 1px Hairline border.
+- **Segment:** full pill, 44px, Inter 500; selected is Ivory with Ink text and a hairline border;
+  unselected is transparent with Muted text.
+- **Behaviour:** unchanged tab semantics and roving tabindex.
 
-### Verdict Card
-- **Style:** 6px left spine + state wash + 1rem padding, max 46rem wide. The product name is a
-  2rem h1 with a SAMPLE/SIMULATED chip; the outcome appears once as a 1.6rem line, followed by
-  one sentence.
-- **Target rows:** below 640px each target is a stacked row: aspect + change, a noise-band line
-  and an Outside/Within chip with a direction word, then baseline → check-in. The six-column
-  table returns at 640px.
-- **Warnings:** the "can't isolate one product" warning uses the 4px amber spine + wash card.
-- **Masks:** shown only for REAL captures; SIMULATED/SAMPLE verdicts omit the section entirely.
-
-### Tabs (capture)
-- **Style:** a segmented control on a neutral track; the selected segment is Paper with Deep
-  Ledger Green text and a Rule Line border, the unselected segment is transparent with body ink.
-  Both are 44px and the control uses the real tab pattern with roving tabindex.
+### Verdict card
+- **Summary:** a Stone panel with the outcome word in Fraunces Display, one sentence in Inter,
+  the window and the in-card disclaimer. On laptop it sits beside the target list.
+- **Targets:** each target is a warm Ivory card with 16px radius, 1px hairline, the aspect in
+  Fraunces Title, the change in tabular Inter, a `Noise band ±x` line and a pill direction chip.
+  Desktop uses a refined table inside the same panel language at ≥768px.
+- **Status:** 3px state spine on the summary card; the warnings use the amber wash and spine.
+- **Masks:** shown only for REAL captures.
 
 ### Timeline
-- **Summary strip:** counts and the latest check-in above the grid.
-- **Product key:** full product names with a numbered swatch whose line style matches the
-  product-start mark in every chart.
-- **Default:** three cards visible (product targets first), with a Show-all toggle after them;
-  charts are created only for visible cards.
-- **Numbers:** every card has a `<details>` table of Date / Score / Data as the no-JS fallback.
-- **Axis:** date only ("Oct 4"); time stays in the tooltip.
+- **Summary:** stone strip with counts and latest check-in; the score-direction line below it.
+- **Product key:** numbered swatch with the same muted dash as the chart, full product name and
+  date; on laptop it sits beside the chart grid.
+- **Cards:** Ivory cards with serif titles, a 1px hairline, a sand band and sage line; the first
+  three aspects show by default with a pill Show-all control after them.
+- **Numbers:** a `<details>` tabular table in Inter, 0.875rem, as the no-JS fallback.
+- **Charts:** sage line, sand band, hairline grid, muted product marks, date-only axis, 12px
+  tabular tick labels.
 
 ### Product form
-- **Order:** the product list comes first; "Add a product" is a disclosure below it.
-- **Targets:** four grouped fieldsets (Texture & pores, Oil & moisture, Tone, Eyes) with a live
-  "n of 4 selected" counter. At four, unchecked boxes disable with muted labels and a
-  not-allowed cursor.
+- The product list comes first; "Add a product" is a stone disclosure panel below it.
+- Four grouped fieldsets on stone, 16px radius, 1px hairline; the counter and score-direction
+  note sit above the groups. At four targets, unchecked rows mute and disable.
 
 ### People
-- **Style:** one card per profile. The public sample carries a SIMULATED chip and one primary
-  "Open sample timeline" action. A real profile has one primary timeline action, secondary
-  settings links, and a separated danger-tinted Delete.
+- Stone cards with the name in Fraunces Title and one primary sage action. The sample card
+  carries a SAMPLE/SIMULATED pill; a real profile's Delete sits in a separated warm-red text row.
 
 ### Footer
-- **Style:** the verbatim disclaimer on one line; below it one link line:
-  Privacy · Powered by YouCam API · Demo.
+- Warm ivory, 1px hairline top; the verbatim disclaimer in Inter 0.875rem Muted, then one link
+  line: Privacy · Powered by YouCam API · Demo.
+
+### Noise-band visual (signature)
+- A 1.5px sage line inside a soft sand band on ivory, with a hairline baseline, no axis labels
+  except two small dates, and the label `SAMPLE` in a stone pill. Static SVG, no animation, no
+  photo, no face. It appears above the fold on home and beside the verdict summary.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** keep the footer disclaimer verbatim on every page and the exact disclaimer inside the
   verdict card.
-- **Do** keep the REAL / SIMULATED / SAMPLE label on every data point, including chips and cards.
-- **Do** use the 4px left spine + wash pattern for any state message; it is the product's one
-  recurring decorative move.
-- **Do** keep touch targets at least 44px and body copy at 1rem or larger.
-- **Do** use `.sl-chip` for metadata and keep pills non-interactive.
-- **Do** keep `aria-live` status regions on the capture flow; capture has real waiting states.
-- **Do** use the secondary outline style (Muted Ink on Paper) for supporting actions.
-- **Do** keep dark mode on the same token set; every new colour needs a dark counterpart.
+- **Do** keep REAL / SIMULATED / SAMPLE visible on every data point.
+- **Do** keep the noise-band visual and the tabular numbers as the product's signature.
+- **Do** use Fraunces for reading and Inter for operating and for every number.
+- **Do** use sand and rose as atmosphere only; never as a verdict signal.
+- **Do** keep 44px targets, 2px sage focus rings and 4.5:1 text contrast on ivory and dark.
+- **Do** open the layout to two and three columns on tablet and laptop.
 
 ### Don't:
-- **Don't** introduce a webfont, a new external origin or an inline script; the CSP forbids them.
-- **Don't** introduce a second accent colour. Pico's Action Blue is retired; secondary actions
-  are ink and neutral, not another hue.
-- **Don't** convey a verdict by colour alone; the word and the border must agree.
-- **Don't** show or chart `ui_score` anywhere; the raw score is the only approved number.
-- **Don't** add shadows to controls, chips or links.
-- **Don't** add brand logos, product brands or medical language.
+- **Don't** add decorative gradients, glassmorphism, glow, coloured shadows or emoji.
+- **Don't** use stock photos, faces, testimonials, press logos or product brands.
+- **Don't** use luxury superlatives ("revolutionary", "luxurious", "miracle").
+- **Don't** introduce a second accent colour; sage is the only action and Keep colour.
+- **Don't** use sand or rose to say Keep, Worse or No change.
+- **Don't** use the serif for buttons, inputs or data cells.
+- **Don't** add a webfont beyond the two self-hosted OFL families; no external font origins on
+  app pages (the capture page keeps its existing Camera Kit exception).
+- **Don't** show or chart `ui_score`; the raw score is the only approved number.
