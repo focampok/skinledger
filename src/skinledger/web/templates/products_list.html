@@ -60,7 +60,8 @@
       <tbody>
         {% for product in products %}
         <tr data-product-id="{{ product.id }}" data-active="{{ 'true' if product.active else 'false' }}">
-          <td>{{ product.name }} <small>{{ product.data_label }}</small></td>
+          {% set parts = product.name|split_data_label %}
+          <td>{{ parts.name }} <small>{{ product.data_label }}</small></td>
           <td>{{ product.category_label }}</td>
           <td>
             {{ product.started_on }}

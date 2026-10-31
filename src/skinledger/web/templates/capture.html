@@ -23,7 +23,10 @@
   data-msg-uploading="{{ capture_uploading }}"
   data-msg-retry="{{ capture_retry }}"
 >
-  <h1>Capture for {{ person.display_name }}</h1>
+  <div class="capture-layout">
+    <div class="capture-side">
+  {% set person_parts = person.display_name|split_data_label %}
+  <h1>Capture for {{ person_parts.name }}{% if person_parts.label %} <span class="sl-chip sl-chip-neutral">{{ person_parts.label }}</span>{% endif %}</h1>
   {% if demo_banner %}
   <p class="demo-banner" role="status">{{ demo_banner }}</p>
   {% endif %}
@@ -43,6 +46,8 @@
     <p>{{ privacy_note }} <a href="/privacy">Read the privacy page</a></p>
   </div>
 
+    </div>
+    <div class="capture-stage">
   <div class="capture-tabs" role="tablist" aria-label="Capture method">
     <button type="button" class="capture-tab" id="tab-guided" role="tab"
             aria-selected="true" aria-controls="panel-guided"
@@ -153,5 +158,7 @@
     {{ baseline_done }}
     <a href="/people/{{ person.id }}/baseline">See your baseline</a>
   </p>
+    </div>
+  </div>
 </div>
 {% endblock %}

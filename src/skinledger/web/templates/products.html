@@ -8,7 +8,8 @@
 
 {% block content %}
 <div id="products-page" data-person-id="{{ person.id }}">
-  <h1>Products for {{ person.display_name }}</h1>
+  {% set person_parts = person.display_name|split_data_label %}
+  <h1>Products for {{ person_parts.name }}{% if person_parts.label %} <span class="sl-chip sl-chip-neutral">{{ person_parts.label }}</span>{% endif %}</h1>
   {% if demo_banner %}
   <p class="demo-banner" role="status">{{ demo_banner }}</p>
   {% endif %}
@@ -36,54 +37,60 @@
       <p class="product-error" role="alert">{{ error }}</p>
       {% endif %}
 
-      <label for="product-name">Product name</label>
-      <input id="product-name" name="name" type="text" maxlength="80" required
-             placeholder="{{ name_placeholder }}" value="{{ form.name }}">
-      <small>{{ name_note }}</small>
+      <div class="product-form-grid">
+        <div class="product-identity">
+          <label for="product-name">Product name</label>
+          <input id="product-name" name="name" type="text" maxlength="80" required
+                 placeholder="{{ name_placeholder }}" value="{{ form.name }}">
+          <small>{{ name_note }}</small>
 
-      <label for="product-category">Category</label>
-      <select id="product-category" name="category">
-        {% for category in categories %}
-        <option value="{{ category.key }}"{% if form.category == category.key %} selected{% endif %}>
-          {{ category.label }}
-        </option>
-        {% endfor %}
-      </select>
+          <label for="product-category">Category</label>
+          <select id="product-category" name="category">
+            {% for category in categories %}
+            <option value="{{ category.key }}"{% if form.category == category.key %} selected{% endif %}>
+              {{ category.label }}
+            </option>
+            {% endfor %}
+          </select>
 
-      <div class="product-dates">
-        <label>Start date
-          <input name="started_on" type="date" value="{{ form.started_on }}" required>
-        </label>
-        <label>End date (optional)
-          <input name="ended_on" type="date" value="{{ form.ended_on }}">
-        </label>
-      </div>
-      <small class="product-date-note">{{ product_date_note }}</small>
+          <div class="product-dates">
+            <label>Start date
+              <input name="started_on" type="date" value="{{ form.started_on }}" required>
+            </label>
+            <label>End date (optional)
+              <input name="ended_on" type="date" value="{{ form.ended_on }}">
+            </label>
+          </div>
+          <small class="product-date-note">{{ product_date_note }}</small>
+        </div>
 
-      <h3 class="product-targets-title">{{ product_targets_title }}</h3>
-      <p id="target-count" class="product-count" role="status" aria-live="polite">
-        {{ form.targets|length }} of {{ max_targets }} selected
-      </p>
-      <p class="product-aspects-note">{{ product_aspects_note }}</p>
-      <p class="score-note">{{ score_direction_note }}</p>
-      {% set unstable_aspects = aspects|selectattr("unstable")|list %}
-      {% if unstable_aspects %}
-      <p class="product-unstable-note">{{ unstable_hint }}</p>
-      {% endif %}
+        <div class="product-targets">
+          <h3 class="product-targets-title">{{ product_targets_title }}</h3>
+          <p id="target-count" class="product-count" role="status" aria-live="polite">
+            {{ form.targets|length }} of {{ max_targets }} selected
+          </p>
+          <p class="product-aspects-note">{{ product_aspects_note }}</p>
+          <p class="score-note">{{ score_direction_note }}</p>
+          {% set unstable_aspects = aspects|selectattr("unstable")|list %}
+          {% if unstable_aspects %}
+          <p class="product-unstable-note">{{ unstable_hint }}</p>
+          {% endif %}
 
-      <div class="product-groups">
-        {% for group in aspect_groups %}
-        <fieldset class="product-group">
-          <legend>{{ group.label }}</legend>
-          {% for aspect in group.aspects %}
-          <label class="product-aspect{% if aspect.unstable %} product-aspect-unstable{% endif %}">
-            <input type="checkbox" name="target_aspects" value="{{ aspect.key }}"
-                   {% if aspect.key in form.targets %}checked{% endif %}>
-            <span>{{ aspect.label }}</span>
-          </label>
-          {% endfor %}
-        </fieldset>
-        {% endfor %}
+          <div class="product-groups">
+            {% for group in aspect_groups %}
+            <fieldset class="product-group">
+              <legend>{{ group.label }}</legend>
+              {% for aspect in group.aspects %}
+              <label class="product-aspect{% if aspect.unstable %} product-aspect-unstable{% endif %}">
+                <input type="checkbox" name="target_aspects" value="{{ aspect.key }}"
+                       {% if aspect.key in form.targets %}checked{% endif %}>
+                <span>{{ aspect.label }}</span>
+              </label>
+              {% endfor %}
+            </fieldset>
+            {% endfor %}
+          </div>
+        </div>
       </div>
 
       <button type="submit">Add product</button>

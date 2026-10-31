@@ -3,28 +3,35 @@
 {% block title %}SkinLedger — {{ demo_title }}{% endblock %}
 
 {% block content %}
-<h1>{{ demo_title }}</h1>
-<p>{{ demo_intro }}</p>
+<div class="demo-layout">
+  <div class="demo-main">
+    <p class="eyebrow">Demo</p>
+    <h1>{{ demo_title }}</h1>
+    <p class="demo-sub">{{ demo_intro }}</p>
 
-{% if sample_products %}
-<ol class="demo-tour">
-  <li>
-    <a href="/people/{{ demo_person_id }}/timeline">See the noise band</a>
-    <small>15 aspects, each against the sample's own day-1 band.</small>
-  </li>
-  {% for product in sample_products %}
-  {% set parts = product.name|split_data_label %}
-  <li>
-    <a href="/products/{{ product.id }}/verdict">See the verdict for {{ parts.name }}</a>
-    {% if parts.label %}<span class="sl-chip sl-chip-neutral">{{ parts.label }}</span>{% endif %}
-  </li>
-  {% endfor %}
-</ol>
-{% else %}
-<p><a href="/people" role="button">{{ demo_sample_link }}</a></p>
-{% endif %}
+    {% if sample_products %}
+    <ol class="demo-tour">
+      <li>
+        <a href="/people/{{ demo_person_id }}/timeline">See the noise band</a>
+        <small>15 aspects, each against the sample's own day-1 band.</small>
+      </li>
+      {% for product in sample_products %}
+      {% set parts = product.name|split_data_label %}
+      <li>
+        <a href="/products/{{ product.id }}/verdict">See the verdict for {{ parts.name }}</a>
+        {% if parts.label %}<span class="sl-chip sl-chip-neutral">{{ parts.label }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p><a href="/people" role="button">{{ demo_sample_link }}</a></p>
+    {% endif %}
+  </div>
 
-<p>{{ demo_invite_note }}</p>
-<p><a href="/try">{{ demo_try_link }}</a></p>
-<p><small>{{ demo_privacy_note }} <a href="/privacy">Privacy</a></small></p>
+  <aside class="demo-aside">
+    <p class="demo-invite">{{ demo_invite_note }}</p>
+    <p class="demo-try"><a href="/try" role="button">{{ demo_try_link }}</a></p>
+    <p class="demo-privacy"><small>{{ demo_privacy_note }} <a href="/privacy">Privacy</a></small></p>
+  </aside>
+</div>
 {% endblock %}

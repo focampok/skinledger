@@ -370,7 +370,7 @@ def test_htmx_create_returns_only_the_list_panel(env, web):
     assert response.status_code == 200
     assert 'id="product-panel"' in response.text
     assert "<html" not in response.text.lower()
-    assert "Niacinamide serum (SAMPLE)" in response.text
+    assert "Niacinamide serum" in response.text
     assert "Check-ins: day 14 (between days 12–20)" in response.text
 
 

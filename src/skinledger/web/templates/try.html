@@ -3,33 +3,41 @@
 {% block title %}SkinLedger — Try it{% endblock %}
 
 {% block content %}
-<h1>Try SkinLedger</h1>
-<p>
-  SkinLedger measures 15 skin aspects plus skin type (one measurement per aspect) from one
-  selfie and tells you whether a product is really working, against your own measurement noise.
-  {{ powered_by }}.
-</p>
-{% if demo_person_id %}
-<p><a href="/people/{{ demo_person_id }}/timeline" role="button"
-      class="secondary outline">{{ try_sample_link }}</a></p>
-<p><small>No invite code needed for the sample.</small></p>
-{% else %}
-<p><a href="/people" role="button" class="secondary outline">Browse the sample profile</a></p>
-{% endif %}
-<p><a href="/demo">{{ try_demo_link }}</a></p>
+<div class="try-layout">
+  <div class="try-intro">
+    <h1>Try SkinLedger</h1>
+    <p class="try-sub">
+      SkinLedger measures 15 skin aspects plus skin type (one measurement per aspect) from one
+      selfie and tells you whether a product is really working, against your own measurement
+      noise. {{ powered_by }}.
+    </p>
+    {% if demo_person_id %}
+    <p class="try-sample">
+      <a href="/people/{{ demo_person_id }}/timeline" role="button"
+         class="secondary outline">{{ try_sample_link }}</a>
+      <small>No invite code needed for the sample.</small>
+    </p>
+    {% else %}
+    <p class="try-sample">
+      <a href="/people" role="button" class="secondary outline">Browse the sample profile</a>
+    </p>
+    {% endif %}
+    <p class="try-demo-link"><a href="/demo">{{ try_demo_link }}</a></p>
+  </div>
 
-{% if error %}
-<p role="alert">{{ error }}</p>
-{% endif %}
-
-<form method="post" action="/try">
-  <label for="invite_code">Invite code</label>
-  <input type="text" id="invite_code" name="invite_code" autocomplete="off"
-         autocapitalize="off" autocorrect="off" spellcheck="false"
-         aria-describedby="invite-hint" required>
-  <small id="invite-hint">{{ try_invite_hint }}</small>
-  <button type="submit">Continue</button>
-</form>
-
-<p><small>An invite code is required to analyze your own face. Visitors get 2 analyses.</small></p>
+  <div class="try-form-card">
+    {% if error %}
+    <p class="product-error" role="alert">{{ error }}</p>
+    {% endif %}
+    <form method="post" action="/try">
+      <label for="invite_code">Invite code</label>
+      <input type="text" id="invite_code" name="invite_code" autocomplete="off"
+             autocapitalize="off" autocorrect="off" spellcheck="false"
+             aria-describedby="invite-hint" required>
+      <small id="invite-hint">{{ try_invite_hint }}</small>
+      <button type="submit">Continue</button>
+    </form>
+    <p class="try-note"><small>An invite code is required to analyze your own face. Visitors get 2 analyses.</small></p>
+  </div>
+</div>
 {% endblock %}
