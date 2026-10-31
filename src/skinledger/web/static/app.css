@@ -173,9 +173,16 @@ body > footer a {
   color: var(--sl-accent-ink);
 }
 
-:where(a, button, input, select, textarea, [role="button"]):focus-visible {
+:where(a, button, input, select, textarea, summary, [role="button"]):focus-visible {
   outline: 2px solid var(--sl-focus);
   outline-offset: 2px;
+}
+
+/* Pico's summary rule is more specific; match it and replace its translucent ring. */
+details summary:focus-visible:not([role]) {
+  outline: 2px solid var(--sl-focus);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 main.container {
@@ -767,6 +774,11 @@ input[type="file"]::file-selector-button:hover {
   margin-top: -0.5rem;
   margin-bottom: 1rem;
   color: var(--sl-muted);
+}
+
+.product-list-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
 }
 
 .product-cards {

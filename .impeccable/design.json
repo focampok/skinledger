@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-30T17:05:00-06:00",
+  "generatedAt": "2026-10-30T18:55:00-06:00",
   "title": "Design System: SkinLedger",
   "extensions": {
     "colorMeta": {
@@ -10,11 +10,17 @@
         "canonical": "#1f6f5c",
         "tonalRamp": ["#0d2f27", "#144a3f", "#1f6f5c", "#2c8a73", "#57a78f", "#8fc7b8", "#c8e5dc", "#eef7f2"]
       },
-      "action-blue": {
-        "role": "secondary",
-        "displayName": "Pico Action Blue (inherited default)",
-        "canonical": "#0172ad",
-        "tonalRamp": ["#002c44", "#004a70", "#016294", "#0172ad", "#1a8cc4", "#5aabd6", "#a3cfe8", "#dceef8"]
+      "primary-deep": {
+        "role": "primary",
+        "displayName": "Deep Ledger Hover",
+        "canonical": "#145247",
+        "tonalRamp": ["#0a241e", "#0e332a", "#124236", "#145247", "#1f6f5c", "#4f9a82", "#93c9b9", "#d8eee6"]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#646b79",
+        "tonalRamp": ["#2d3138", "#3f444c", "#565c66", "#646b79", "#9aa0ab", "#c9cdd6", "#e7eaf0", "#f7f8fa"]
       },
       "warn": {
         "role": "tertiary",
@@ -28,11 +34,17 @@
         "canonical": "#b3261e",
         "tonalRamp": ["#3b0b08", "#6d1712", "#93201a", "#b3261e", "#d14840", "#e5807a", "#f3bbb7", "#fdeeee"]
       },
-      "muted-ink": {
+      "dark-page": {
         "role": "neutral",
-        "displayName": "Muted Ink",
-        "canonical": "#646b79",
-        "tonalRamp": ["#2d3138", "#3f444c", "#565c66", "#646b79", "#9aa0ab", "#c9cdd6", "#e7eaf0", "#f7f8fa"]
+        "displayName": "Dark Page",
+        "canonical": "#12161b",
+        "tonalRamp": ["#0b0e12", "#0f1318", "#12161b", "#181e25", "#232a33", "#3a434e", "#a4adb9", "#eef1f4"]
+      },
+      "dark-accent-ink": {
+        "role": "primary",
+        "displayName": "Dark Accent Ink",
+        "canonical": "#7fd0b6",
+        "tonalRamp": ["#0d2f27", "#16302a", "#1f6f5c", "#2c8a73", "#57a78f", "#7fd0b6", "#b5e8d7", "#e8f8f2"]
       }
     },
     "typographyMeta": {
@@ -46,14 +58,15 @@
       {
         "name": "card-rest",
         "value": "0.0145rem 0.029rem 0.174rem rgba(129,145,181,0.01698), 0.0335rem 0.067rem 0.402rem rgba(129,145,181,0.024), 0.0625rem 0.125rem 0.75rem rgba(129,145,181,0.03), 0.1125rem 0.225rem 1.35rem rgba(129,145,181,0.036), 0.2085rem 0.417rem 2.502rem rgba(129,145,181,0.04302), 0.5rem 1rem 6rem rgba(129,145,181,0.06), 0 0 0 0.0625rem rgba(129,145,181,0.015)",
-        "purpose": "Pico's neutral stacked shadow on every article card; static, never animated."
+        "purpose": "Pico's neutral stacked shadow on every article card; static, never animated. Dark mode uses Pico's neutral dark shadow."
       }
     ],
     "motion": [
-      { "name": "standard", "value": "0.2s ease-in-out", "purpose": "Pico's default for background, border, colour and shadow transitions on controls." }
+      { "name": "standard", "value": "0.2s ease-in-out", "purpose": "Pico's default for background, border, colour and shadow transitions; the capture tabs use 150ms." }
     ],
     "breakpoints": [
       { "name": "app-grid-2", "value": "640px" },
+      { "name": "product-table", "value": "768px" },
       { "name": "sm", "value": "576px" },
       { "name": "md", "value": "768px" },
       { "name": "lg", "value": "1024px" },
@@ -66,39 +79,39 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Pico's default primary action; currently stock blue rather than the brand green.",
+      "description": "The one filled action; Deep Ledger Green.",
       "html": "<button class=\"ds-btn-primary\">Continue</button>",
-      "css": ".ds-btn-primary { background: var(--pico-primary-background, #0172ad); color: var(--pico-primary-inverse, #fff); border: 1px solid var(--pico-primary-border, #015887); border-radius: var(--pico-border-radius, 0.25rem); padding: 0.75rem 1rem; width: 100%; font: inherit; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; cursor: pointer; transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; } .ds-btn-primary:hover { background: var(--pico-primary-hover, #015887); } .ds-btn-primary:focus-visible { outline: 2px solid var(--pico-primary-focus, rgba(2,154,232,0.5)); outline-offset: 2px; }"
+      "css": ".ds-btn-primary { background: #1f6f5c; color: #fff; border: 1px solid #1f6f5c; border-radius: 0.25rem; padding: 0.75rem 1rem; width: 100%; font: inherit; font-size: 1rem; font-weight: 400; line-height: 1.5; text-align: center; cursor: pointer; transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; } .ds-btn-primary:hover { background: #145247; border-color: #145247; } .ds-btn-primary:focus-visible { outline: 2px solid #1f6f5c; outline-offset: 2px; }"
     },
     {
-      "name": "Secondary Button",
+      "name": "Secondary Outline Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Neutral action such as ending a product log row.",
+      "description": "Supporting action; Muted Ink on Paper, never a second accent.",
       "html": "<button class=\"ds-btn-secondary\">End</button>",
-      "css": ".ds-btn-secondary { background: #e7eaf0; color: #373c44; border: 1px solid #cfd5e2; border-radius: var(--pico-border-radius, 0.25rem); padding: 0.75rem 1rem; font: inherit; font-size: 1rem; cursor: pointer; transition: background-color 0.2s ease-in-out; } .ds-btn-secondary:hover { background: #d9dee7; } .ds-btn-secondary:focus-visible { outline: 2px solid #0172ad; outline-offset: 2px; }"
+      "css": ".ds-btn-secondary { background: #fff; color: #646b79; border: 1px solid #646b79; border-radius: 0.25rem; padding: 0.75rem 1rem; font: inherit; font-size: 1rem; cursor: pointer; transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; } .ds-btn-secondary:hover { background: #f1f3f4; color: #2d3138; } .ds-btn-secondary:focus-visible { outline: 2px solid #1f6f5c; outline-offset: 2px; }"
     },
     {
       "name": "Navigation",
       "kind": "nav",
       "description": "Wordmark left, plain text links right; no active state in the current build.",
       "html": "<nav class=\"ds-nav\"><strong>SkinLedger</strong><span class=\"ds-nav-links\"><a href=\"#\">Home</a><a href=\"#\">Try it</a><a href=\"#\">My people</a></span></nav>",
-      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; } .ds-nav strong { color: #2d3138; font-size: 1rem; } .ds-nav-links { display: flex; gap: 0.75rem; } .ds-nav-links a { color: #0172ad; text-decoration: underline; font-size: 1rem; } .ds-nav-links a:hover { color: #015887; }"
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; } .ds-nav strong { color: #2d3138; font-size: 1rem; } .ds-nav-links { display: flex; gap: 0.75rem; } .ds-nav-links a { color: #1f6f5c; text-decoration: underline; font-size: 1rem; } .ds-nav-links a:hover { color: #145247; }"
     },
     {
       "name": "Accent Chip",
       "kind": "chip",
       "refersTo": "chip-accent",
-      "description": "Pill metadata such as skin type or an unstable aspect.",
+      "description": "Pill metadata such as skin type or a data label.",
       "html": "<span class=\"ds-chip-accent\">Skin type: <strong>Oily</strong></span>",
-      "css": ".ds-chip-accent { display: inline-flex; align-items: baseline; gap: 0.35rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: rgba(31,111,92,0.12); color: #1f6f5c; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; font-size: 0.78rem; } .ds-chip-accent strong { font-weight: 700; }"
+      "css": ".ds-chip-accent { display: inline-flex; align-items: baseline; gap: 0.35rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: rgba(31,111,92,0.12); color: #1f6f5c; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; font-size: 0.78rem; }"
     },
     {
       "name": "Neutral Chip",
       "kind": "chip",
       "refersTo": "chip-neutral",
-      "description": "Unstable aspect marker; deliberately low-emphasis.",
-      "html": "<span class=\"ds-chip-neutral\">Unstable for your setup</span>",
+      "description": "Unstable aspect or SAMPLE/SIMULATED label; deliberately low-emphasis.",
+      "html": "<span class=\"ds-chip-neutral\">SAMPLE</span>",
       "css": ".ds-chip-neutral { display: inline-flex; padding: 0.15rem 0.55rem; border-radius: 999px; background: #e8eaed; color: #3c4043; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; font-size: 0.78rem; }"
     },
     {
@@ -111,31 +124,39 @@
     {
       "name": "Verdict Card",
       "kind": "card",
-      "description": "The product's signature surface: 6px state spine plus tint, with a repeated outcome line.",
-      "html": "<article class=\"ds-verdict\"><h1>Verdict for Niacinamide serum (SAMPLE)</h1><p class=\"ds-verdict-outcome\">Keep</p><p>Keep using it: the change is bigger than your noise band.</p></article>",
-      "css": ".ds-verdict { border-left: 6px solid #1f6f5c; background: #eef7f2; border-radius: 0.25rem; padding: 1rem; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; color: #373c44; } .ds-verdict h1 { margin: 0 0 0.25rem; font-size: 2rem; line-height: 1.125; color: #2d3138; } .ds-verdict-outcome { margin: 0; font-size: 1.6rem; font-weight: 700; line-height: 1.2; color: #2d3138; }"
+      "description": "The signature surface: 6px state spine + tint; mobile target rows carry band and direction.",
+      "html": "<article class=\"ds-verdict\"><h1>Verdict for Niacinamide serum <span class=\"ds-chip\">SAMPLE</span></h1><p class=\"ds-outcome\">Keep</p><p>The change is bigger than your noise band.</p></article>",
+      "css": ".ds-verdict { border-left: 6px solid #1f6f5c; background: #eef7f2; border-radius: 0.25rem; padding: 1rem; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; color: #373c44; } .ds-verdict h1 { margin: 0 0 0.25rem; font-size: 2rem; line-height: 1.125; color: #2d3138; } .ds-outcome { margin: 0; font-size: 1.6rem; font-weight: 700; line-height: 1.2; color: #2d3138; } .ds-chip { display: inline-flex; padding: 0.15rem 0.55rem; border-radius: 999px; background: #e8eaed; color: #3c4043; font-size: 0.78rem; vertical-align: middle; }"
+    },
+    {
+      "name": "Timeline Product Key",
+      "kind": "custom",
+      "description": "Numbered swatch + full product name; the same dash pattern marks the chart.",
+      "html": "<ul class=\"ds-key\"><li><span>1</span><svg width=\"28\" height=\"10\" aria-hidden=\"true\"><line x1=\"0\" y1=\"5\" x2=\"28\" y2=\"5\" stroke=\"currentColor\" stroke-width=\"2\"/></svg><span><strong>Niacinamide serum</strong><small>Sep 20</small></span></li></ul>",
+      "css": ".ds-key { list-style: none; padding: 0; margin: 0; color: #373c44; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; } .ds-key li { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.15rem 0; } .ds-key svg { flex: none; color: #646b79; } .ds-key small { display: block; color: #646b79; font-size: 0.85rem; }"
     },
     {
       "name": "Text Input",
       "kind": "input",
       "refersTo": "input",
       "description": "Pico field with a visible label above it.",
-      "html": "<label class=\"ds-field\">Invite code<input class=\"ds-input\" type=\"text\" placeholder=\"\"></label>",
-      "css": ".ds-field { display: block; margin-bottom: 1rem; color: #373c44; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; font-size: 1rem; } .ds-input { display: block; width: 100%; margin-top: 0.5rem; padding: 0.75rem 1rem; border: 1px solid #cfd5e2; border-radius: 0.25rem; background: #fbfcfc; color: #373c44; font: inherit; } .ds-input:focus-visible { border-color: #0172ad; outline: 2px solid rgba(2,154,232,0.5); outline-offset: 1px; }"
+      "html": "<label class=\"ds-field\">Invite code<input class=\"ds-input\" type=\"text\"></label>",
+      "css": ".ds-field { display: block; margin-bottom: 1rem; color: #373c44; font-family: system-ui, 'Segoe UI', Roboto, sans-serif; font-size: 1rem; } .ds-input { display: block; width: 100%; margin-top: 0.5rem; padding: 0.75rem 1rem; border: 1px solid #cfd5e2; border-radius: 0.25rem; background: #fbfcfc; color: #373c44; font: inherit; } .ds-input:focus-visible { border-color: #1f6f5c; outline: 2px solid #1f6f5c; outline-offset: 1px; }"
     },
     {
       "name": "Capture Tabs",
       "kind": "custom",
-      "description": "Two capture modes; both currently render as primary blue, so selection is invisible.",
-      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab\" aria-selected=\"true\">Guided capture (recommended for tracking)</button><button class=\"ds-tab\" aria-selected=\"false\">Quick try: upload a photo</button></div>",
-      "css": ".ds-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; } .ds-tab { flex: 1 1 12rem; background: #0172ad; color: #fff; border: 1px solid #015887; border-radius: 0.25rem; padding: 0.75rem 1rem; font: inherit; font-size: 1rem; cursor: pointer; } .ds-tab[aria-selected='true'] { background: #015887; } .ds-tab:focus-visible { outline: 2px solid rgba(2,154,232,0.5); outline-offset: 2px; }"
+      "description": "Segmented control; selected segment is Paper with green text, unselected transparent.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\"><button class=\"ds-tab\" role=\"tab\" aria-selected=\"true\">Guided capture</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Upload a photo</button></div>",
+      "css": ".ds-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); gap: 0.25rem; padding: 0.25rem; border: 1px solid #e7eaf0; border-radius: 0.5rem; background: #f1f3f4; } .ds-tab { min-height: 44px; padding: 0.55rem 0.5rem; border: 1px solid transparent; border-radius: 0.35rem; background: transparent; color: #373c44; font: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background-color 150ms ease, color 150ms ease; } .ds-tab[aria-selected='true'] { background: #fff; border-color: #e7eaf0; color: #1f6f5c; } .ds-tab:focus-visible { outline: 2px solid #1f6f5c; outline-offset: 2px; }"
     }
   ],
   "narrative": {
     "northStar": "The Honest Ledger",
-    "overview": "SkinLedger looks like a calm measuring instrument you keep in the bathroom, not a beauty brand. The page is paper-white, the type is the system font at reading size, and the only saturated colour is a deep green used where a measurement has produced a judgement. Everything else is ink, rule lines and quiet grey surfaces. The interface has one job per screen and says the uncomfortable thing (\"No measurable change\", \"Too early\") in the same weight as the good news.",
+    "overview": "SkinLedger looks like a calm measuring instrument you keep in the bathroom, not a beauty brand. The page is paper-white, the type is the system font at reading size, and the only saturated colour is a deep green used for action and for a measurement that has produced a judgement. Everything else is ink, rule lines and quiet grey surfaces. Dark mode uses the same token set: page, text, washes, focus and chart colours flip together.",
     "keyCharacteristics": [
       "Paper-white page with near-black ink and one deep-green accent.",
+      "Dark mode uses the same tokens; every colour has a dark counterpart.",
       "Status is carried by a 4-6px left border plus a tinted surface, never by gradients or icons alone.",
       "System sans-serif at 1rem/1.5; headings 2rem/1.75rem/1.5rem bold.",
       "Pico.css defaults are the substrate: 0.25rem radii, 1rem rhythm, neutral stacked shadow.",
@@ -153,11 +174,13 @@
       "Do use the 4px left spine + wash pattern for any state message; it is the product's one recurring decorative move.",
       "Do keep touch targets at least 44px and body copy at 1rem or larger.",
       "Do use .sl-chip for metadata and keep pills non-interactive.",
-      "Do keep aria-live status regions on the capture flow; capture has real waiting states."
+      "Do keep aria-live status regions on the capture flow; capture has real waiting states.",
+      "Do use the secondary outline style (Muted Ink on Paper) for supporting actions.",
+      "Do keep dark mode on the same token set; every new colour needs a dark counterpart."
     ],
     "donts": [
       "Don't introduce a webfont, a new external origin or an inline script; the CSP forbids them.",
-      "Don't extend Pico's Action Blue to a new status meaning; it is an inherited default, not a brand signal.",
+      "Don't introduce a second accent colour. Pico's Action Blue is retired; secondary actions are ink and neutral, not another hue.",
       "Don't convey a verdict by colour alone; the word and the border must agree.",
       "Don't show or chart ui_score anywhere; the raw score is the only approved number.",
       "Don't add shadows to controls, chips or links.",

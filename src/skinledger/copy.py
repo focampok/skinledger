@@ -162,6 +162,7 @@ PRODUCT_ADD_TITLE = "Add a product"
 PRODUCT_ASPECTS_NOTE = (
     "An aspect is one skin measurement. Pick the ones this product should change."
 )
+PRODUCT_LIST_TITLE = "Logged products"
 
 PRODUCT_NAME_REQUIRED = "Please enter a product name."
 

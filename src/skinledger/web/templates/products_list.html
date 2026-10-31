@@ -3,6 +3,7 @@
   {% if error and panel_error %}<p class="product-error" role="alert">{{ error }}</p>{% endif %}
 
   {% if products %}
+  <h2 class="product-list-title">{{ product_list_title }}</h2>
   <div class="product-cards">
     {% for product in products %}
     <article class="product-card" data-product-id="{{ product.id }}"

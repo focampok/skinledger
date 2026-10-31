@@ -3,9 +3,9 @@ name: SkinLedger
 description: "Is it working or not? Know before you rebuy."
 colors:
   primary: "#1f6f5c"
+  primary-deep: "#145247"
   primary-tint: "#eef7f2"
-  action-blue: "#0172ad"
-  action-blue-hover: "#015887"
+  accent-chip: "rgba(31, 111, 92, 0.12)"
   warn: "#b26a00"
   warn-tint: "#fff6e5"
   danger: "#b3261e"
@@ -14,9 +14,18 @@ colors:
   body-ink: "#373c44"
   muted-ink: "#646b79"
   neutral-surface: "#f1f3f4"
+  neutral-line: "#e8eaed"
   neutral-border: "#e7eaf0"
   page: "#ffffff"
   card-sectioning: "#fbfcfc"
+  focus: "#1f6f5c"
+  chart-product: "#646b79"
+  dark-page: "#12161b"
+  dark-body: "#d5dae1"
+  dark-accent-ink: "#7fd0b6"
+  dark-muted: "#a4adb9"
+  dark-warn-tint: "#33260f"
+  dark-danger-tint: "#3a1514"
 typography:
   display:
     fontFamily: "system-ui, \"Segoe UI\", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, sans-serif"
@@ -55,27 +64,27 @@ spacing:
   section: "1.5rem"
 components:
   button-primary:
-    backgroundColor: "{colors.action-blue}"
+    backgroundColor: "{colors.primary}"
     textColor: "#ffffff"
     rounded: "{rounded.control}"
     padding: "0.75rem 1rem"
   button-primary-hover:
-    backgroundColor: "{colors.action-blue-hover}"
+    backgroundColor: "{colors.primary-deep}"
     textColor: "#ffffff"
     rounded: "{rounded.control}"
     padding: "0.75rem 1rem"
   button-secondary:
-    backgroundColor: "#e7eaf0"
-    textColor: "{colors.body-ink}"
+    backgroundColor: "{colors.page}"
+    textColor: "{colors.muted-ink}"
     rounded: "{rounded.control}"
     padding: "0.75rem 1rem"
   chip-accent:
-    backgroundColor: "{colors.primary-tint}"
+    backgroundColor: "{colors.accent-chip}"
     textColor: "{colors.primary}"
     rounded: "{rounded.pill}"
     padding: "0.15rem 0.55rem"
   chip-neutral:
-    backgroundColor: "{colors.neutral-surface}"
+    backgroundColor: "{colors.neutral-line}"
     textColor: "#3c4043"
     rounded: "{rounded.pill}"
     padding: "0.15rem 0.55rem"
@@ -103,14 +112,16 @@ colour is a deep green used where a measurement has produced a judgement. Everyt
 ink, rule lines and quiet grey surfaces. The interface has one job per screen and says the
 uncomfortable thing ("No measurable change", "Too early") in the same weight as the good news.
 
-The visual language is inherited almost entirely from Pico.css: 0.25rem controls, 1rem spacing,
-a seven-layer neutral shadow on cards, and a blue primary action. The product's own additions are
-a green accent, left-border status cards, pill chips for metadata, and tinted verdict surfaces.
-The system is deliberately plain; its character comes from restraint, labelling and honest
-wording rather than decoration.
+The visual language is inherited from Pico.css: 0.25rem controls, 1rem spacing and the
+seven-layer neutral card shadow. Pico's variables are remapped to one token set, so the deep
+green now drives primary actions, links and focus as well as judgement. The product's own
+additions are the green accent, left-border status cards, pill chips for metadata, tinted verdict
+surfaces and the noise-band chart language. The system is deliberately plain; its character
+comes from restraint, labelling and honest wording rather than decoration.
 
 **Key Characteristics:**
 - Paper-white page with near-black ink and one deep-green accent.
+- Dark mode uses the same tokens: page, text, washes, focus and chart colours flip together.
 - Status is carried by a 4-6px left border plus a tinted surface, never by gradients or icons alone.
 - System sans-serif at 1rem/1.5; headings 2rem/1.75rem/1.5rem bold.
 - Pico.css defaults are the substrate: 0.25rem radii, 1rem rhythm, neutral stacked shadow.
@@ -121,16 +132,18 @@ wording rather than decoration.
 A near-monochrome page interrupted by one green judgement accent and three status tints.
 
 ### Primary
-- **Deep Ledger Green** (#1f6f5c): the product accent. Used on verdict "Keep" borders and
-  surfaces, selected chips, the timeline band legend, product notices, and the "all good"
-  capture guidance. It is the only colour that reads as "SkinLedger".
-- **Green Wash** (#eef7f2): the Keep verdict surface and the accent chip background.
+- **Deep Ledger Green** (#1f6f5c): the product accent and the primary action fill. Used on
+  primary buttons, links, focus rings, verdict "Keep" borders and surfaces, selected chips, the
+  timeline band legend and the "all good" capture guidance. It is the only colour that reads as
+  "SkinLedger".
+- **Deep Ledger Hover** (#145247): the primary button hover and link hover.
+- **Green Wash** (#eef7f2): the Keep verdict surface.
+- **Accent Chip** (rgba(31, 111, 92, 0.12)): the pill background under green metadata.
 
 ### Secondary
-- **Pico Action Blue** (#0172ad): currently the background of every primary button and selected
-  tab because Pico.css is not themed. It is an inherited framework default, not a brand colour.
-  This is documented drift; new status meaning must not be built on it.
-- **Action Blue Hover** (#015887): the hover state of those buttons.
+- **Muted Ink** (#646b79): secondary outline buttons and secondary actions. There is no second
+  accent; Pico's stock blue is fully retired and its secondary variables are mapped to ink and
+  neutral surfaces. The only saturated colours in the product are the judgement accents.
 
 ### Tertiary
 - **Caution Amber** (#b26a00) on **Amber Wash** (#fff6e5): "No measurable change" verdicts,
@@ -143,8 +156,15 @@ A near-monochrome page interrupted by one green judgement accent and three statu
 - **Ink** (#2d3138 / #373c44): headings and body copy.
 - **Muted Ink** (#646b79): secondary text, hints, footer and `<small>`.
 - **Rule Line** (#e7eaf0): card borders, table rules, dividers.
+- **Neutral Line** (#e8eaed): neutral chip backgrounds and mask placeholders.
 - **Paper** (#ffffff): the page and card surface.
 - **Sectioning Paper** (#fbfcfc): form fields and card headers.
+
+### Dark scheme
+- **Page** (#12161b), **Body** (#d5dae1), **Muted** (#a4adb9), **Accent Ink** (#7fd0b6),
+  **Accent Wash** (#16302a), **Amber Wash** (#33260f), **Red Wash** (#3a1514).
+- All are declared under `@media (prefers-color-scheme: dark)` in `app.css`, mapped onto the same
+  Pico variables. Chart colours read `--sl-chart-*` so the charts flip with the page.
 
 ### Named Rules
 **The One Judgement Rule.** Green, amber, red and grey mean a verdict state. They never decorate a
@@ -182,9 +202,10 @@ vertical padding. The primary composition is a single reading column; multi-colu
 only above 640px (`repeat(2, 1fr)`) and 1024px (`repeat(3, 1fr)`) for timeline cards and home
 product cards, and the product form's date pair splits into two columns at 640px.
 
-Mobile is the design target: 390x844, one column, 1rem rhythm. Dense tables (verdict targets,
-product log) are placed in an `overflow-x: auto` wrapper rather than restructured; their full
-six-column row does not fit 390px. Page actions are inline links, not a bottom action bar.
+Mobile is the design target: 390x844, one column, 1rem rhythm. Dense data does not scroll
+sideways at 390px: verdict targets become stacked rows, the product log becomes cards, and the
+timeline shows three cards with a Show-all toggle. The six-column verdict table and seven-column
+product table return only when the container can hold them (640px and 768px).
 
 ## Elevation & Depth
 
@@ -213,15 +234,19 @@ Borders are hairline (0.0625rem) in Rule Line grey on a white surface. There are
 
 ### Buttons
 - **Shape:** 0.25rem radius, 0.0625rem border, Pico's 0.75rem x 1rem padding.
-- **Primary:** Action Blue (#0172ad) background with white text; `role="button"` links inherit it.
-- **Hover / Focus:** background shifts to #015887 over 0.2s; focus uses the browser/Pico outline.
-- **Secondary:** light grey (#e7eaf0 in the product log's End button) with body ink text.
+- **Primary:** Deep Ledger Green (#1f6f5c) background with white text; `role="button"` links
+  inherit it. Hover shifts to #145247 over 0.2s.
+- **Secondary:** an outline button on Paper with Muted Ink text and border; filled secondary
+  uses the neutral surface with ink text. Both are deliberately quieter than green.
+- **Focus:** a solid 2px outline in Deep Ledger Green light / Accent Ink dark, including
+  `summary` disclosure controls.
 - **Capture primary:** "Start capture" is 1.15rem text, full width up to 420px.
 
 ### Chips
-- **Style:** pill, 0.15rem x 0.55rem padding, 0.78rem text, on Green Wash with Deep Ledger Green
-  text (`.sl-chip`) or grey on Quiet Grey (`.sl-chip-unstable`).
-- **State:** metadata only; chips are not interactive and carry the skin-type or unstable label.
+- **Style:** pill, 0.15rem x 0.55rem padding, 0.78rem text. Accent chips use rgba(31, 111, 92,
+  0.12) with Deep Ledger Green text; neutral chips use Neutral Line (#e8eaed) with #3c4043.
+- **State:** metadata only; chips are not interactive and carry skin type, unstable status or
+  the SAMPLE/SIMULATED data label.
 
 ### Cards / Containers
 - **Corner Style:** 0.25rem.
@@ -251,14 +276,43 @@ Borders are hairline (0.0625rem) in Rule Line grey on a white surface. There are
 - **Placement:** directly under the page title, inside the reading column.
 
 ### Verdict Card
-- **Style:** 6px left spine + state wash + 1rem padding, max 46rem wide, followed by a summary
-  block, a six-column target table, a change list and mask figures.
-- **Signal:** the outcome word is repeated as a 1.6rem line; the same word also appears as the
-  card's message, so the first word is read twice in a row.
+- **Style:** 6px left spine + state wash + 1rem padding, max 46rem wide. The product name is a
+  2rem h1 with a SAMPLE/SIMULATED chip; the outcome appears once as a 1.6rem line, followed by
+  one sentence.
+- **Target rows:** below 640px each target is a stacked row: aspect + change, a noise-band line
+  and an Outside/Within chip with a direction word, then baseline → check-in. The six-column
+  table returns at 640px.
+- **Warnings:** the "can't isolate one product" warning uses the 4px amber spine + wash card.
+- **Masks:** shown only for REAL captures; SIMULATED/SAMPLE verdicts omit the section entirely.
 
 ### Tabs (capture)
-- **Style:** two bordered buttons in a row, both using the primary blue in the current build, with
-  only `aria-selected` distinguishing them visually. The selected state is not visible.
+- **Style:** a segmented control on a neutral track; the selected segment is Paper with Deep
+  Ledger Green text and a Rule Line border, the unselected segment is transparent with body ink.
+  Both are 44px and the control uses the real tab pattern with roving tabindex.
+
+### Timeline
+- **Summary strip:** counts and the latest check-in above the grid.
+- **Product key:** full product names with a numbered swatch whose line style matches the
+  product-start mark in every chart.
+- **Default:** three cards visible (product targets first), with a Show-all toggle after them;
+  charts are created only for visible cards.
+- **Numbers:** every card has a `<details>` table of Date / Score / Data as the no-JS fallback.
+- **Axis:** date only ("Oct 4"); time stays in the tooltip.
+
+### Product form
+- **Order:** the product list comes first; "Add a product" is a disclosure below it.
+- **Targets:** four grouped fieldsets (Texture & pores, Oil & moisture, Tone, Eyes) with a live
+  "n of 4 selected" counter. At four, unchecked boxes disable with muted labels and a
+  not-allowed cursor.
+
+### People
+- **Style:** one card per profile. The public sample carries a SIMULATED chip and one primary
+  "Open sample timeline" action. A real profile has one primary timeline action, secondary
+  settings links, and a separated danger-tinted Delete.
+
+### Footer
+- **Style:** the verbatim disclaimer on one line; below it one link line:
+  Privacy · Powered by YouCam API · Demo.
 
 ## Do's and Don'ts
 
@@ -271,11 +325,13 @@ Borders are hairline (0.0625rem) in Rule Line grey on a white surface. There are
 - **Do** keep touch targets at least 44px and body copy at 1rem or larger.
 - **Do** use `.sl-chip` for metadata and keep pills non-interactive.
 - **Do** keep `aria-live` status regions on the capture flow; capture has real waiting states.
+- **Do** use the secondary outline style (Muted Ink on Paper) for supporting actions.
+- **Do** keep dark mode on the same token set; every new colour needs a dark counterpart.
 
 ### Don't:
 - **Don't** introduce a webfont, a new external origin or an inline script; the CSP forbids them.
-- **Don't** extend Pico's Action Blue to a new status meaning; it is an inherited default, not a
-  brand signal.
+- **Don't** introduce a second accent colour. Pico's Action Blue is retired; secondary actions
+  are ink and neutral, not another hue.
 - **Don't** convey a verdict by colour alone; the word and the border must agree.
 - **Don't** show or chart `ui_score` anywhere; the raw score is the only approved number.
 - **Don't** add shadows to controls, chips or links.

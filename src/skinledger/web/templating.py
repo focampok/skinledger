@@ -31,6 +31,7 @@ templates.env.globals.update(
     upload_tip=copy.UPLOAD_TIP,
     product_target_count=copy.PRODUCT_TARGET_COUNT,
     product_aspects_note=copy.PRODUCT_ASPECTS_NOTE,
+    product_list_title=copy.PRODUCT_LIST_TITLE,
     product_targets_title=copy.PRODUCT_TARGETS_TITLE,
     product_date_note=copy.PRODUCT_DATE_NOTE,
     product_add_title=copy.PRODUCT_ADD_TITLE,
