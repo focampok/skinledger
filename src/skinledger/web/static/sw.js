@@ -2,10 +2,12 @@
 // It caches only the static app shell. API responses, pages, images and masks stay
 // network-only: they are never written to a cache.
 
-const CACHE_NAME = "skinledger-shell-v2";
+const CACHE_NAME = "skinledger-shell-v3";
 const SHELL_ASSETS = [
   "/offline",
   "/static/app.css",
+  "/static/fonts/fraunces-latin.woff2",
+  "/static/fonts/inter-latin.woff2",
   "/static/manifest.webmanifest",
   "/static/icons/icon-192.png",
   "/static/icons/icon-512.png",

@@ -138,5 +138,5 @@ The API key is read only on the server and never reaches the browser, logs or te
 Cosmetic skin insights, not a medical diagnosis. Scores are AI estimates and vary with lighting. See a dermatologist for persistent acne, changing moles, rashes or pain.
 
 ## Licence and credits
-MIT. Built with HTMX, Chart.js and Pico CSS, each under its own licence (add the exact licence names and versions from the vendored files). Skin analysis and guided capture are powered by YouCam API.
+MIT. Built with HTMX, Chart.js and Pico CSS, each under its own licence (add the exact licence names and versions from the vendored files). Fraunces and Inter are self-hosted under the SIL Open Font License 1.1; the licence texts are in `src/skinledger/web/static/fonts/OFL-Fraunces.txt` and `OFL-Inter.txt`. Skin analysis and guided capture are powered by YouCam API.
 

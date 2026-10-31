@@ -15,18 +15,19 @@
   {% block head %}{% endblock %}
 </head>
 <body>
+  {% set current = request.url.path %}
   <header class="container">
     <nav>
       <ul>
-        <li><strong>SkinLedger</strong></li>
+        <li><a class="wordmark" href="/">SkinLedger</a></li>
       </ul>
       <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/try">Try it</a></li>
-        <li><a href="/people">My people</a></li>
-        {% if features.timeline %}<li><a href="/timeline">Timeline</a></li>{% endif %}
-        {% if features.products %}<li><a href="/products">Products</a></li>{% endif %}
-        {% if features.routine %}<li><a href="/routine">Routine</a></li>{% endif %}
+        <li><a href="/"{% if current == "/" %} aria-current="page"{% endif %}>Home</a></li>
+        <li><a href="/try"{% if current.startswith("/try") %} aria-current="page"{% endif %}>Try it</a></li>
+        <li><a href="/people"{% if current.startswith("/people") %} aria-current="page"{% endif %}>My people</a></li>
+        {% if features.timeline %}<li><a href="/timeline"{% if current.startswith("/timeline") %} aria-current="page"{% endif %}>Timeline</a></li>{% endif %}
+        {% if features.products %}<li><a href="/products"{% if current.startswith("/products") %} aria-current="page"{% endif %}>Products</a></li>{% endif %}
+        {% if features.routine %}<li><a href="/routine"{% if current.startswith("/routine") %} aria-current="page"{% endif %}>Routine</a></li>{% endif %}
       </ul>
     </nav>
   </header>

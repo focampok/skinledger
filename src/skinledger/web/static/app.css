@@ -1,53 +1,97 @@
-/* SkinLedger shell styles on top of Pico.css. */
+/* SkinLedger — The Quiet Lab. Warm ivory, stone, sage, Fraunces + Inter. */
 
-/*
- * P16b-1: the palette is one token set, mapped onto Pico's variables. Pico's
- * own dark scheme is replaced below so every surface, wash and status colour
- * stays readable when the phone is in dark mode.
- */
+@font-face {
+  font-family: "Fraunces";
+  src: url("/static/fonts/fraunces-latin.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/static/fonts/inter-latin.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
 :root {
   color-scheme: light dark;
+  --sl-font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --sl-font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --sl-radius-control: 12px;
+  --sl-radius-card: 16px;
+  --sl-radius-pill: 999px;
+  --sl-space-xs: 8px;
+  --sl-space-sm: 12px;
+  --sl-space-md: 16px;
+  --sl-space-lg: 24px;
+  --sl-space-xl: 32px;
+  --sl-space-2xl: 48px;
+  --sl-shadow-lift: 0 1px 2px rgba(43, 42, 40, 0.04), 0 12px 32px rgba(43, 42, 40, 0.05);
 }
 
 /* Same specificity as Pico's light block (:root:not([data-theme=dark])). */
 :root:not([data-theme="dark"]) {
-  --sl-page: #ffffff;
-  --sl-ink: #2d3138;
-  --sl-body: #373c44;
-  --sl-muted: #646b79;
-  --sl-rule: #e7eaf0;
-  --sl-surface: #fbfcfc;
-  --sl-field-border: #cfd5e2;
-  --sl-neutral: #f1f3f4;
-  --sl-neutral-ink: #3c4043;
-  --sl-neutral-line: #e8eaed;
+  --sl-page: #faf7f2;
+  --sl-stone: #f1ece4;
+  --sl-stone-deep: #e8e1d6;
+  --sl-ink: #2b2a28;
+  --sl-body: #3b3833;
+  --sl-muted: #66615a;
+  --sl-rule: #e2d9cd;
+  --sl-surface: var(--sl-stone);
+  --sl-field-border: var(--sl-rule);
+
+  --sl-neutral: #efeae1;
+  --sl-neutral-ink: #4a4640;
+  --sl-neutral-line: #e8e1d6;
 
   --sl-accent: #1f6f5c;
   --sl-accent-ink: #1f6f5c;
-  --sl-accent-deep: #145247;
-  --sl-accent-wash: #eef7f2;
-  --sl-accent-chip: rgba(31, 111, 92, 0.12);
+  --sl-accent-deep: #17594a;
+  --sl-accent-wash: #e7efea;
+  --sl-accent-chip: rgba(31, 111, 92, 0.1);
 
-  --sl-warn: #b26a00;
-  --sl-warn-ink: #7a4b00;
-  --sl-warn-wash: #fff6e5;
-  --sl-status-ink: #8a4b08;
+  --sl-sand: #d8c6a6;
+  --sl-sand-wash: #f4ede1;
+  --sl-rose: #c4a09a;
+  --sl-rose-wash: #f6e9e6;
 
-  --sl-danger: #b3261e;
-  --sl-danger-ink: #8a1c1c;
-  --sl-danger-wash: #fdeeee;
+  --sl-warn: #8a5514;
+  --sl-warn-ink: #8a5514;
+  --sl-warn-wash: #f4e8d4;
+  --sl-status-ink: #8a5514;
 
-  --sl-grey: #5f6368;
+  --sl-danger: #a33a32;
+  --sl-danger-ink: #a33a32;
+  --sl-danger-wash: #f7e5e1;
+
+  --sl-grey: #4a4640;
   --sl-focus: #1f6f5c;
 
-  --sl-chart-grid: rgba(0, 0, 0, 0.08);
-  --sl-chart-band: rgba(31, 111, 92, 0.16);
-  --sl-chart-band-unstable: rgba(120, 126, 132, 0.22);
-  --sl-chart-product: #646b79;
+  --sl-chart-grid: #e2d9cd;
+  --sl-chart-band: rgba(216, 198, 166, 0.45);
+  --sl-chart-band-unstable: rgba(102, 97, 90, 0.14);
+  --sl-chart-product: #66615a;
   --sl-chart-real: #1f6f5c;
-  --sl-chart-simulated: #8a6d3b;
-  --sl-chart-sample: #6b5b95;
-  --sl-chart-hollow: #ffffff;
+  --sl-chart-simulated: #1f6f5c;
+  --sl-chart-sample: #1f6f5c;
+  --sl-chart-hollow: #faf7f2;
+
+  --pico-font-family: var(--sl-font-sans);
+  --pico-font-size: 100%;
+  --pico-line-height: 1.6;
+  --pico-border-radius: 12px;
+  --pico-form-element-spacing-vertical: 0.875rem;
+  --pico-form-element-spacing-horizontal: 1.25rem;
 
   --pico-background-color: var(--sl-page);
   --pico-color: var(--sl-body);
@@ -60,14 +104,14 @@
   --pico-muted-color: var(--sl-muted);
   --pico-muted-border-color: var(--sl-rule);
   --pico-card-background-color: var(--sl-page);
-  --pico-card-sectioning-background-color: var(--sl-surface);
-  --pico-form-element-background-color: var(--sl-surface);
-  --pico-form-element-border-color: var(--sl-field-border);
+  --pico-card-sectioning-background-color: var(--sl-stone);
+  --pico-form-element-background-color: var(--sl-page);
+  --pico-form-element-border-color: var(--sl-rule);
   --pico-form-element-active-border-color: var(--sl-accent);
   --pico-form-element-focus-color: var(--sl-accent);
   --pico-form-element-color: var(--sl-body);
   --pico-table-border-color: var(--sl-rule);
-  --pico-code-background-color: var(--sl-neutral);
+  --pico-code-background-color: var(--sl-stone);
   --pico-del-color: var(--sl-danger-ink);
   --pico-ins-color: var(--sl-accent-ink);
 
@@ -81,59 +125,67 @@
   --pico-primary-hover-underline: var(--sl-accent-deep);
   --pico-primary-focus: rgba(31, 111, 92, 0.35);
   --pico-primary-inverse: #ffffff;
+
+  --pico-secondary: var(--sl-ink);
+  --pico-secondary-background: var(--sl-stone);
+  --pico-secondary-border: var(--sl-rule);
+  --pico-secondary-underline: var(--sl-ink);
+  --pico-secondary-hover: var(--sl-ink);
+  --pico-secondary-hover-background: var(--sl-stone-deep);
+  --pico-secondary-hover-border: var(--sl-rule);
+  --pico-secondary-hover-underline: var(--sl-accent);
+  --pico-secondary-focus: rgba(31, 111, 92, 0.3);
+  --pico-secondary-inverse: var(--sl-ink);
 }
 
 @media (prefers-color-scheme: dark) {
   /* Same specificity as Pico's dark block; app.css loads later and wins. */
   :root:not([data-theme]) {
-    --sl-page: #12161b;
-    --sl-ink: #eef1f4;
-    --sl-body: #d5dae1;
-    --sl-muted: #a4adb9;
-    --sl-rule: #2a313a;
-    --sl-surface: #181e25;
-    --sl-field-border: #3a434e;
-    --sl-neutral: #232a33;
-    --sl-neutral-ink: #cdd3db;
-    --sl-neutral-line: #2e3641;
+    --sl-page: #1c1a17;
+    --sl-stone: #25221e;
+    --sl-stone-deep: #2e2a25;
+    --sl-ink: #f2ede5;
+    --sl-body: #dcd5ca;
+    --sl-muted: #b3aa9e;
+    --sl-rule: #3a352f;
+    --sl-surface: var(--sl-stone);
+    --sl-field-border: var(--sl-rule);
 
-    --sl-accent: #1f6f5c;
-    --sl-accent-ink: #7fd0b6;
-    --sl-accent-deep: #17584a;
-    --sl-accent-wash: #16302a;
-    --sl-accent-chip: rgba(127, 208, 182, 0.14);
+    --sl-neutral: #2a2622;
+    --sl-neutral-ink: #cfc7bb;
+    --sl-neutral-line: #2e2a25;
 
-    --sl-warn: #c9832a;
-    --sl-warn-ink: #f0b45e;
-    --sl-warn-wash: #33260f;
-    --sl-status-ink: #e0a24a;
+    --sl-accent: #8fc7b4;
+    --sl-accent-ink: #8fc7b4;
+    --sl-accent-deep: #a8d8c8;
+    --sl-accent-wash: #27332d;
+    --sl-accent-chip: rgba(143, 199, 180, 0.14);
 
-    --sl-danger: #d24a42;
-    --sl-danger-ink: #ff9d97;
-    --sl-danger-wash: #3a1514;
+    --sl-sand: #d8c6a6;
+    --sl-sand-wash: #332c21;
+    --sl-rose: #c4a09a;
+    --sl-rose-wash: #352624;
 
-    --sl-grey: #b6bdc7;
-    --sl-focus: #7fd0b6;
+    --sl-warn: #e0b36a;
+    --sl-warn-ink: #e0b36a;
+    --sl-warn-wash: #33281a;
+    --sl-status-ink: #e0b36a;
 
-    --sl-chart-grid: rgba(255, 255, 255, 0.1);
-    --sl-chart-band: rgba(127, 208, 182, 0.18);
-    --sl-chart-band-unstable: rgba(182, 189, 199, 0.18);
-    --sl-chart-product: #a4adb9;
-    --sl-chart-real: #7fd0b6;
-    --sl-chart-simulated: #d9b16a;
-    --sl-chart-sample: #b3a4d6;
-    --sl-chart-hollow: #12161b;
+    --sl-danger: #e89a90;
+    --sl-danger-ink: #e89a90;
+    --sl-danger-wash: #35211f;
 
-    --pico-primary: var(--sl-accent-ink);
-    --pico-primary-background: var(--sl-accent);
-    --pico-primary-border: var(--sl-accent);
-    --pico-primary-underline: rgba(127, 208, 182, 0.5);
-    --pico-primary-hover: #9be0c8;
-    --pico-primary-hover-background: var(--sl-accent-deep);
-    --pico-primary-hover-border: var(--sl-accent-deep);
-    --pico-primary-hover-underline: #9be0c8;
-    --pico-primary-focus: rgba(127, 208, 182, 0.4);
-    --pico-primary-inverse: #ffffff;
+    --sl-grey: #cfc7bb;
+    --sl-focus: #8fc7b4;
+
+    --sl-chart-grid: #3a352f;
+    --sl-chart-band: rgba(216, 198, 166, 0.22);
+    --sl-chart-band-unstable: rgba(179, 170, 158, 0.16);
+    --sl-chart-product: #b3aa9e;
+    --sl-chart-real: #8fc7b4;
+    --sl-chart-simulated: #8fc7b4;
+    --sl-chart-sample: #8fc7b4;
+    --sl-chart-hollow: #1c1a17;
 
     --pico-background-color: var(--sl-page);
     --pico-color: var(--sl-body);
@@ -146,31 +198,195 @@
     --pico-muted-color: var(--sl-muted);
     --pico-muted-border-color: var(--sl-rule);
     --pico-card-background-color: var(--sl-page);
-    --pico-card-sectioning-background-color: var(--sl-surface);
-    --pico-form-element-background-color: var(--sl-surface);
-    --pico-form-element-border-color: var(--sl-field-border);
-    --pico-form-element-active-border-color: var(--sl-accent-ink);
-    --pico-form-element-focus-color: var(--sl-accent-ink);
+    --pico-card-sectioning-background-color: var(--sl-stone);
+    --pico-form-element-background-color: var(--sl-page);
+    --pico-form-element-border-color: var(--sl-rule);
+    --pico-form-element-active-border-color: var(--sl-accent);
+    --pico-form-element-focus-color: var(--sl-accent);
     --pico-form-element-color: var(--sl-body);
     --pico-table-border-color: var(--sl-rule);
-    --pico-code-background-color: var(--sl-neutral);
+    --pico-code-background-color: var(--sl-stone);
+
+    --pico-primary: var(--sl-accent-ink);
+    --pico-primary-background: var(--sl-accent);
+    --pico-primary-border: var(--sl-accent);
+    --pico-primary-underline: rgba(143, 199, 180, 0.5);
+    --pico-primary-hover: var(--sl-accent-deep);
+    --pico-primary-hover-background: var(--sl-accent-deep);
+    --pico-primary-hover-border: var(--sl-accent-deep);
+    --pico-primary-hover-underline: var(--sl-accent-deep);
+    --pico-primary-focus: rgba(143, 199, 180, 0.4);
+    --pico-primary-inverse: #1c1a17;
+
+    --pico-secondary: var(--sl-body);
+    --pico-secondary-background: var(--sl-stone);
+    --pico-secondary-border: var(--sl-rule);
+    --pico-secondary-underline: var(--sl-body);
+    --pico-secondary-hover: var(--sl-ink);
+    --pico-secondary-hover-background: var(--sl-stone-deep);
+    --pico-secondary-hover-border: var(--sl-rule);
+    --pico-secondary-hover-underline: var(--sl-accent-ink);
+    --pico-secondary-focus: rgba(143, 199, 180, 0.35);
+    --pico-secondary-inverse: var(--sl-ink);
   }
 }
 
-body > header nav ul li a {
+body {
+  background: var(--sl-page);
+  color: var(--sl-body);
+  font-family: var(--sl-font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--sl-font-display);
+  font-weight: 500;
+  color: var(--sl-ink);
+}
+
+h1 {
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 144;
+}
+
+h2 {
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  font-variation-settings: "opsz" 96;
+}
+
+h3 {
+  font-size: 1.25rem;
+  line-height: 1.25;
+  font-variation-settings: "opsz" 48;
+}
+
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: var(--sl-space-lg);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-inline: var(--sl-space-xl);
+  }
+}
+
+@media (min-width: 1440px) {
+  .container {
+    padding-inline: var(--sl-space-2xl);
+  }
+}
+
+main.container {
+  padding-block: var(--sl-space-lg);
+}
+
+@media (min-width: 768px) {
+  main.container {
+    padding-block: 40px;
+  }
+}
+
+body > header {
+  border-bottom: 1px solid var(--sl-rule);
+}
+
+body > header nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-block: 12px;
+}
+
+body > header nav ul {
+  margin: 0;
+  padding: 0;
+}
+
+body > header nav ul li {
+  margin: 0;
+}
+
+body > header nav ul:first-child li {
+  list-style: none;
+}
+
+body > header nav .wordmark {
+  font-family: var(--sl-font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--sl-ink);
   text-decoration: none;
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 48;
+}
+
+body > header nav ul:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 16px;
+}
+
+body > header nav ul:last-child a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 0;
+  font-family: var(--sl-font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--sl-muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+body > header nav ul:last-child a:hover {
+  color: var(--sl-ink);
+}
+
+body > header nav ul:last-child a[aria-current="page"] {
+  color: var(--sl-ink);
+  border-bottom-color: var(--sl-accent);
 }
 
 body > footer {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding-block: 1.5rem;
+  gap: var(--sl-space-xs);
+  border-top: 1px solid var(--sl-rule);
+  margin-top: var(--sl-space-2xl);
+  padding-block: var(--sl-space-xl);
   color: var(--sl-muted);
+  font-size: 0.875rem;
 }
 
 body > footer a {
-  color: var(--sl-accent-ink);
+  color: var(--sl-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+body > footer a:hover {
+  color: var(--sl-ink);
+}
+
+button,
+[role="button"],
+input[type="submit"] {
+  font-weight: 500;
 }
 
 :where(a, button, input, select, textarea, summary, [role="button"]):focus-visible {
@@ -183,10 +399,6 @@ details summary:focus-visible:not([role]) {
   outline: 2px solid var(--sl-focus);
   outline-offset: 2px;
   box-shadow: none;
-}
-
-main.container {
-  padding-block: 1.5rem;
 }
 
 /* -- P16 capture page (moved from capture.html so no inline style is used) -- */
