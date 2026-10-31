@@ -235,6 +235,9 @@ body {
   background: var(--sl-page);
   color: var(--sl-body);
   font-family: var(--sl-font-sans);
+}
+
+.num {
   font-variant-numeric: tabular-nums;
 }
 
@@ -249,7 +252,8 @@ h3 {
 h1 {
   font-size: clamp(2.25rem, 6vw, 3.5rem);
   line-height: 1.08;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
+  word-spacing: 0.01em;
   font-variation-settings: "opsz" 144;
 }
 
@@ -257,6 +261,7 @@ h2 {
   font-size: clamp(1.6rem, 3vw, 2rem);
   line-height: 1.15;
   letter-spacing: -0.005em;
+  word-spacing: 0.01em;
   font-variation-settings: "opsz" 96;
 }
 
@@ -327,7 +332,8 @@ body > header nav .wordmark {
   font-weight: 500;
   color: var(--sl-ink);
   text-decoration: none;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
+  word-spacing: 0.01em;
   font-variation-settings: "opsz" 48;
 }
 
@@ -1312,6 +1318,20 @@ input[type="file"]::file-selector-button:hover {
   font-size: 10px;
   letter-spacing: 0.02em;
   fill: var(--sl-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.band-label {
+  font-family: var(--sl-font-sans);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  fill: var(--sl-muted);
+}
+
+.band-outside {
+  fill: var(--sl-accent);
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
 }
 
 .home-hero-actions {

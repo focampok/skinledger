@@ -12,16 +12,22 @@
 
   <figure class="home-band">
     <svg viewBox="0 0 360 160" role="img"
-         aria-label="Sample noise band: a score line staying inside a soft band">
+         aria-label="Sample noise band: points inside the band, then two points above it after the product start">
       <rect x="0" y="44" width="360" height="68" rx="34" fill="var(--sl-sand-wash)"></rect>
       <line x1="0" y1="112" x2="360" y2="112" stroke="var(--sl-rule)" stroke-width="1"></line>
-      <path d="M0 84 C40 78 70 82 108 78 S180 70 220 76 S300 68 360 64"
-            fill="none" stroke="var(--sl-accent)" stroke-width="2"></path>
+      <line x1="210" y1="44" x2="210" y2="116" stroke="var(--sl-chart-product)"
+            stroke-width="1" stroke-dasharray="3 4"></line>
+      <text x="210" y="30" class="band-label" text-anchor="middle">Product start</text>
+      <polyline points="0,84 40,78 108,78 180,72 260,68 300,36 332,26"
+                fill="none" stroke="var(--sl-accent)" stroke-width="2"></polyline>
+      <circle cx="0" cy="84" r="3" fill="var(--sl-accent)"></circle>
       <circle cx="40" cy="78" r="3" fill="var(--sl-accent)"></circle>
       <circle cx="108" cy="78" r="3" fill="var(--sl-accent)"></circle>
       <circle cx="180" cy="72" r="3" fill="var(--sl-accent)"></circle>
-      <circle cx="260" cy="72" r="3" fill="var(--sl-accent)"></circle>
-      <circle cx="332" cy="66" r="3" fill="var(--sl-accent)"></circle>
+      <circle cx="260" cy="68" r="3" fill="var(--sl-accent)"></circle>
+      <circle cx="300" cy="36" r="3" fill="var(--sl-accent)"></circle>
+      <circle cx="332" cy="26" r="3" fill="var(--sl-accent)"></circle>
+      <text x="356" y="16" class="band-label band-outside" text-anchor="end">Outside noise</text>
       <text x="0" y="140" class="band-axis">Sep 20</text>
       <text x="318" y="140" class="band-axis">Oct 28</text>
     </svg>
