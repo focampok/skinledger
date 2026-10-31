@@ -124,7 +124,7 @@
   };
 
   Chart.register(productMarks);
-  Chart.defaults.font.family = "system-ui, sans-serif";
+  Chart.defaults.font.family = "Inter, system-ui, sans-serif";
   Chart.defaults.font.size = 12;
   Chart.defaults.color = COLORS.text;
 
@@ -294,17 +294,26 @@
     });
   }
 
-  fetch("/api/people/" + encodeURIComponent(personId) + "/series", {
-    headers: { Accept: "application/json" },
-    credentials: "same-origin"
-  })
-    .then(function (response) {
-      if (!response.ok) throw new Error("series " + response.status);
-      return response.json();
+  function loadSeries() {
+    fetch("/api/people/" + encodeURIComponent(personId) + "/series", {
+      headers: { Accept: "application/json" },
+      credentials: "same-origin"
     })
-    .then(function (series) {
-      latestSeries = series;
-      buildVisible();
-    })
-    .catch(showChartError);
+      .then(function (response) {
+        if (!response.ok) throw new Error("series " + response.status);
+        return response.json();
+      })
+      .then(function (series) {
+        latestSeries = series;
+        buildVisible();
+      })
+      .catch(showChartError);
+  }
+
+  // Wait for the self-hosted Inter face so canvas labels use the same UI font.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(loadSeries);
+  } else {
+    loadSeries();
+  }
 })();
