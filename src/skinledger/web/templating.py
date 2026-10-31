@@ -66,6 +66,7 @@ templates.env.globals.update(
     verdict_take_checkin=copy.VERDICT_TAKE_CHECKIN,
     verdict_targets_title=copy.VERDICT_TARGETS_TITLE,
     verdict_aspect_note=copy.VERDICT_ASPECT_NOTE,
+    verdict_result_eyebrow=copy.VERDICT_RESULT_EYEBROW,
     verdict_top_changes_title=copy.VERDICT_TOP_CHANGES_TITLE,
     verdict_masks_title=copy.VERDICT_MASKS_TITLE,
     verdict_col_aspect=copy.VERDICT_COL_ASPECT,
@@ -163,5 +164,16 @@ def split_data_label(value: object) -> dict[str, str]:
     return {"name": text, "label": ""}
 
 
+def human_date(value: object) -> str:
+    """A reading date: '18 Oct 2026'."""
+    text = str(value or "")
+    try:
+        moment = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return text
+    return f"{moment.day} {_MONTHS[moment.month - 1]} {moment.year}"
+
+
 templates.env.filters["short_date"] = short_date
+templates.env.filters["human_date"] = human_date
 templates.env.filters["split_data_label"] = split_data_label

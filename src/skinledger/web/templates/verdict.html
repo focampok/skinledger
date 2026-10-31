@@ -18,112 +18,121 @@
   <p class="verdict-banner" role="status">{{ verdict_sample_banner }}</p>
   {% endif %}
 
-  <article class="verdict-card verdict-{{ verdict.outcome }}">
-    <header class="verdict-header">
-      <h1>{{ verdict_title_prefix }} {{ name_parts.name }}{% if name_parts.label %} <span class="sl-chip sl-chip-neutral">{{ name_parts.label }}</span>{% endif %}</h1>
-      <p class="verdict-outcome">{{ outcome_label }}</p>
-    </header>
-    <p class="verdict-action">{{ verdict.message }}</p>
-    <p class="verdict-window"><strong>{{ window_label }}</strong> · {{ window_date }}</p>
+  <div class="verdict-layout">
+    <article class="verdict-card verdict-{{ verdict.outcome }}">
+      <p class="eyebrow">{{ verdict_result_eyebrow }}</p>
+      <h1 class="verdict-outcome">{{ outcome_label }}</h1>
+      <p class="verdict-product">
+        {{ name_parts.name }}{% if name_parts.label %} <span class="sl-chip sl-chip-neutral">{{ name_parts.label }}</span>{% endif %}
+      </p>
+      <p class="verdict-action">{{ verdict.message }}</p>
+      <p class="verdict-window">
+        <strong>{{ window_label }}</strong> ·
+        <time datetime="{{ window_date }}">{{ window_date|human_date }}</time>
+      </p>
+      <p class="verdict-disclaimer"><small>{{ disclaimer }}</small></p>
+    </article>
 
-    {% if target_rows %}
-    <h2>{{ verdict_targets_title }}</h2>
-    <p class="verdict-note">{{ verdict_aspect_note }}</p>
-    <p class="score-note">{{ score_direction_note }}</p>
-    <div class="verdict-table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">{{ verdict_col_aspect }}</th>
-            <th scope="col">{{ verdict_col_baseline }}</th>
-            <th scope="col">{{ verdict_col_checkin }}</th>
-            <th scope="col">{{ verdict_col_change }}</th>
-            <th scope="col">{{ verdict_col_band }}</th>
-            <th scope="col">{{ verdict_col_outside }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in target_rows %}
-          <tr data-target-aspect="{{ row.aspect }}"{% if row.unstable %} data-unstable="true"{% endif %}>
-            <td>{{ row.label }}</td>
-            <td>{{ row.baseline }}</td>
-            <td>{{ row.checkin }}</td>
-            <td>{{ row.change }}</td>
-            <td>{{ row.band }}</td>
-            <td>{{ row.outside }}{% if row.direction_label %} {{ row.direction_label }}{% endif %}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <section class="verdict-detail">
+      {% if target_rows %}
+      <h2>{{ verdict_targets_title }}</h2>
+      <p class="verdict-note">{{ verdict_aspect_note }}</p>
+      <p class="score-note">{{ score_direction_note }}</p>
 
-    <ul class="verdict-targets" aria-label="{{ verdict_targets_title }}">
-      {% for row in target_rows %}
-      <li class="verdict-target" data-target-aspect="{{ row.aspect }}"{% if row.unstable %} data-unstable="true"{% endif %}>
-        <span class="verdict-target-label">{{ row.label }}</span>
-        <span class="verdict-target-change">{{ row.change }}</span>
-        <span class="verdict-target-band">{{ verdict_col_band }} {{ row.band_display }}</span>
-        <span class="verdict-target-state">
-          <span class="sl-chip{% if row.outside_state != 'outside' %} sl-chip-neutral{% endif %}">{{ row.outside_plain }}{% if row.direction_label %} · {{ row.direction_label }}{% endif %}</span>
-        </span>
-        <span class="verdict-target-meta">{{ verdict_col_baseline }} {{ row.baseline }} → {{ verdict_col_checkin }} {{ row.checkin }}</span>
-      </li>
+      <div class="verdict-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{{ verdict_col_aspect }}</th>
+              <th scope="col">{{ verdict_col_baseline }}</th>
+              <th scope="col">{{ verdict_col_checkin }}</th>
+              <th scope="col">{{ verdict_col_change }}</th>
+              <th scope="col">{{ verdict_col_band }}</th>
+              <th scope="col">{{ verdict_col_outside }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in target_rows %}
+            <tr data-target-aspect="{{ row.aspect }}"{% if row.unstable %} data-unstable="true"{% endif %}>
+              <td>{{ row.label }}</td>
+              <td class="num">{{ row.baseline }}</td>
+              <td class="num">{{ row.checkin }}</td>
+              <td class="num">{{ row.change }}</td>
+              <td class="num">{{ row.band }}</td>
+              <td>{{ row.outside }}{% if row.direction_label %} {{ row.direction_label }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="verdict-targets" aria-label="{{ verdict_targets_title }}">
+        {% for row in target_rows %}
+        <li class="verdict-target" data-target-aspect="{{ row.aspect }}"{% if row.unstable %} data-unstable="true"{% endif %}>
+          <span class="verdict-target-label">{{ row.label }}</span>
+          <span class="verdict-target-change num">{{ row.change }}</span>
+          <span class="verdict-target-band">{{ verdict_col_band }} <span class="num">{{ row.band_display }}</span></span>
+          <span class="verdict-target-state">
+            <span class="sl-chip{% if row.outside_state == 'outside' %} sl-chip-accent{% else %} sl-chip-neutral{% endif %}">{{ row.outside_plain }}{% if row.direction_label %} · {{ row.direction_label }}{% endif %}</span>
+          </span>
+          <span class="verdict-target-meta">{{ verdict_col_baseline }} <span class="num">{{ row.baseline }}</span> → {{ verdict_col_checkin }} <span class="num">{{ row.checkin }}</span></span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if unstable_rows %}
+      <p class="verdict-unstable">
+        <strong>{{ verdict_unstable_not_used }}:</strong>
+        {% for target in unstable_rows %}
+        {{ target.label }}{% if target.band is not none %} ({{ verdict_col_band }} <span class="num">{{ target.band }}</span>){% endif %}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      {% endif %}
+
+      {% if top_change_rows %}
+      <h2>{{ verdict_top_changes_title }}</h2>
+      <ul class="verdict-changes">
+        {% for change in top_change_rows %}
+        <li>
+          <span class="verdict-arrow" aria-hidden="true">{{ change.arrow }}</span>
+          {{ change.label }} <strong class="num">{{ change.delta }}</strong> · {{ change.outside }}{% if change.direction_label %} · {{ change.direction_label }}{% endif %}{% if change.band %} (<span class="num">{{ change.band }}</span>){% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% for warning in verdict.warnings %}
+      <p class="verdict-warning">{{ warning }}</p>
       {% endfor %}
-    </ul>
-    {% endif %}
 
-    {% if unstable_rows %}
-    <p class="verdict-unstable">
-      <strong>{{ verdict_unstable_not_used }}:</strong>
-      {% for target in unstable_rows %}
-      {{ target.label }}{% if target.band is not none %} ({{ verdict_col_band }} {{ target.band }}){% endif %}{% if not loop.last %}, {% endif %}
-      {% endfor %}
-    </p>
-    {% endif %}
+      {% if mask_rows %}
+      <h2>{{ verdict_masks_title }}</h2>
+      <div class="verdict-masks">
+        {% for pair in mask_rows %}
+        <figure>
+          <img src="/media/{{ pair.before_capture_id }}/{{ pair.before_file }}"
+               alt="{{ verdict_mask_before_alt }} {{ pair.label }}" loading="lazy">
+          <figcaption>{{ verdict_before }}</figcaption>
+        </figure>
+        <figure>
+          <img src="/media/{{ pair.after_capture_id }}/{{ pair.after_file }}"
+               alt="{{ verdict_mask_after_alt }} {{ pair.label }}" loading="lazy">
+          <figcaption>{{ verdict_after }}</figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+      {% elif verdict.label == "REAL" %}
+      <h2>{{ verdict_masks_title }}</h2>
+      <p>{{ verdict_no_masks }}</p>
+      {% endif %}
 
-    {% if top_change_rows %}
-    <h2>{{ verdict_top_changes_title }}</h2>
-    <ul class="verdict-changes">
-      {% for change in top_change_rows %}
-      <li>
-        <span class="verdict-arrow">{{ change.arrow }}</span>
-        {{ change.label }} <strong>{{ change.delta }}</strong> · {{ change.outside }}{% if change.direction_label %} · {{ change.direction_label }}{% endif %}{% if change.band %} ({{ change.band }}){% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-
-    {% for warning in verdict.warnings %}
-    <p class="verdict-warning">{{ warning }}</p>
-    {% endfor %}
-
-    {% if mask_rows %}
-    <h2>{{ verdict_masks_title }}</h2>
-    <div class="verdict-masks">
-      {% for pair in mask_rows %}
-      <figure>
-        <img src="/media/{{ pair.before_capture_id }}/{{ pair.before_file }}"
-             alt="{{ verdict_mask_before_alt }} {{ pair.label }}" loading="lazy">
-        <figcaption>{{ verdict_before }}</figcaption>
-      </figure>
-      <figure>
-        <img src="/media/{{ pair.after_capture_id }}/{{ pair.after_file }}"
-             alt="{{ verdict_mask_after_alt }} {{ pair.label }}" loading="lazy">
-        <figcaption>{{ verdict_after }}</figcaption>
-      </figure>
-      {% endfor %}
-    </div>
-    {% elif verdict.label == "REAL" %}
-    <h2>{{ verdict_masks_title }}</h2>
-    <p>{{ verdict_no_masks }}</p>
-    {% endif %}
-
-    {% if can_write %}
-    <p class="verdict-checkin">
-      <a href="/people/{{ person.id }}/capture" role="button">{{ verdict_take_checkin }}</a>
-    </p>
-    {% endif %}
-    <p class="verdict-disclaimer"><small>{{ disclaimer }}</small></p>
-  </article>
+      {% if can_write %}
+      <p class="verdict-checkin">
+        <a href="/people/{{ person.id }}/capture" role="button">{{ verdict_take_checkin }}</a>
+      </p>
+      {% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}

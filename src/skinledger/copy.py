@@ -201,6 +201,7 @@ def verdict_outcome_label(outcome: str) -> str:
 
 
 VERDICT_TITLE_PREFIX = "Verdict for"
+VERDICT_RESULT_EYEBROW = "Result"
 
 VERDICT_SIMULATED_BANNER = "Demo: day 14/28 check-ins are SIMULATED. Day 1 is real."
 
