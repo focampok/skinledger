@@ -2,6 +2,10 @@
 
 {% block title %}SkinLedger — Products{% endblock %}
 
+{% block head %}
+<script src="/static/products.js" defer></script>
+{% endblock %}
+
 {% block content %}
 <div id="products-page" data-person-id="{{ person.id }}">
   <h1>Products for {{ person.display_name }}</h1>
@@ -17,12 +21,21 @@
   {% if not can_write %}
   <p class="product-notice">{{ demo_read_only }}</p>
   {% endif %}
+
+  {% include "products_list.html" %}
+
   {% if can_write %}
-  <article class="product-form">
-    <h2>Add a product</h2>
-    <form method="post" action="/people/{{ person.id }}/products"
+  <details class="product-add"{% if error %} open{% endif %}>
+    <summary>{{ product_add_title }}</summary>
+    <form class="product-form" method="post" action="/people/{{ person.id }}/products"
           hx-post="/people/{{ person.id }}/products"
-          hx-target="#product-panel" hx-swap="outerHTML">
+          hx-target="#product-panel" hx-swap="outerHTML"
+          data-max-targets="{{ max_targets }}"
+          data-count-template="{{ product_target_count }}">
+      {% if error %}
+      <p class="product-error" role="alert">{{ error }}</p>
+      {% endif %}
+
       <label for="product-name">Product name</label>
       <input id="product-name" name="name" type="text" maxlength="80" required
              placeholder="{{ name_placeholder }}" value="{{ form.name }}">
@@ -45,26 +58,35 @@
           <input name="ended_on" type="date" value="{{ form.ended_on }}">
         </label>
       </div>
+      <small class="product-date-note">{{ product_date_note }}</small>
 
-      <fieldset>
-        <legend>Target aspects (1 to 4)</legend>
-        {% for aspect in aspects %}
-        <label class="product-aspect">
-          <input type="checkbox" name="target_aspects" value="{{ aspect.key }}"
-                 {% if aspect.key in form.targets %}checked{% endif %}>
-          <span>{{ aspect.label }}</span>
-          {% if aspect.unstable %}
-          <small class="product-unstable">{{ unstable_hint }}</small>
-          {% endif %}
-        </label>
+      <h3 class="product-targets-title">{{ product_targets_title }}</h3>
+      <p id="target-count" class="product-count" role="status" aria-live="polite">
+        {{ form.targets|length }} of {{ max_targets }} selected
+      </p>
+      {% set unstable_aspects = aspects|selectattr("unstable")|list %}
+      {% if unstable_aspects %}
+      <p class="product-unstable-note">{{ unstable_hint }}</p>
+      {% endif %}
+
+      <div class="product-groups">
+        {% for group in aspect_groups %}
+        <fieldset class="product-group">
+          <legend>{{ group.label }}</legend>
+          {% for aspect in group.aspects %}
+          <label class="product-aspect{% if aspect.unstable %} product-aspect-unstable{% endif %}">
+            <input type="checkbox" name="target_aspects" value="{{ aspect.key }}"
+                   {% if aspect.key in form.targets %}checked{% endif %}>
+            <span>{{ aspect.label }}</span>
+          </label>
+          {% endfor %}
+        </fieldset>
         {% endfor %}
-      </fieldset>
+      </div>
 
       <button type="submit">Add product</button>
     </form>
-  </article>
+  </details>
   {% endif %}
-
-  {% include "products_list.html" %}
 </div>
 {% endblock %}

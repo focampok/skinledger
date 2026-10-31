@@ -31,7 +31,7 @@
     sample: cssVar("--sl-chart-sample", "#6b5b95"),
     band: cssVar("--sl-chart-band", "rgba(31, 111, 92, 0.16)"),
     bandUnstable: cssVar("--sl-chart-band-unstable", "rgba(120, 126, 132, 0.22)"),
-    rule: cssVar("--sl-chart-rule", "rgba(31, 111, 92, 0.55)"),
+    product: cssVar("--sl-chart-product", "#646b79"),
     hollow: cssVar("--sl-chart-hollow", "#ffffff")
   };
 
@@ -71,16 +71,22 @@
     return String(point.t || "").slice(0, 10);
   }
 
-  // One vertical mark per product start. The full names live in the shared
-  // product key, so nothing is truncated inside a 300px chart.
+  // Each product gets its own muted line style and a small number, matching
+  // the swatches in the shared product key. No names are drawn in the chart.
+  var PRODUCT_DASHES = [[], [5, 4], [1, 3], [8, 3]];
+
   function productMarksFor(points, products) {
     var marks = [];
-    (products || []).forEach(function (product) {
+    (products || []).forEach(function (product, productIndex) {
       if (!product.started_on) return;
       var started = String(product.started_on).slice(0, 10);
       for (var index = 0; index < points.length; index += 1) {
         if (dayOf(points[index]) >= started) {
-          marks.push({ index: index });
+          marks.push({
+            index: index,
+            number: productIndex + 1,
+            dash: PRODUCT_DASHES[productIndex % PRODUCT_DASHES.length]
+          });
           return;
         }
       }
@@ -98,16 +104,20 @@
       var ctx = chart.ctx;
       var labels = chart.data.labels || [];
       ctx.save();
-      ctx.strokeStyle = COLORS.rule;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = COLORS.product;
+      ctx.lineWidth = 1.5;
       marks.forEach(function (mark) {
         if (mark.index < 0 || mark.index >= labels.length) return;
         var px = x.getPixelForValue(mark.index);
+        ctx.setLineDash(mark.dash || []);
         ctx.beginPath();
         ctx.moveTo(px, area.top);
         ctx.lineTo(px, area.bottom);
         ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = COLORS.product;
+        ctx.font = "600 11px system-ui, sans-serif";
+        ctx.fillText(String(mark.number), px + 4, area.top + 11);
       });
       ctx.restore();
     }

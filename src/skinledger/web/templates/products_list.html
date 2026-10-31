@@ -1,19 +1,58 @@
 <div id="product-panel">
   {% if notice %}<p class="product-notice" role="status">{{ notice }}</p>{% endif %}
-  {% if error %}<p class="product-error" role="alert">{{ error }}</p>{% endif %}
+  {% if error and panel_error %}<p class="product-error" role="alert">{{ error }}</p>{% endif %}
 
   {% if products %}
+  <div class="product-cards">
+    {% for product in products %}
+    <article class="product-card" data-product-id="{{ product.id }}"
+             data-active="{{ 'true' if product.active else 'false' }}">
+      <header>
+        <h3>{{ product.name }}</h3>
+        <span class="sl-chip sl-chip-neutral">{{ product.data_label }}</span>
+      </header>
+      <p class="product-card-line">
+        {{ product.category_label }} ·
+        {{ product.days_elapsed }} day{{ '' if product.days_elapsed == 1 else 's' }} ·
+        started {{ product.started_on }}
+        {% if product.ended_on %}· ended {{ product.ended_on }}{% endif %}
+      </p>
+      <p class="product-card-line">
+        <strong>Targets:</strong>
+        {% for target in product.targets %}{{ target.label }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}
+      </p>
+      <p class="product-card-line product-card-checkins">
+        <small>Day 14 {{ product.checkin_14 }} · Day 28 {{ product.checkin_28 }}</small>
+      </p>
+      <div class="product-card-actions">
+        <a href="/products/{{ product.id }}/verdict" role="button">Verdict</a>
+        {% if not can_write %}
+        <small>Read-only</small>
+        {% elif product.active %}
+        <form method="post" action="/people/{{ person.id }}/products/{{ product.id }}/end"
+              hx-post="/people/{{ person.id }}/products/{{ product.id }}/end"
+              hx-target="#product-panel" hx-swap="outerHTML">
+          <button type="submit" class="secondary outline">End</button>
+        </form>
+        {% else %}
+        <small>Ended</small>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
   <div class="product-table-wrap">
     <table class="product-table">
       <thead>
         <tr>
-          <th>Product</th>
-          <th>Category</th>
-          <th>Started</th>
-          <th>Days</th>
-          <th>Targets</th>
-          <th>Check-ins</th>
-          <th></th>
+          <th scope="col">Product</th>
+          <th scope="col">Category</th>
+          <th scope="col">Started</th>
+          <th scope="col">Days</th>
+          <th scope="col">Targets</th>
+          <th scope="col">Check-ins</th>
+          <th scope="col"></th>
         </tr>
       </thead>
       <tbody>

@@ -178,6 +178,35 @@ def test_the_products_page_has_the_form_and_15_aspects(env, web):
     assert copy.DISCLAIMER in response.text
 
 
+def test_the_form_groups_targets_with_a_counter_and_one_unstable_note(env, web):
+    person_id = seed_person()
+    add_unstable_band(person_id, aspect="pore")
+    login(web)
+
+    page = web.get(f"/people/{person_id}/products")
+
+    assert 'id="target-count"' in page.text
+    assert 'data-max-targets="4"' in page.text
+    assert "0 of 4 selected" in page.text
+    assert page.text.count('class="product-group"') == 4
+    assert page.text.count('name="target_aspects"') == 15
+    assert html.unescape(page.text).count(copy.PRODUCT_UNSTABLE_HINT) == 1
+
+
+def test_the_product_list_comes_before_the_add_form_and_has_cards(env, web):
+    person_id = seed_person()
+    login(web)
+    assert create_product(web, person_id).status_code == 303
+
+    page = web.get(f"/people/{person_id}/products").text
+
+    assert page.index('id="product-panel"') < page.index('class="product-add"')
+    assert 'class="product-cards"' in page
+    assert 'class="product-card"' in page
+    assert 'class="product-table-wrap"' in page
+    assert 'role="button">Verdict</a>' in page
+
+
 def test_creating_a_product_stores_real_data_and_shows_checkin_dates(env, web):
     person_id = seed_person()
     login(web)

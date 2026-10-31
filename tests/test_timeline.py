@@ -236,7 +236,8 @@ def test_timeline_charts_use_date_ticks_and_no_truncated_product_labels(env, web
     assert 'month: "short"' in charts_js
     assert 'day: "numeric"' in charts_js
     assert "slice(0, 16)" not in charts_js
-    assert "fillText" not in charts_js
+    assert "mark.label" not in charts_js
+    assert "String(mark.number)" in charts_js
     assert "offsetParent" in charts_js
     assert "timeline-card-extra" in timeline
     assert "timeline-numbers" in timeline

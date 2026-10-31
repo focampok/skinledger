@@ -32,6 +32,17 @@ MAX_TARGETS = 4
 MAX_NAME = 80
 DATA_LABEL = "REAL"
 
+# The 15 numeric aspects, grouped the way people look at their skin.
+ASPECT_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("Texture & pores", ("pore", "texture", "wrinkle", "firmness")),
+    ("Oil & moisture", ("oiliness", "moisture", "acne")),
+    ("Tone", ("radiance", "redness", "age_spot", "dark_circle_v2")),
+    (
+        "Eyes",
+        ("eye_bag", "droopy_upper_eyelid", "droopy_lower_eyelid", "tear_trough"),
+    ),
+)
+
 
 def _authorized_person_read(
     conn: sqlite3.Connection, request: Request, person_id: int
@@ -206,8 +217,18 @@ def _page_context(
     notice: str | None = None,
     error: str | None = None,
     values: dict[str, object] | None = None,
+    panel_error: bool = True,
 ) -> dict[str, object]:
     today = usage.guatemala_today()
+    aspects = _aspect_choices(conn, int(person["id"]))
+    by_key = {aspect["key"]: aspect for aspect in aspects}
+    aspect_groups = [
+        {
+            "label": label,
+            "aspects": [by_key[key] for key in keys if key in by_key],
+        }
+        for label, keys in ASPECT_GROUPS
+    ]
     return {
         "person": dict(person),
         "can_write": can_write,
@@ -216,10 +237,13 @@ def _page_context(
         "categories": [
             {"key": category, "label": category.title()} for category in CATEGORIES
         ],
-        "aspects": _aspect_choices(conn, int(person["id"])),
+        "aspects": aspects,
+        "aspect_groups": aspect_groups,
+        "max_targets": MAX_TARGETS,
         "form": values or _default_form(today),
         "notice": notice,
         "error": error,
+        "panel_error": panel_error,
         "name_placeholder": copy.PRODUCT_NAME_PLACEHOLDER,
         "name_note": copy.PRODUCT_NAME_NOTE,
         "unstable_hint": copy.PRODUCT_UNSTABLE_HINT,
@@ -260,6 +284,7 @@ async def products_page(
             can_write=can_write,
             demo_banner=demo_banner,
             notice=notice,
+            panel_error=False,
         )
     finally:
         conn.close()
@@ -280,6 +305,7 @@ async def create_product(request: Request, person_id: int):
                 demo_banner=banners.for_person(conn, person),
                 error=error,
                 values=values,
+                panel_error=_is_htmx(request),
             )
             if _is_htmx(request):
                 return templates.TemplateResponse(

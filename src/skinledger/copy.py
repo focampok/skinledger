@@ -151,8 +151,13 @@ PRODUCT_NAME_PLACEHOLDER = "e.g. Niacinamide serum"
 PRODUCT_NAME_NOTE = "Use a generic name; no brand needed"
 
 PRODUCT_UNSTABLE_HINT = (
-    "Unstable for your setup — it won't count in this product's verdict."
+    "Greyed aspects are unstable for this person's setup and won't count in the verdict."
 )
+
+PRODUCT_TARGET_COUNT = "{count} of {max} selected"
+PRODUCT_TARGETS_TITLE = "Target aspects (1 to 4)"
+PRODUCT_DATE_NOTE = "Saved as YYYY-MM-DD."
+PRODUCT_ADD_TITLE = "Add a product"
 
 PRODUCT_NAME_REQUIRED = "Please enter a product name."
 
@@ -251,8 +256,25 @@ VERDICT_SAMPLE_BANNER = "Sample data for testing, not a real result."
 SAMPLE_PROFILE_BANNER = "Sample profile: all data is SIMULATED."
 
 TRY_SAMPLE_LINK = "Open the sample profile (all data is SIMULATED)"
+TRY_INVITE_HINT = "From the Devpost testing instructions."
 
-TRY_DEMO_LINK = "Judges: how this demo works"
+TRY_DEMO_LINK = "About the demo"
+
+HOME_SAMPLE_LINK = "Open the sample profile (SIMULATED)"
+HOME_SAMPLE_TITLE = "Sample profile products"
+
+HOME_OUTCOME_DETAILS = {
+    "keep": "The change is bigger than your noise band.",
+    "no_change": "Reconsider before rebuying.",
+    "worse": "Pause and look at what changed.",
+    "too_early": "Check back on day 14.",
+    "no_band": "Take 2 baseline captures first.",
+    "need_checkin": "Take the next check-in.",
+}
+
+
+def home_outcome_detail(outcome: str) -> str:
+    return HOME_OUTCOME_DETAILS.get(outcome, "")
 
 DEMO_TITLE = "SkinLedger demo"
 
@@ -270,7 +292,7 @@ DEMO_INVITE_NOTE = (
     "testing instructions. 2 analyses per person."
 )
 
-DEMO_PRIVACY_NOTE = "Your photo is never stored. Read the Privacy page."
+DEMO_PRIVACY_NOTE = "Your photo is never stored."
 
 FOOTER_DEMO_LINK = "Demo"
 
