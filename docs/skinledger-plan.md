@@ -2,13 +2,13 @@
 
 *Written Monday 26 Oct 2026, ~20:10 GT (Guatemala time, UTC−6); rewritten in English and updated ~20:30 GT with Francisco's photo-handling decision (production keeps a photo upload path; original photos are never stored). Single source of truth for scope. Sources: `HANDOFF.md` and `extract.md` (same folder), plus the official docs re-read today: the Skin Analysis and JS Camera Kit reference (https://docs.perfectcorp.com/reference/ai_skin_analysis), the `/develop/` pages (quick start, API server, error codes, rate limit, webhook, file retention, debugging guide, FAQ, MCP, agent skills) and the official repo `github.com/YouCam-API/skills`. Differences from extract.md are in §5.1. Stack and accounts: `skinledger-stack-setup.md`. Prompts for your coding agent: `skinledger-prompts.md`. This is the original 26 Oct text, kept in sync with the build; the current state is in the **Status** section below.*
 
-## Status (29 Oct 2026, 06:40 GT)
-- **Done, P00–P07 (154 tests green):** 355eeca P00 · 36857dd P01 · 17582fc P02 · 25ee2ec P03b · 6da8a10 P04 · a0da119 P05 · 118fab3 P05c · e1c90ba P05d · 00d0863 P06 · 5ba01e8 P07.
-- **In progress:** P08 per-aspect timeline (Chart.js vendored under `src/skinledger/web/static/vendor/`).
-- **Next:** P09–P14, P15 deploy, a UI polish pass (list in plan §16; it can go before the P15 deploy once the main flow is complete), and P17–P20 on Saturday.
+## Status (31 Oct 2026, aligned with main @ 53d31c2)
+- **Shipped:** P00–P16c-4, ending with the "The Quiet Lab" UI; **316 tests green** and `ruff` clean on 31 Oct 2026.
+- **Docs aligned:** P17–P19 updated `README.md`, `docs/devpost.md`, `docs/video-script.md`, `docs/screenshots.md`, `docs/requirements-matrix.md` and this Status section against the shipped app. Docs only; no code changes.
+- **Next:** P20 submission checks (live flow, unit balance, repo history, video upload). No code work is planned.
 - **Real data:** the real day-1 baseline pair is person 7, captures 2 and 3 (guided Camera Kit, same light, 3 minutes apart). Measured noise: pore +17.3 and acne +15.0 (both unstable, band > 10), radiance -7.9, oiliness +7.5, firmness +6.7, droopy upper eyelid -6.2, tear trough -5.5, droopy lower eyelid +5.2; every other aspect moved 3.5 or less; skin type identical.
 - **Cleanup before recording:** the orphan test profile, person 6, must be deleted.
-- **Units:** 64 of 1,040 used.
+- **Units (29 Oct snapshot):** 64 of 1,040 used.
 - **Schedule (decided 29 Oct):** everything submitted by **Sat 31 Oct 21:00 GT** (hard deadline Mon 2 Nov 10:45 GT); submission checklist Sat 31 Oct 14:00 GT; kill switch Sat 31 Oct 20:00 GT. Sunday is buffer only, Monday is margin only.
 - **Paths:** all `web/...` paths in these docs live under `src/skinledger/` (for example `src/skinledger/web/static/`).
 
@@ -136,8 +136,8 @@ Native app or APK, HD, real multi-user accounts with passwords, LLM, brand or na
 |---|---|---|
 | Mon 26 | — | ✔ YouCam account created and code redeemed (1,000 units) |
 | Wed 28, evening | API key · P00–P03 | ✔ Client passes mocked tests; real analyses stored |
-| **Thu 29** | P04–P07 done (see Status); **P08 timeline in progress**, then P09 onward through the UI | From the phone over the HTTPS tunnel: consent → real Camera Kit capture → analysis stored → baseline pair and noise band ✔ |
-| Fri 30 | Buffer: continue P09–P14 and the UI polish pass (plan §16), no units spent | — |
+| **Thu 29** | P04–P07 done (see Status); P08 onward through the UI | From the phone over the HTTPS tunnel: consent → real Camera Kit capture → analysis stored → baseline pair and noise band ✔ |
+| Fri 30 | P09–P16c: timeline, products, verdict, routine, demo and the "Quiet Lab" UI polish | Real Camera Kit capture and the full flow verified on the phone |
 | **Sat 31** | P15 deploy → P16 phone test → P17–P20 | **14:00 GT: submission checklist (P20).** **20:00 GT: kill switch.** **Submit by 21:00 GT.** |
 | Sun 1 Nov | Buffer only (leftovers, no planned work) | — |
 | Mon 2 Nov | — | Margin only until 10:45 GT. No planned work: save energy for the Vultr kickoff (Tue 3, 09:00) |

@@ -1,6 +1,6 @@
 # SkinLedger: Devpost description
 
-Paste the sections below into the Devpost form. `<INVITE_CODE>` is a placeholder: the real code goes only into Devpost, never into the repo. Items marked **[PLANNED]** are removed or reworded before submission if the feature did not ship (see `requirements-matrix.md`, Open items).
+Paste the sections below into the Devpost form. `<INVITE_CODE>` is a placeholder: the real code goes only into Devpost, never into the repo. `VIDEO_URL_TBD` is the video placeholder, kept in both `README.md` and this file so it is easy to find and replace after upload.
 
 ---
 
@@ -22,17 +22,20 @@ SkinLedger is a responsive web app (installable as a PWA) that gives a person an
 2. **Guided capture or quick try.** The YouCam JS Camera Kit guides light, distance and pose for repeatable weekly captures. A quick photo upload is available for first-time visitors with an invite code.
 3. **Skin analysis.** Each capture runs the YouCam AI Skin Analysis API: 15 numeric skin scores plus skin type. SkinLedger stores the `raw_score` of each aspect and the analysis masks. It never stores or shows the display score, because that score is adjusted to look more favourable.
 4. **Your own noise band (the key idea).** Day 1 takes two captures. For each aspect, the band is the larger of the difference between the two captures and a 3-point floor. An aspect whose band is wider than 10 points is shown as **"Unstable for your setup"** and is left out of verdicts. SkinLedger tells you which metrics are reliable for you before it gives a verdict. In my own day-1 pair, pore and acne moved more than 10 points between two captures taken three minutes apart, so they would be flagged for me.
-5. **Timeline per aspect.** One chart per aspect with the noise band shaded around your baseline. Only changes outside the band count. **[PLANNED: timeline page is being built today]**
-6. **Product log and verdict.** Log what you started and when. At day 14 and day 28 a check-in compares your target aspects with your baseline and the band, and returns **Keep**, **No measurable change → reconsider before rebuying**, or **Worse → pause & consult**, with the three aspects that changed most. It warns when another product changed in the same window. **[PLANNED: verdict engine and screen]**
-7. **AM/PM routine and generic shopping list.** Fixed rules map your lowest aspects to ingredient categories (no brands). **[PLANNED: routine and list]**
+5. **Timeline per aspect.** One chart per aspect with the day-1 noise band shaded around your baseline. Only changes outside the band count, and every REAL, SIMULATED or SAMPLE point is labelled.
+6. **Product log and verdict.** Log what you started, when, and which 1–4 aspects it should change. At day 14 and day 28 a check-in compares your target aspects with your baseline and the band, and returns **Keep** ("The change is bigger than your noise band."), **No measurable change** ("Reconsider before rebuying."), **Worse** ("Pause and look at what changed.") or **Too early** ("Check back on day 14."), with the aspects that changed most. It warns when another product changed in the same window.
+7. **AM/PM routine and generic shopping list.** Fixed rules map your lowest stable aspects to ingredient categories (no brands).
+
+### The shipped interface
+The UI is **"The Quiet Lab"**: a warm ivory and sage palette, with Fraunces for display type and Inter for interface text, both self-hosted under the SIL Open Font License 1.1. It is responsive at phone (390 px), tablet (768 px) and laptop (1440 px) widths. Every aspect has its own noise band; aspects wider than 10 points are labelled **"Unstable for your setup"** and left out of verdicts. Verdicts are `KEEP` / `NO_CHANGE` / `WORSE` / `TOO_EARLY`, shown as Keep / No measurable change / Worse / Too early with the messages above. **"Higher score = healthier-looking skin, for every aspect"**, following the YouCam AI Skin Analysis docs (Inputs & Outputs): https://docs.perfectcorp.com/reference/ai_skin_analysis.
 
 ### Data labels: REAL, SIMULATED, SAMPLE
 Everything on screen carries a label.
 - **REAL**: an actual analysis of a real capture (my day-1 captures, and visitors' own analyses).
-- **SIMULATED**: generated scores for the demo, used for the day-14 and day-28 check-ins in the public sample profile (no photos, no masks). The verdict screen shows the banner "Demo: day 14/28 check-ins are SIMULATED. Day 1 is real."
+- **SIMULATED**: generated scores for demo data (no photos, no masks). The public sample profile is entirely SIMULATED and its banner says "Sample profile: all data is SIMULATED." A real profile with attached demo history shows "Demo: day 14/28 check-ins are SIMULATED. Day 1 is real."
 - **SAMPLE**: fixtures and example products (for instance "Niacinamide serum (SAMPLE)"). No real product brands appear anywhere.
 
-Two weeks of real history cannot exist at the time of submission, so the demo shows my real day 1 and labels everything after it as simulated.
+Two weeks of real history cannot exist at the time of submission, so the public sample is entirely SIMULATED and labelled as such. My own day-1 pair is REAL wherever it appears.
 
 ### Privacy by design
 Adults 18+ only. Every analysis requires ticking "This is my own face and I am 18 or older." SkinLedger never stores your photo: it is held in memory, sent to the YouCam API for analysis and discarded, with no disk, no object storage and no cache. We store only the scores (`raw_score`), the result JSON without signed URLs, and the masks. YouCam may keep uploaded files for up to 30 days under its own terms. Photos are never sent to any other AI. You can delete your profile at any time, which removes everything SkinLedger stores.
@@ -45,7 +48,7 @@ Powered by YouCam API.
 - **YouCam AI Skin Analysis API (V2, SD).** The asynchronous 4-step flow: create the file entry, upload the image to the signed URL, create the skin-analysis task, then poll the task until it reports success or error. 15 numeric aspects with `raw_score` (wrinkle, droopy upper eyelid, droopy lower eyelid, firmness, acne, moisture, eye bag, dark circle, age spot, radiance, redness, oiliness, pore, texture, tear trough) plus skin type. Masks are downloaded in the same job because result links are short-lived.
 - **YouCam JS Camera Kit v2.5** in `skincare` mode with strict quality checks for consistent captures. It runs in the browser and sends photos only to the YouCam service.
 - **Backend:** Python 3.12 with uv, FastAPI, Jinja templates, HTMX for interaction, SQLite, httpx.
-- **Frontend:** Pico CSS, Chart.js (vendored, no CDN), installable PWA.
+- **Frontend:** Pico CSS, Chart.js (vendored, no CDN), Fraunces and Inter self-hosted under the SIL Open Font License 1.1, installable PWA.
 - **Deploy:** Railway with a persistent volume at `https://skinledger.focampo.com`.
 - **Guards on the shared link:** invite code to run a real analysis, 2 real analyses per person, a daily unit cap and a hard total unit cap, all set by environment variables. The API key lives only in environment variables on the server; the browser never talks to the YouCam REST API.
 - **Testing:** mocked API client and fixtures labelled SAMPLE; no test uses a real photo.
@@ -63,7 +66,7 @@ Powered by YouCam API.
 - A real end-to-end guided capture on my phone, analysed and stored, and a measured day-1 noise band from my own two captures.
 - A product whose headline feature is saying "this metric is not reliable for you yet".
 - A consent-first, photo-never-stored design that I would be comfortable using for my family.
-- An honest demo: real day 1, clearly labelled SIMULATED follow-up.
+- An honest demo: my real day-1 pair is labelled REAL, and the public sample profile is entirely SIMULATED and labelled as such.
 
 ## What we learned
 - Skin scores are estimates, and light changes them as much as skincare does. Any tracker has to measure its own noise before it claims progress.
@@ -71,10 +74,9 @@ Powered by YouCam API.
 - A short test-retest check on day one is cheap and reveals which aspects to trust.
 
 ## What's next
-- Longer real tracking beyond day 28, and more check-in points.
-- A "Before you buy" ingredient check against your latest capture.
-- A sun-care reminder using skin tone type.
-- A private instance for family use after the hackathon.
+- Proper accounts (passkeys or OAuth) so a profile follows you across devices.
+- More check-in prompts and reminders beyond day 14 and day 28.
+- Export your scores and verdicts.
 
 ## Built with (tags)
 python, fastapi, htmx, sqlite, chart.js, youcam-api, pwa, railway
@@ -82,10 +84,10 @@ python, fastapi, htmx, sqlite, chart.js, youcam-api, pwa, railway
 ## Try it out (links)
 - Live demo: https://skinledger.focampo.com
 - Repo: https://github.com/focampok/skinledger (MIT licence)
-- Video: `<YOUTUBE_URL>` (fill in after upload)
+- Video: `VIDEO_URL_TBD` (replace after upload)
 
 ## Testing instructions (for judges)
-1. Open https://skinledger.focampo.com/demo. Browse the public "Sample user (SIMULATED)" profile with no code. **[PLANNED: /demo page and sample profile]**
+1. Open https://skinledger.focampo.com/demo. Browse the public read-only "Sample user (SIMULATED)" profile with no code.
 2. To analyze your own face, go to `/try` and enter the invite code `<INVITE_CODE>`.
 3. Tick "This is my own face and I am 18 or older."
 4. Use the guided camera (Chrome or Safari on a phone, allow camera access) or upload a well-lit, front-facing selfie. Please use only your own face.
@@ -93,9 +95,11 @@ python, fastapi, htmx, sqlite, chart.js, youcam-api, pwa, railway
 6. No account or password is needed.
 
 ## Suggested screenshots (see `docs/screenshots.md`)
-1. Guided capture on the phone (Francisco's face).
-2. Day-1 result: 15 scores plus skin type (REAL).
-3. Noise-band page with "Unstable for your setup" chips (REAL).
-4. Timeline with the shaded band and dashed SIMULATED points.
-5. Verdict screen with the SIMULATED banner and disclaimer.
+1. Guided capture page with the attestation gate (no face needed).
+2. Timeline with the shaded band and dashed SIMULATED points.
+3. Verdict screen with the SIMULATED banner, outcome card and disclaimer.
+4. Product form showing unstable aspects greyed out.
+5. Home at laptop width with the SAMPLE noise-band chart.
+
+All shipped screenshots are in `docs/screenshots/p16c/after/` at 390, 768 and 1440 px. They show only the public SAMPLE/SIMULATED profile and contain no faces.
 

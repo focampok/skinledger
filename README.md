@@ -4,18 +4,21 @@
 
 SkinLedger is a responsive web app (installable PWA) that tells you, from your own measurements, whether a skincare product is really working, and only counts a change when it beats the noise of the measurement itself.
 
-Demo: https://skinledger.focampo.com · Licence: MIT · Powered by YouCam API
+Demo: https://skinledger.focampo.com · Video: `VIDEO_URL_TBD` · Licence: MIT · Powered by YouCam API
 
 ## The problem
 People wonder about their skin right before a purchase, and right when they are standing in front of a mirror deciding whether a product is working. The light changes, the mirror lies, and many beauty apps show deliberately encouraging scores. A tracker that confuses noise with progress misleads you.
 
 ## How it works
 1. **Capture.** A guided capture with the YouCam JS Camera Kit (recommended for tracking, because it keeps light, distance and pose consistent), or a quick photo upload for a first try.
-2. **Analysis.** The server runs the YouCam AI Skin Analysis API (V2, SD): 15 numeric skin scores plus skin type.
+2. **Analysis.** The server runs the YouCam AI Skin Analysis API (V2, SD): 15 numeric aspects plus skin type.
 3. **Raw scores.** SkinLedger stores `raw_score` for each aspect, plus the analysis masks. The display score (`ui_score`) is discarded at parse time.
 4. **Personal noise band.** Day 1 takes two captures. Per aspect, `band = max(|A − B|, 3.0)`. An aspect whose band is above 10 points is shown as "Unstable for your setup" and is excluded from verdicts.
-5. **Verdict at day 14 and day 28.** Keep, No measurable change → reconsider before rebuying, or Worse → pause & consult. [PLANNED]
-6. **AM/PM routine** from fixed aspect → ingredient-category rules, plus a generic shopping list (no brands). [PLANNED]
+5. **Timeline per aspect.** One chart per aspect with the day-1 noise band shaded. Only changes outside the band count, and every point carries its REAL, SIMULATED or SAMPLE label.
+6. **Product log and verdict.** Log what you started, when, and which 1–4 aspects it should change. At day 14 and day 28 the verdict is **Keep** ("The change is bigger than your noise band."), **No measurable change** ("Reconsider before rebuying."), **Worse** ("Pause and look at what changed.") or **Too early** ("Check back on day 14."). It warns when another product changed in the same window.
+7. **AM/PM routine** from fixed aspect → ingredient-category rules, plus a generic shopping list (no brands).
+
+**Score direction.** Higher score = healthier-looking skin, for every aspect. This follows the YouCam AI Skin Analysis docs, Inputs & Outputs: https://docs.perfectcorp.com/reference/ai_skin_analysis.
 
 ## Guided capture
 The capture page (`/people/{id}/capture`) shows a three-bullet tips card before the
@@ -51,6 +54,14 @@ the page and the tests share one source of truth.
 - **Unit guards.** Invite code, per-person limit, daily cap and total cap protect the shared demo.
 - **Real delete.** Deleting a person removes all rows and mask files.
 
+## The shipped interface
+The UI is **"The Quiet Lab"**: a warm ivory and sage palette, with Fraunces for display type and Inter for interface text. Both fonts are self-hosted from `src/skinledger/web/static/fonts/` as `.woff2` under the SIL Open Font License 1.1 (licence files are next to them). The layout is responsive at phone (390 px), tablet (768 px) and laptop (1440 px) widths, in light and dark themes.
+
+Every aspect has its own day-1 noise band. An aspect whose band is wider than 10 points is shown as **"Unstable for your setup"** and left out of verdicts. The verdict cards use `KEEP` / `NO_CHANGE` / `WORSE` / `TOO_EARLY`, shown as Keep / No measurable change / Worse / Too early with the messages above.
+
+## Screenshots
+The shipped UI is captured at 390, 768 and 1440 px in [docs/screenshots/p16c/after/](docs/screenshots/p16c/after/). They show only the public SAMPLE/SIMULATED sample profile and contain no faces. Per-file captions and the Devpost gallery picks are in [docs/screenshots.md](docs/screenshots.md); the earlier p16b shots are kept only as a before/after reference.
+
 ## Architecture
 ```
  Browser (phone or laptop)
@@ -72,12 +83,12 @@ the page and the tests share one source of truth.
 Powered by YouCam API.
 
 ## Try it
-- Public sample profile, no code needed: https://skinledger.focampo.com/demo (shows a "Sample user (SIMULATED)" profile). [PLANNED]
-- Analyze your own face: `/try`, using the invite code from the Devpost testing instructions. Tick "This is my own face and I am 18 or older." Use the guided camera or upload a well-lit, front-facing selfie. 2 analyses per person.
+- Public sample profile, no code needed: https://skinledger.focampo.com/demo (shows a read-only "Sample user (SIMULATED)" profile with SAMPLE products).
+- Analyze your own face: `/try`, using the invite code from the Devpost testing instructions. Tick "This is my own face and I am 18 or older." Use the guided camera or upload a well-lit, front-facing selfie. 2 analyses per person, plus a per-browser limit and daily and total unit caps.
 
 ## Data labels
 - **REAL**: real analyses of real captures.
-- **SIMULATED**: generated scores for demo check-ins (no photos, no masks); badges, dashed lines and a banner mark them.
+- **SIMULATED**: generated scores for demo data (no photos, no masks); badges, dashed lines and a banner mark them. The public sample profile is entirely SIMULATED.
 - **SAMPLE**: fixtures and example products, labelled SAMPLE.
 
 Numbers in this README come from the app, not from invention.
@@ -114,10 +125,10 @@ The API key is read only on the server and never reaches the browser, logs or te
 ## Requirements matrix
 | Requirement | Where it is implemented |
 |---|---|
-| YouCam AI Skin Analysis API (SD, 15 numeric scores + skin type, 4-step async flow) | `src/skinledger/youcam.py`, `pipeline.py` |
+| YouCam AI Skin Analysis API (SD, 15 numeric aspects + skin type, 4-step async flow) | `src/skinledger/youcam.py`, `pipeline.py` |
 | Guided Camera Kit capture + quick upload, never storing the photo | `web/static/capture_boot.js`, `capture.js`, `imaging.py`, `web/routes/captures.py` |
 | Personal day-1 noise band and unstable aspects | `noise.py` |
-| Keep / No measurable change / Worse verdict at day 14/28 | `verdict.py`, `/products/{id}/verdict` |
+| Keep / No measurable change / Worse / Too early verdict at day 14/28 | `verdict.py`, `/products/{id}/verdict` |
 | Generic AM/PM routine and shopping list | `routine.py`, `shopping.py`, `/people/{id}/routine` |
 | Consent, delete, shared-link invite and unit caps | `web/routes/persons.py`, `guards.py`, `usage.py` |
 | REAL / SIMULATED / SAMPLE labels and the public sample | `web/banners.py`, `seed.py`, `/demo` |
@@ -131,12 +142,17 @@ The API key is read only on the server and never reaches the browser, logs or te
 - The two-capture noise band is a rough estimate of measurement noise, not a statistical guarantee.
 - The 3.0-point floor is a product heuristic, not a YouCam figure.
 - Lighting changes scores; uploads are less consistent than guided capture.
-- Demo check-ins on day 14 and day 28 are SIMULATED; only day 1 is real.
+- In the public sample profile, all data is SIMULATED. On a real profile, captures stay REAL unless SIMULATED history is explicitly attached for a demo, and every point carries its label.
 - Not clinically validated. Skin scores are AI estimates.
+
+## Next steps
+- Proper accounts (passkeys or OAuth) so a profile follows you across devices.
+- More check-in prompts and reminders beyond day 14 and day 28.
+- Export your scores and verdicts.
 
 ## Disclaimer
 Cosmetic skin insights, not a medical diagnosis. Scores are AI estimates and vary with lighting. See a dermatologist for persistent acne, changing moles, rashes or pain.
 
 ## Licence and credits
-MIT. Built with HTMX, Chart.js and Pico CSS, each under its own licence (add the exact licence names and versions from the vendored files). Fraunces and Inter are self-hosted under the SIL Open Font License 1.1; the licence texts are in `src/skinledger/web/static/fonts/OFL-Fraunces.txt` and `OFL-Inter.txt`. Skin analysis and guided capture are powered by YouCam API.
+MIT. Built with HTMX 2.0.4 (Zero-Clause BSD), Chart.js 4.6.1 (MIT) and Pico CSS 2.0.6 (MIT), each vendored in `src/skinledger/web/static/vendor/` with its licence file. Fraunces and Inter are self-hosted under the SIL Open Font License 1.1; the licence texts are in `src/skinledger/web/static/fonts/OFL-Fraunces.txt` and `OFL-Inter.txt`. Skin analysis and guided capture are powered by YouCam API.
 
