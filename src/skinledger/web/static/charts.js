@@ -30,7 +30,8 @@
     simulated: cssVar("--sl-chart-simulated", "#8a6d3b"),
     sample: cssVar("--sl-chart-sample", "#6b5b95"),
     band: cssVar("--sl-chart-band", "rgba(31, 111, 92, 0.16)"),
-    bandUnstable: cssVar("--sl-chart-band-unstable", "rgba(120, 126, 132, 0.22)"),
+    bandUnstable: cssVar("--sl-chart-band-unstable", "#efeae1"),
+    bandEdge: cssVar("--sl-chart-band-edge", "#d8c6a6"),
     product: cssVar("--sl-chart-product", "#646b79"),
     hollow: cssVar("--sl-chart-hollow", "#ffffff")
   };
@@ -148,6 +149,9 @@
         borderWidth: 0,
         pointRadius: 0,
         backgroundColor: bandColor,
+        borderColor: COLORS.bandEdge,
+        borderWidth: 1,
+        order: 2,
         fill: false,
         tension: 0,
         slKind: "band"
@@ -158,6 +162,9 @@
         borderWidth: 0,
         pointRadius: 0,
         backgroundColor: bandColor,
+        borderColor: COLORS.bandEdge,
+        borderWidth: 1,
+        order: 2,
         fill: "-1",
         tension: 0,
         slKind: "band"
@@ -184,6 +191,7 @@
         pointRadius: 4,
         pointHoverRadius: 5,
         borderWidth: 2,
+        order: 1,
         borderDash: style.dash,
         tension: 0,
         spanGaps: false,
@@ -278,6 +286,21 @@
       buildChart(aspect, latestSeries.products || []);
       built[aspect.aspect] = true;
     });
+  }
+
+  // The product key is a disclosure on phones and open on tablet/laptop.
+  var productKey = document.getElementById("timeline-product-key");
+  if (productKey && window.matchMedia) {
+    var keyMedia = window.matchMedia("(min-width: 768px)");
+    var syncKey = function () {
+      if (keyMedia.matches) {
+        productKey.setAttribute("open", "");
+      } else {
+        productKey.removeAttribute("open");
+      }
+    };
+    syncKey();
+    keyMedia.addEventListener("change", syncKey);
   }
 
   if (extraCards.length && grid && controls && toggle) {

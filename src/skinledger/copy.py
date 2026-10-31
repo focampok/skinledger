@@ -140,8 +140,7 @@ TIMELINE_NOSCRIPT = "Charts need JavaScript. Open Numbers in each card for the v
 TIMELINE_NO_POINTS = "No captures yet."
 
 TIMELINE_BAND_LEGEND = (
-    "Each card is one aspect (a skin measurement). Shaded band = your day-1 noise. "
-    "Only changes outside it count."
+    "Each card is one aspect. Higher score is better; the shaded band is your day-1 noise."
 )
 
 TIMELINE_UNSTABLE_CHIP = "Unstable for your setup"
@@ -272,12 +271,12 @@ VERDICT_SAMPLE_BANNER = "Sample data for testing, not a real result."
 
 SAMPLE_PROFILE_BANNER = "Sample profile: all data is SIMULATED."
 
-TRY_SAMPLE_LINK = "Open the sample profile (all data is SIMULATED)"
+TRY_SAMPLE_LINK = "See the sample profile"
 TRY_INVITE_HINT = "From the Devpost testing instructions."
 
 TRY_DEMO_LINK = "About the demo"
 
-HOME_SAMPLE_LINK = "Open the sample profile (SIMULATED)"
+HOME_SAMPLE_LINK = "See the sample profile"
 HOME_SAMPLE_TITLE = "Sample profile products"
 HOME_EYEBROW = "Your own baseline"
 HOME_SUB = (

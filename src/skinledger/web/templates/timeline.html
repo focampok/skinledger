@@ -26,8 +26,6 @@
         <span>{{ timeline_summary_latest }} <strong class="num">{{ summary_latest|short_date }}</strong></span>
         {% endif %}
       </p>
-      <p class="score-note">{{ score_direction_note }}</p>
-
       {% if has_band %}
       <p class="timeline-legend">{{ band_legend }}</p>
       {% else %}
@@ -39,8 +37,8 @@
 
     {% if products %}
     {% set product_dashes = ["", "5 4", "1 3", "8 3"] %}
-    <div class="timeline-product-key">
-      <p class="timeline-product-key-title">{{ timeline_product_key }}</p>
+    <details class="timeline-product-key" id="timeline-product-key">
+      <summary>{{ timeline_product_key }}</summary>
       <ul>
         {% for product in products %}
         {% set dash = product_dashes[loop.index0 % product_dashes|length] %}
@@ -58,7 +56,7 @@
         </li>
         {% endfor %}
       </ul>
-    </div>
+    </details>
     {% endif %}
   </div>
 

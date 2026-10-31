@@ -10,6 +10,13 @@
     <p class="home-hero-sub">{{ home_sub }}</p>
   </div>
 
+  <div class="home-hero-actions">
+    <a href="/try" role="button">Try it</a>
+    {% if demo_person_id %}
+    <a href="/people/{{ demo_person_id }}/timeline" class="sample-link">{{ home_sample_link }}</a>
+    {% endif %}
+  </div>
+
   <figure class="home-band">
     <svg viewBox="0 0 360 160" role="img"
          aria-label="Sample noise band: points inside the band, then two points above it after the product start">
@@ -36,14 +43,6 @@
       {{ home_band_caption }}
     </figcaption>
   </figure>
-
-  <div class="home-hero-actions">
-    <a href="/try" role="button">Try it</a>
-    {% if demo_person_id %}
-    <a href="/people/{{ demo_person_id }}/timeline" role="button"
-       class="secondary outline">{{ home_sample_link }}</a>
-    {% endif %}
-  </div>
 </section>
 
 {% if show_home_products %}

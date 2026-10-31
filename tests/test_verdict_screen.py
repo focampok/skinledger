@@ -239,7 +239,7 @@ def test_score_direction_label_is_on_verdict_and_timeline(env, web):
     timeline = web.get(f"/people/{person_id}/timeline")
 
     assert copy.SCORE_DIRECTION_NOTE in verdict.text
-    assert copy.SCORE_DIRECTION_NOTE in timeline.text
+    assert copy.TIMELINE_BAND_LEGEND in timeline.text
 
 
 def test_another_browser_gets_404(env, web):

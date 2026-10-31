@@ -13,13 +13,12 @@
     </p>
     {% if demo_person_id %}
     <p class="try-sample">
-      <a href="/people/{{ demo_person_id }}/timeline" role="button"
-         class="secondary outline">{{ try_sample_link }}</a>
+      <a href="/people/{{ demo_person_id }}/timeline" class="sample-link">{{ try_sample_link }}</a>
       <small>No invite code needed for the sample.</small>
     </p>
     {% else %}
     <p class="try-sample">
-      <a href="/people" role="button" class="secondary outline">Browse the sample profile</a>
+      <a href="/people" class="sample-link">See the sample profile</a>
     </p>
     {% endif %}
     <p class="try-demo-link"><a href="/demo">{{ try_demo_link }}</a></p>
