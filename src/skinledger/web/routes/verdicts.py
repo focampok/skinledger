@@ -73,6 +73,15 @@ def _outside_state(target: TargetResult) -> str:
     return "other"
 
 
+def _direction_label(target: TargetResult) -> str:
+    """The verdict engine treats higher raw_score as better; mirror it in words."""
+    if target.status == "improved":
+        return copy.VERDICT_DIRECTION_IMPROVED
+    if target.status == "worse":
+        return copy.VERDICT_DIRECTION_WORSE
+    return ""
+
+
 def _outside_plain(target: TargetResult) -> str:
     """Words for the mobile chip; the table keeps the compact symbol."""
     state = _outside_state(target)
@@ -96,6 +105,7 @@ def _target_rows(computed: Verdict) -> list[dict[str, object]]:
             "outside": _outside(target),
             "outside_plain": _outside_plain(target),
             "outside_state": _outside_state(target),
+            "direction_label": _direction_label(target),
             "unstable": target.status == "unstable",
         }
         for target in computed.targets
@@ -112,12 +122,21 @@ def _top_rows(computed: Verdict) -> list[dict[str, object]]:
             outside = copy.VERDICT_OUTSIDE_NOISE
         else:
             outside = copy.VERDICT_WITHIN_NOISE
+        band = change["band"]
         rows.append(
             {
                 "label": change["label"],
                 "delta": f"{'+' if delta > 0 else ''}{delta:.1f}",
                 "arrow": _arrow(delta),
                 "outside": outside,
+                "direction_label": (
+                    copy.VERDICT_DIRECTION_IMPROVED
+                    if change["status"] == "improved"
+                    else copy.VERDICT_DIRECTION_WORSE
+                    if change["status"] == "worse"
+                    else ""
+                ),
+                "band": None if band is None else f"±{float(band):.1f}",
             }
         )
     return rows

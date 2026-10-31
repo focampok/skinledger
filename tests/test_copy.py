@@ -376,12 +376,12 @@ def test_rendered_pages_have_the_disclaimer_and_attestation(env, web):
     assert copy.ATTESTATION in capture_page.text
 
     home = web.get("/")
-    assert "Niacinamide serum (SAMPLE)" in home.text
+    assert "Niacinamide serum" in home.text
 
     web.cookies.clear()
     anonymous_home = web.get("/")
     assert copy.DISCLAIMER in anonymous_home.text
-    assert "Niacinamide serum (SAMPLE)" not in anonymous_home.text
+    assert "Niacinamide serum" not in anonymous_home.text
 
     login(web)
     baseline = web.get(f"/people/{person_id}/baseline")

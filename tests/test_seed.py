@@ -377,7 +377,8 @@ def test_public_demo_pages_are_viewable_and_read_only(env, web):
         assert f"/people/{demo_id}/capture" not in web.get(path).text
 
     people = web.get("/people")
-    assert seed.SAMPLE_PERSON in people.text
+    assert "Sample user" in people.text
+    assert "SIMULATED" in people.text
     try_page = web.get("/try")
     assert f"/people/{demo_id}/timeline" in try_page.text
 

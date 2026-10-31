@@ -669,6 +669,25 @@ input[type="file"]::file-selector-button:hover {
   color: var(--sl-muted);
 }
 
+.product-aspect input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.product-aspect:has(input:disabled) {
+  cursor: not-allowed;
+}
+
+.product-aspect:has(input:disabled) span {
+  color: var(--sl-muted);
+}
+
+.product-aspects-note {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--sl-muted);
+}
+
 .product-notice {
   color: var(--sl-accent-ink);
 }
@@ -938,11 +957,21 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .verdict-warning {
-  color: var(--sl-warn-ink);
+  border-left: 4px solid var(--sl-warn);
+  background: var(--sl-warn-wash);
+  padding: 0.75rem 1rem;
+  margin-block: 0.75rem;
+}
+
+.verdict-note {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--sl-muted);
 }
 
 .verdict-changes {
-  padding-left: 1.1rem;
+  padding-left: 0;
+  list-style: none;
 }
 
 .verdict-arrow {
@@ -995,10 +1024,6 @@ input[type="file"]::file-selector-button:hover {
 
 .home-actions a[role="button"] {
   margin: 0;
-}
-
-.home-people {
-  margin-top: 0.25rem;
 }
 
 .home-product-grid {

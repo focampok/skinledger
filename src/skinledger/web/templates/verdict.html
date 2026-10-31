@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}SkinLedger — {{ verdict_title_prefix }} {{ product.name }}{% endblock %}
+{% block title %}SkinLedger — {{ verdict_title_prefix }} {{ (product.name|split_data_label).name }}{% endblock %}
 
 {% block content %}
+{% set name_parts = product.name|split_data_label %}
 <div id="verdict-page" data-product-id="{{ product.id }}" data-outcome="{{ verdict.outcome }}">
   <p class="verdict-links">
     <a href="/people/{{ person.id }}/products">Products</a> ·
@@ -19,7 +20,7 @@
 
   <article class="verdict-card verdict-{{ verdict.outcome }}">
     <header class="verdict-header">
-      <h1>{{ verdict_title_prefix }} {{ product.name }}</h1>
+      <h1>{{ verdict_title_prefix }} {{ name_parts.name }}{% if name_parts.label %} <span class="sl-chip sl-chip-neutral">{{ name_parts.label }}</span>{% endif %}</h1>
       <p class="verdict-outcome">{{ outcome_label }}</p>
     </header>
     <p class="verdict-action">{{ verdict.message }}</p>
@@ -27,6 +28,7 @@
 
     {% if target_rows %}
     <h2>{{ verdict_targets_title }}</h2>
+    <p class="verdict-note">{{ verdict_aspect_note }}</p>
     <div class="verdict-table-wrap">
       <table>
         <thead>
@@ -47,7 +49,7 @@
             <td>{{ row.checkin }}</td>
             <td>{{ row.change }}</td>
             <td>{{ row.band }}</td>
-            <td>{{ row.outside }}</td>
+            <td>{{ row.outside }}{% if row.direction_label %} {{ row.direction_label }}{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -61,7 +63,7 @@
         <span class="verdict-target-change">{{ row.change }}</span>
         <span class="verdict-target-band">{{ verdict_col_band }} {{ row.band_display }}</span>
         <span class="verdict-target-state">
-          <span class="sl-chip{% if row.outside_state != 'outside' %} sl-chip-neutral{% endif %}">{{ row.outside_plain }}</span>
+          <span class="sl-chip{% if row.outside_state != 'outside' %} sl-chip-neutral{% endif %}">{{ row.outside_plain }}{% if row.direction_label %} · {{ row.direction_label }}{% endif %}</span>
         </span>
         <span class="verdict-target-meta">{{ verdict_col_baseline }} {{ row.baseline }} → {{ verdict_col_checkin }} {{ row.checkin }}</span>
       </li>
@@ -84,7 +86,7 @@
       {% for change in top_change_rows %}
       <li>
         <span class="verdict-arrow">{{ change.arrow }}</span>
-        {{ change.label }} <strong>{{ change.delta }}</strong> · {{ change.outside }}
+        {{ change.label }} <strong>{{ change.delta }}</strong> · {{ change.outside }}{% if change.direction_label %} · {{ change.direction_label }}{% endif %}{% if change.band %} ({{ change.band }}){% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -94,8 +96,8 @@
     <p class="verdict-warning">{{ warning }}</p>
     {% endfor %}
 
-    <h2>{{ verdict_masks_title }}</h2>
     {% if mask_rows %}
+    <h2>{{ verdict_masks_title }}</h2>
     <div class="verdict-masks">
       {% for pair in mask_rows %}
       <figure>
@@ -110,9 +112,8 @@
       </figure>
       {% endfor %}
     </div>
-    {% elif verdict.label != "REAL" %}
-    <p>{{ verdict_masks_real_only }}</p>
-    {% else %}
+    {% elif verdict.label == "REAL" %}
+    <h2>{{ verdict_masks_title }}</h2>
     <p>{{ verdict_no_masks }}</p>
     {% endif %}
 

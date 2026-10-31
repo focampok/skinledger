@@ -30,6 +30,7 @@ templates.env.globals.update(
     upload_tips_title=copy.UPLOAD_TIPS_TITLE,
     upload_tip=copy.UPLOAD_TIP,
     product_target_count=copy.PRODUCT_TARGET_COUNT,
+    product_aspects_note=copy.PRODUCT_ASPECTS_NOTE,
     product_targets_title=copy.PRODUCT_TARGETS_TITLE,
     product_date_note=copy.PRODUCT_DATE_NOTE,
     product_add_title=copy.PRODUCT_ADD_TITLE,
@@ -62,6 +63,7 @@ templates.env.globals.update(
     verdict_unstable_not_used=copy.VERDICT_UNSTABLE_NOT_USED,
     verdict_take_checkin=copy.VERDICT_TAKE_CHECKIN,
     verdict_targets_title=copy.VERDICT_TARGETS_TITLE,
+    verdict_aspect_note=copy.VERDICT_ASPECT_NOTE,
     verdict_top_changes_title=copy.VERDICT_TOP_CHANGES_TITLE,
     verdict_masks_title=copy.VERDICT_MASKS_TITLE,
     verdict_col_aspect=copy.VERDICT_COL_ASPECT,
@@ -146,4 +148,15 @@ def short_date(value: object) -> str:
     return f"{_MONTHS[moment.month - 1]} {moment.day}"
 
 
+def split_data_label(value: object) -> dict[str, str]:
+    """Split a stored name's SAMPLE/SIMULATED suffix for a chip beside the title."""
+    text = str(value or "")
+    for label in ("SAMPLE", "SIMULATED"):
+        suffix = f" ({label})"
+        if text.endswith(suffix):
+            return {"name": text[: -len(suffix)], "label": label}
+    return {"name": text, "label": ""}
+
+
 templates.env.filters["short_date"] = short_date
+templates.env.filters["split_data_label"] = split_data_label

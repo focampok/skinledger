@@ -7,8 +7,9 @@
     {% for product in products %}
     <article class="product-card" data-product-id="{{ product.id }}"
              data-active="{{ 'true' if product.active else 'false' }}">
+      {% set name_parts = product.name|split_data_label %}
       <header>
-        <h3>{{ product.name }}</h3>
+        <h3>{{ name_parts.name }}</h3>
         <span class="sl-chip sl-chip-neutral">{{ product.data_label }}</span>
       </header>
       <p class="product-card-line">

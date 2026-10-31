@@ -10,15 +10,16 @@
 
 <div class="people-grid">
   {% for person in persons %}
+  {% set person_parts = person.display_name|split_data_label %}
   <article class="person-card">
     <header>
-      <h2>{{ person.display_name }}</h2>
+      <h2>{{ person_parts.name }}</h2>
       {% if person.is_demo_public %}
       <span class="sl-chip sl-chip-neutral">SIMULATED</span>
       {% endif %}
     </header>
     {% if person.is_demo_public %}
-    <p>Sample profile · read-only · all data is SIMULATED.</p>
+    <p>Sample profile · read-only.</p>
     <p><a href="/people/{{ person.id }}/timeline" role="button">Open sample timeline</a></p>
     {% else %}
     <p><a href="/people/{{ person.id }}/timeline" role="button">Open timeline</a></p>

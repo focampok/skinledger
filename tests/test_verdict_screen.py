@@ -334,7 +334,10 @@ def test_masks_are_not_shown_for_sample_captures(env, web):
     response = web.get(f"/products/{product_id}/verdict")
 
     assert response.status_code == 200
-    assert copy.VERDICT_MASKS_REAL_ONLY in response.text
+    # P16b-7: sample verdicts no longer render an empty masks section.
+    assert copy.VERDICT_MASKS_REAL_ONLY not in response.text
+    assert copy.VERDICT_MASKS_TITLE not in response.text
+    assert 'class="verdict-masks"' not in response.text
     assert "/media/" not in response.text
 
 
@@ -378,9 +381,9 @@ def test_home_shows_one_card_per_active_product_with_the_next_checkin(env, web):
     response = web.get("/")
 
     assert response.status_code == 200
-    assert "Keep serum (SAMPLE)" in response.text
-    assert "Steady cream (SAMPLE)" in response.text
-    assert "Ended product (SAMPLE)" not in response.text
+    assert "Keep serum" in response.text
+    assert "Steady cream" in response.text
+    assert "Ended product" not in response.text
     assert copy.verdict_outcome_label("keep") in response.text
     assert copy.verdict_outcome_label("no_change") in response.text
     assert copy.HOME_NEXT_CHECKIN in response.text

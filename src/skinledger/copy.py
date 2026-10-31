@@ -136,7 +136,8 @@ TIMELINE_NOSCRIPT = "Charts need JavaScript. Open Numbers in each card for the v
 TIMELINE_NO_POINTS = "No captures yet."
 
 TIMELINE_BAND_LEGEND = (
-    "Shaded band = your day-1 measurement noise. Only changes outside it count."
+    "Each card is one aspect (a skin measurement). Shaded band = your day-1 noise. "
+    "Only changes outside it count."
 )
 
 TIMELINE_UNSTABLE_CHIP = "Unstable for your setup"
@@ -158,6 +159,9 @@ PRODUCT_TARGET_COUNT = "{count} of {max} selected"
 PRODUCT_TARGETS_TITLE = "Target aspects (1 to 4)"
 PRODUCT_DATE_NOTE = "Saved as YYYY-MM-DD."
 PRODUCT_ADD_TITLE = "Add a product"
+PRODUCT_ASPECTS_NOTE = (
+    "An aspect is one skin measurement. Pick the ones this product should change."
+)
 
 PRODUCT_NAME_REQUIRED = "Please enter a product name."
 
@@ -204,6 +208,13 @@ VERDICT_UNSTABLE_NOT_USED = "Unstable, not used"
 VERDICT_TAKE_CHECKIN = "Take check-in now"
 
 VERDICT_TARGETS_TITLE = "Target aspects"
+
+VERDICT_ASPECT_NOTE = (
+    "Each aspect is one skin measurement. The noise band is your day-1 wobble."
+)
+
+VERDICT_DIRECTION_IMPROVED = "improved"
+VERDICT_DIRECTION_WORSE = "worse"
 
 VERDICT_TOP_CHANGES_TITLE = "Biggest changes"
 

@@ -15,7 +15,6 @@
      class="secondary outline">{{ home_sample_link }}</a>
   {% endif %}
 </p>
-<p class="home-people"><a href="/people">My people</a></p>
 
 {% if show_home_products %}
 <section class="home-products">
@@ -28,7 +27,8 @@
     {% for card in product_cards %}
     <article class="home-product-card home-verdict-{{ card.outcome }}"
              data-product-id="{{ card.product_id }}" data-outcome="{{ card.outcome }}">
-      <h3><a href="/products/{{ card.product_id }}/verdict">{{ card.name }}</a></h3>
+      {% set name_parts = card.name|split_data_label %}
+      <h3><a href="/products/{{ card.product_id }}/verdict">{{ name_parts.name }}</a>{% if name_parts.label %} <span class="sl-chip sl-chip-neutral">{{ name_parts.label }}</span>{% endif %}</h3>
       <p class="home-product-outcome">{{ card.outcome_label }}</p>
       {% if card.detail %}<p><small>{{ card.detail }}</small></p>{% endif %}
       {% if card.next_checkin_date %}
@@ -36,7 +36,8 @@
       {% else %}
       <p><small>{{ home_both_passed }}</small></p>
       {% endif %}
-      <p><small>{{ card.person_name }} · {{ card.label }}</small></p>
+      {% set person_parts = card.person_name|split_data_label %}
+      <p><small>{{ person_parts.name }} · {{ card.label }}</small></p>
     </article>
     {% endfor %}
   </div>
